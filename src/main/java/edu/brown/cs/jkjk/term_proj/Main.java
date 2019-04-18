@@ -68,6 +68,9 @@ public abstract class Main {
     FreeMarkerEngine freeMarker = createEngine();
 
     Spark.get("/study", new LandingPageHandler(), freeMarker);
+    Spark.get("/study/dashboard", new DashboardHandler(), freeMarker);
+    Spark.get("/study/newgroup", new NewGroupHandler(), freeMarker);
+    Spark.get("/study/group", new GroupHandler(), freeMarker);
   }
 
   private static class LandingPageHandler implements TemplateViewRoute {
@@ -75,7 +78,36 @@ public abstract class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables = ImmutableMap.of("title", "Study");
-      return new ModelAndView(variables, "main.ftl");
+      return new ModelAndView(variables, "landing.ftl");
+    }
+  }
+
+  private static class DashboardHandler implements TemplateViewRoute {
+
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title",
+          "Study - Your dashboard");
+      return new ModelAndView(variables, "dashboard.ftl");
+    }
+  }
+
+  private static class NewGroupHandler implements TemplateViewRoute {
+
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title",
+          "Create a new group");
+      return new ModelAndView(variables, "newgroup.ftl");
+    }
+  }
+
+  private static class GroupHandler implements TemplateViewRoute {
+
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title", "Group status");
+      return new ModelAndView(variables, "group.ftl");
     }
   }
 
