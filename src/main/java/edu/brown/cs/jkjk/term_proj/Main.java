@@ -5,15 +5,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import spark.ExceptionHandler;
+import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
+import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
 
 /**
@@ -61,6 +66,17 @@ public abstract class Main {
     Spark.externalStaticFileLocation("src/main/resources/static");
     Spark.exception(Exception.class, new ExceptionPrinter());
     FreeMarkerEngine freeMarker = createEngine();
+
+    Spark.get("/study", new LandingPageHandler(), freeMarker);
+  }
+
+  private static class LandingPageHandler implements TemplateViewRoute {
+
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title", "Study");
+      return new ModelAndView(variables, "main.ftl");
+    }
   }
 
   // Below here, there isn't much for a new CS32 student to worry
