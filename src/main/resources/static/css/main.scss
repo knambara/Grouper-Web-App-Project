@@ -1,13 +1,62 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,700');
 
-$default_font: "Roboto", sans-serif;
+$default_font: Roboto;
+
+$default_button_width: 200px;
+$default_button_height: 50px;
+
+$primary_color: #C4C4C4;
+$primary_color_highlighted: #D4D4D4;
+$background_color: #FFFFFF;
+$dark_color: #000000;
+$white_color: #FFFFFF;
+
+body {
+  font-family: $default_font;
+}
 
 h1 {
-  font: $default_font;
   font-size: 24pt;
 }
 
 button {
   border: none;
-  background-color: #C4C4C4;
+  background-color: $primary_color;
+  width: $default_button_width;
+  height: $default_button_height;
+  color: $white_color;
+  font-family: $default_font;
+
+  -webkit-transition: background-color 0.5s;
+  transition: background-color 0.5s;
+}
+button:hover {
+  background-color: $primary_color_highlighted;
+
+  -webkit-transition: background-color 0.5s;
+  transition: background-color 0.5s;
+}
+
+
+.centered {
+
+}
+
+#page-body {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#landing-body {
+  top: 40%;
+  position: relative;
+}
+
+#landing-centered {
+  width: 400px;
+  height: 300px;
+  margin: auto;
+  position: relative;
+  text-align: center;
 }

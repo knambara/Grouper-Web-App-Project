@@ -5,9 +5,16 @@ the page is written in -->
 
   <!-- Head contains meta data and imports -->
   <head>
+<<<<<<< HEAD
 	  <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/html5bp.css">
+=======
+	  <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/html5bp.css">
+    <link rel="stylesheet" href="css/main.css">
+
+>>>>>>> dc28f196e0b7ae6d8d5907d25e63d37c2b1ab01a
     <!-- define character set in use -->
     <meta charset="utf-8">
 
