@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
+import edu.brown.cs.jkjk.database.DBConnector;
+import edu.brown.cs.jkjk.grouper.User;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -29,6 +34,9 @@ import spark.template.freemarker.FreeMarkerEngine;
 public abstract class Main {
 
   private static final int PORT_NUM = 4567;
+
+  private static DBConnector grouperDB = new DBConnector();
+  // private static DBConnector groupDB = new DBConnector();
 
   /**
    * Method entrypoint for CLI invocation.
@@ -54,6 +62,11 @@ public abstract class Main {
       }
 
       // Run Spark server.
+      try {
+        grouperDB.connect("data/grouperDB.sqlite3");
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+      }
       runSparkServer();
 
     }
@@ -71,6 +84,7 @@ public abstract class Main {
     Spark.get("/study/dashboard", new DashboardHandler(), freeMarker);
     Spark.get("/study/newgroup", new NewGroupHandler(), freeMarker);
     Spark.get("/study/group", new GroupHandler(), freeMarker);
+
   }
 
   private static class LandingPageHandler implements TemplateViewRoute {
@@ -145,4 +159,55 @@ public abstract class Main {
       res.body(stacktrace.toString());
     }
   }
+
+  /**
+   * Saves user info into users table in database for new users.
+   * 
+   * @param user Newly created user; no duplicates in db.
+   */
+  private static void saveNewUser(User user) {
+    // Create 'users' table if it doesn't exist already
+    Connection conn = grouperDB.getConnection();
+    String query = "CREATE TABLE IF NOT EXISTS "
+        + "users(U_ID INTEGER NOT NULL AUTO_INCREMENT, "
+        + "name TEXT, email TEXT, G_ID INTEGER, PRIMARY KEY (U_ID));";
+
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.executeUpdate();
+      prep.close();
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+
+    // Save the input user into 'users' table
+    String userName = user.getName();
+    String email = user.getEmail();
+    int groupID = user.getGroupID();
+    query = "INSERT INTO users VALUES(NULL, ?, ?, ?);";
+
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, userName);
+      prep.setString(2, email);
+      prep.setInt(3, groupID);
+      prep.addBatch();
+      prep.executeBatch();
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+
+    // Query unique id from data just entered, and set user's id
+    query = "SELECT U_ID FROM boards WHERE name = ? AND email = ?;";
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, userName);
+      prep.setString(2, email);
+      try (ResultSet res = prep.executeQuery()) {
+        user.setUserID(res.getInt(1));
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+      }
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+  }
+
 }
