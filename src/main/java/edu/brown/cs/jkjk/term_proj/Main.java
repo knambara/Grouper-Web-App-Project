@@ -73,6 +73,11 @@ public abstract class Main {
     Spark.get("/study/group", new GroupHandler(), freeMarker);
   }
 
+  /**
+   * Handler for the landing page of the site.
+   *
+   * @author jsoenkse
+   */
   private static class LandingPageHandler implements TemplateViewRoute {
 
     @Override
@@ -82,6 +87,11 @@ public abstract class Main {
     }
   }
 
+  /**
+   * Handler for the dashboard page which displays groups.
+   *
+   * @author jsoenkse
+   */
   private static class DashboardHandler implements TemplateViewRoute {
 
     @Override
@@ -92,27 +102,36 @@ public abstract class Main {
     }
   }
 
+  /**
+   * Handler for the page that allows you to create a new group.
+   *
+   * @author jsoenkse
+   */
   private static class NewGroupHandler implements TemplateViewRoute {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables = ImmutableMap.of("title",
-          "Create a new group");
+          "Study - Create a new group");
       return new ModelAndView(variables, "newgroup.ftl");
     }
   }
 
+  /**
+   * Handler for the page that allows you to view and moniter your current
+   * group.
+   *
+   * @author jsoenkse
+   */
   private static class GroupHandler implements TemplateViewRoute {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Group status");
+      Map<String, Object> variables = ImmutableMap.of("title",
+          "Study - Group status");
       return new ModelAndView(variables, "group.ftl");
     }
   }
-
-  // Below here, there isn't much for a new CS32 student to worry
-  // about understanding.
 
   private static FreeMarkerEngine createEngine() {
     Configuration config = new Configuration();
