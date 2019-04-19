@@ -5,10 +5,14 @@ $default_font: Roboto;
 $default_button_width: 200px;
 $default_button_height: 50px;
 
+$default_input_height: 40px;
+$default_input_width: 350px;
+
 $primary_color: #C4C4C4;
 $primary_color_highlighted: #D4D4D4;
 $background_color: #FFFFFF;
 $dark_color: #000000;
+$shadow_color: #A5A5A5;
 $white_color: #FFFFFF;
 
 body {
@@ -16,7 +20,8 @@ body {
 }
 
 h1 {
-  font-size: 24pt;
+  font-size: 32pt;
+  font-weight: lighter;
 }
 
 button {
@@ -24,22 +29,49 @@ button {
   background-color: $primary_color;
   width: $default_button_width;
   height: $default_button_height;
-  color: $white_color;
+  color: $white_color !important;
   font-family: $default_font;
+  font-size: 15pt;
+  box-shadow: 2px 2px 3px $shadow_color;
 
   -webkit-transition: background-color 0.5s;
   transition: background-color 0.5s;
 }
 button:hover {
   background-color: $primary_color_highlighted;
+  box-shadow: 2px 2px 5px $shadow_color;
 
   -webkit-transition: background-color 0.5s;
   transition: background-color 0.5s;
 }
 
+input[type="submit"] {
+  @extend button;
+}
 
-.centered {
+input[type="text"], input[type="number"], select {
+  height: $default_input_height;
+  border: 1px solid $shadow_color;
+  font-family: $default_font;
+}
 
+input[type="number"] {
+  text-align: center;
+}
+
+input[type="text"] {
+  height: ($default_input_height - 2px);
+  width: $default_input_width;
+  padding: 0px;
+}
+
+.half-column-form {
+  margin-right: 20%;
+  width: 500px;
+}
+
+.duration-box {
+  width: 50px;
 }
 
 #page-body {
@@ -59,4 +91,19 @@ button:hover {
   margin: auto;
   position: relative;
   text-align: center;
+}
+
+#newgroup-body {
+  width: 100%;
+}
+
+#newgroup-content {
+  margin: auto;
+  width: 60%;
+}
+
+#new-group-form {
+  margin: 10px;
+  height: 200px;
+  display: flex;
 }
