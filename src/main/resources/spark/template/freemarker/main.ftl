@@ -5,7 +5,7 @@ the page is written in -->
 
   <!-- Head contains meta data and imports -->
   <head>
-	<link rel="stylesheet" href="css/normalize.css">
+	  <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/html5bp.css">
     <!-- define character set in use -->
