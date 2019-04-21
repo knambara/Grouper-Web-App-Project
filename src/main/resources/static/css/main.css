@@ -144,6 +144,7 @@ input[type="text"] {
     height: 280px;
     width: 220px;
     margin: 15px;
+    position: relative;
 }
 
 #add-group-button a {
@@ -159,12 +160,20 @@ input[type="text"] {
     font-size: 124pt;
     font-weight: 100;
     text-align: center;
+    position: absolute;
+    right: 65px;
 }
 
 #plus-sign, #add-group {
     margin: 0;
     padding: 0;
     margin: auto;
+}
+
+#add-group-button #add-group {
+    left: 55px;
+    position: absolute;
+    bottom: 45px;
 }
 
 #plus-sign {
@@ -187,6 +196,8 @@ input[type="text"] {
 
 .group-tile-content {
     padding: 15px;
+    height: 250px;
+    position: relative;
 }
 
 .group-tile-content h2 {
@@ -218,8 +229,10 @@ input[type="text"] {
     flex-direction: row-reverse;
     flex-wrap: wrap-reverse;
     justify-content: space-between;
-    position: relative;
-    bottom: -55px;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    left: 15px;
 }
 
 input[type="checkbox"] {

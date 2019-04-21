@@ -35,6 +35,7 @@
             <option value="desc">Descending</option>
         </select>
         <select id="sort">
+            <option value="none">---</option>
             <option value="course-code">Course Code</option>
             <option value="group-size">Group Size</option>
             <option value="distance">Distance to Me</option>

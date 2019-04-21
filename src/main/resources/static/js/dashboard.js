@@ -1,8 +1,9 @@
 class GroupTile {
-    constructor(id, title, course, size, loc, time_left) {
+    constructor(id, title, dept, code, size, loc, time_left) {
         this.id = id;
         this.title = title;
-        this.course = course;
+        this.dept = dept;
+        this.code =code;
         this.size = size;
         this.loc = loc;
         this.time_left = time_left; // in minutes
@@ -14,7 +15,7 @@ class GroupTile {
         tile.setAttribute('id', this.id);
         tile.setAttribute('class', 'group-tile');
         tile.innerHTML ="<div class='group-tile-content'><h2>"+this.title + "</h2>" +
-        "<h4>" + this.course + "</h4>" +
+        "<h4>" + this.dept + " " + this.code + "</h4>" +
         "<p>" + this.loc + "</p>" +
         "<div id='group-tile-bottom'>" +
         "<button id='join'>Join</button>" +
@@ -22,7 +23,7 @@ class GroupTile {
         "<div id='time-"+ this.id + "'>" + this.time_left + " left</div>" +
         "</div></div>"
         ;
-        $('#group-grid').prepend(tile);
+        $group_grid.prepend(tile);
     }
 
     // Removes HTML from DOM
@@ -47,18 +48,34 @@ class GroupTile {
     }
 }
 
+function rebuildGrid(sortedTiles) {
+    $group_grid.empty();
+    for (i in sortedTiles) {
+        sortedTiles[i].build();
+        sortedTiles[i].updateTime();
+    }
+    const addGroup = document.createElement('div');
+    addGroup.setAttribute('id', 'add-group-button');
+    addGroup.innerHTML = "<div id='add-group-text'>" +
+        "<a href=/study/newgroup id='plus-sign'>+</a><a href=/study/newgroup id='add-group'>Add Group</a></div>";
+    $group_grid.append(addGroup);
+}
+
 // Groups currently displayed stored in map where key = id, value = GroupTile
 let displayedGroups = new Map();
+const oldOrder = [];
 
 // Groups for Test Purposes
-const cs22_groups = [[1, "Studying for Midterm", "CSCI 0220", 5, "CIT", 142],[2, "Drawing Logic Circuits", "CSCI 0220", 4, "Science Library", 43]];
-const cs32_groups = [[3, "Talking about Appliances", "CSCI 0320", 37, "CIT", 252]];
+const cs22_groups = [[1, "Studying for Midterm", "CSCI", "0220", 5, "CIT", 142],[2, "Drawing Logic Circuits", "CSCI", "0220", 4, "Science Library", 43]];
+const cs32_groups = [[3, "Talking about Appliances", "CSCI", "0320", 37, "CIT", 252]];
+const cs15_groups = [[4, "Sketchy Meeting", "CSCI", "0150", 7, "Ratty", 335]];
 
 const $dept_select = $('#department-selector');
 const $class_list = $('#class-list');
 const $update_button = $('#update');
 const $order_select = $('#order');
 const $sort_select = $('#sort');
+const $group_grid = $('#group-grid');
 
 const class_map = new Map();
 
@@ -119,7 +136,7 @@ $(document).ready(() => {
         // TODO: Display active groups for checked classes
 
         // IDEA: POST request for all groups associated with the checked_classes =>
-        // list of group information in format [id, title, course, size, location, time-remaining]
+        // list of group information in format [id, title, dept, code, size, location, time-remaining]
         // for each group
         // get groups associated w/ checked classes
 
@@ -131,7 +148,7 @@ $(document).ready(() => {
                     const group = cs22_groups[g];
                     if (curr_classes[i].checked) {
                         if (!displayedGroups.has(group[0])) {
-                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5]);
+                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
                             displayedGroups.set(tile.id, tile);
                             tile.build();
                             tile.updateTime();
@@ -150,7 +167,25 @@ $(document).ready(() => {
                     const group = cs32_groups[g];
                     if (curr_classes[i].checked) {
                         if (!displayedGroups.has(group[0])) {
-                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5]);
+                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
+                            displayedGroups.set(tile.id, tile);
+                            tile.build();
+                            tile.updateTime();
+                        }
+                    } else {
+                        if (displayedGroups.has(group[0])) {
+                            displayedGroups.get(group[0]).hide();
+                            displayedGroups.delete(group[0]);
+                        }
+                    }
+                }
+            }
+            if (curr_classes[i].value === "CSCI 0150") {
+                for (g in cs15_groups) {
+                    const group = cs15_groups[g];
+                    if (curr_classes[i].checked) {
+                        if (!displayedGroups.has(group[0])) {
+                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
                             displayedGroups.set(tile.id, tile);
                             tile.build();
                             tile.updateTime();
@@ -164,6 +199,7 @@ $(document).ready(() => {
                 }
             }
         }
+        sort();
     });
 
     function updateTimeRemainingForDisplayed() {
@@ -180,32 +216,95 @@ $(document).ready(() => {
     // SORTING FUNCTIONALITY
 
     $order_select.on('change', event => {
-        console.log($order_select.val());
-        console.log($sort_select.val());
+        sort();
     });
 
     $sort_select.on('change', event => {
-        console.log($order_select.val());
-        console.log($sort_select.val());
+        sort();
     });
 
-    function sortByCourseCode(groups) {
+    function sort() {
+        if ($sort_select.val() === "course-code") {
+            const sorted = sortByCourseCode(displayedGroups);
+            if ($order_select.val() === "asc") {
+                rebuildGrid(sorted);
+            } else {
+                rebuildGrid(sorted.reverse());
+            }
+        }
+        else if ($sort_select.val() === "time-rem") {
+            const sorted = sortByTimeLeft(displayedGroups);
+            if ($order_select.val() === "asc") {
+                rebuildGrid(sorted);
+            } else {
+                rebuildGrid(sorted.reverse());
+            }
+        }
+        else if ($sort_select.val() === "group-size") {
+            const sorted = sortByGroupSize(displayedGroups);
+            if ($order_select.val() === "asc") {
+                rebuildGrid(sorted);
+            } else {
+                rebuildGrid(sorted.reverse());
+            }
+        }
+    }
 
+    function sortByCourseCode(groups) {
+        const tempList = [];
+        const groupIter = groups.values();
+        for (let i = 0; i < groups.size; i++) {
+            const g = groupIter.next().value;
+            const tempGroup = {code: g.code, tile: g};
+            tempList.push(tempGroup);
+        }
+        tempList.sort(function(a,b){return b.code - a.code;});
+        console.log(tempList);
+        const sortedTiles = [];
+        for (i in tempList) {
+            sortedTiles.push(tempList[i].tile);
+        }
+        console.log(sortedTiles);
+        return sortedTiles;
     }
 
     function sortByTimeLeft(groups) {
-
+        const tempList = [];
+        const groupIter = groups.values();
+        for (let i = 0; i < groups.size; i++) {
+            const g = groupIter.next().value;
+            const tempGroup = {time: g.time_left, tile: g};
+            tempList.push(tempGroup);
+        }
+        tempList.sort(function(a,b){return b.time - a.time;});
+        console.log(tempList);
+        const sortedTiles = [];
+        for (i in tempList) {
+            sortedTiles.push(tempList[i].tile);
+        }
+        console.log(sortedTiles);
+        return sortedTiles;
     }
 
     function sortByGroupSize(groups) {
-
+        const tempList = [];
+        const groupIter = groups.values();
+        for (let i = 0; i < groups.size; i++) {
+            const g = groupIter.next().value;
+            const tempGroup = {size: g.size, tile: g};
+            tempList.push(tempGroup);
+        }
+        tempList.sort(function(a,b){return b.size - a.size;});
+        console.log(tempList);
+        const sortedTiles = [];
+        for (i in tempList) {
+            sortedTiles.push(tempList[i].tile);
+        }
+        console.log(sortedTiles);
+        return sortedTiles;
     }
 
     function sortByDistance(groups) {
-
-    }
-
-    function reverseOrder(groups) {
 
     }
 
