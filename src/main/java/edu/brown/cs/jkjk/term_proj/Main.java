@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 
 import edu.brown.cs.jkjk.database.DBConnector;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
@@ -19,8 +20,10 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import spark.ExceptionHandler;
 import spark.ModelAndView;
+import spark.QueryParamsMap;
 import spark.Request;
 import spark.Response;
+import spark.Route;
 import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -33,6 +36,7 @@ import spark.template.freemarker.FreeMarkerEngine;
 public abstract class Main {
 
   private static final int PORT_NUM = 4567;
+  private static final Gson GSON = new Gson();
 
   private static DBConnector GROUPER_DB = new DBConnector();
   private static UserCacheHandler USER_CACHE = new UserCacheHandler(GROUPER_DB);
@@ -70,9 +74,8 @@ public abstract class Main {
       // Create 'users' table if it doesn't exist already
       Connection conn = GROUPER_DB.getConnection();
       String query = "CREATE TABLE IF NOT EXISTS "
-          + "users(U_ID INTEGER, "
+          + "users(U_ID TEXT, "
           + "name TEXT, "
-          + "email TEXT, "
           + "G_ID INTEGER, "
           + "PRIMARY KEY (U_ID));";        
       try (PreparedStatement prep = conn.prepareStatement(query)) {
@@ -84,14 +87,14 @@ public abstract class Main {
       
       // Create 'groups' table if it doesn't exist already
       query = "CREATE TABLE IF NOT EXISTS "
-          + "groups(G_ID INTEGER, "
+          + "groups(G_ID INTEGER NOT NULL AUTO_INCREMENT, "
           + "code TEXT, "
           + "departmet TEXT, "
           + "description TEXT, "
           + "duration DOUBLE, "
-          + "Mod INTEGER, "
-          + "PRIMARY KEY (U_ID), "
-          + "FOREIGN KEY (Mod) REFERENCES users(P_ID) ON DELETE CASCADE ON UPDATE CASCADE);";        
+          + "Mod TEXT, "
+          + "PRIMARY KEY (G_ID), "
+          + "FOREIGN KEY (Mod) REFERENCES users(U_ID) ON DELETE CASCADE ON UPDATE CASCADE);";        
       try (PreparedStatement prep = conn.prepareStatement(query)) {
         prep.executeUpdate();
         prep.close();
@@ -117,6 +120,8 @@ public abstract class Main {
     Spark.get("/study/dashboard", new DashboardHandler(), freeMarker);
     Spark.get("/study/newgroup", new NewGroupHandler(), freeMarker);
     Spark.get("/study/group", new GroupHandler(), freeMarker);
+
+    Spark.post("/newuser", new NewUserHandler());
 
   }
 
@@ -144,8 +149,6 @@ public abstract class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables = ImmutableMap.of("title", "Study - Your dashboard");
-      // TODO disassemble returned user information
-      // Store user info into db if not exist
       return new ModelAndView(variables, "dashboard.ftl");
     }
   }
@@ -208,6 +211,37 @@ public abstract class Main {
         pw.println("</pre>");
       }
       res.body(stacktrace.toString());
+    }
+  }
+
+  /**
+   * Handles receival of newly logged-in user's information.
+   * 
+   * @author Kento
+   *
+   */
+  private static class NewUserHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String name = qm.value("name");
+      String email = qm.value("email");
+      String img = qm.value("img");
+
+      Connection conn = GROUPER_DB.getConnection();
+      String query = "INSERT OR IGNORE INTO users VALUES (?, ?, ?);";
+      try (PreparedStatement prep = conn.prepareStatement(query)) {
+        prep.setString(1, email);
+        prep.setString(2, name);
+        prep.setInt(3, -1);
+        prep.executeUpdate();
+        prep.close();
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+      }
+
+      Map<String, Object> variables = ImmutableMap.of("msg", "success");
+      return GSON.toJson(variables);
     }
   }
 
