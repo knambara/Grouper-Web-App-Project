@@ -12,7 +12,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import edu.brown.cs.jkjk.database.DBConnector;
-import edu.brown.cs.jkjk.grouper.User;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -34,7 +33,7 @@ public abstract class Main {
 
   private static final int PORT_NUM = 4567;
 
-  private static DBConnector grouperDB = new DBConnector();
+  private static DBConnector GROUPER_DB = new DBConnector();
 
   /**
    * Method entrypoint for CLI invocation.
@@ -47,8 +46,7 @@ public abstract class Main {
 
     parser.accepts("gui");
 
-    OptionSpec<Integer> portSpec = parser.accepts("port").withRequiredArg()
-        .ofType(Integer.class);
+    OptionSpec<Integer> portSpec = parser.accepts("port").withRequiredArg().ofType(Integer.class);
 
     OptionSet options = parser.parse(args);
 
@@ -59,14 +57,49 @@ public abstract class Main {
         Spark.port(PORT_NUM);
       }
 
-      // Run Spark server.
+      // Connect to database
       try {
-        grouperDB.connect("data/grouperDB.sqlite3");
+        GROUPER_DB.connect("data/grouperDB.sqlite3");
       } catch (Exception e) {
         System.out.println(e.getMessage());
       }
-      runSparkServer();
 
+      // @formatter:off
+      // Create 'users' table if it doesn't exist already
+      Connection conn = GROUPER_DB.getConnection();
+      String query = "CREATE TABLE IF NOT EXISTS "
+          + "users(U_ID INTEGER, "
+          + "name TEXT, "
+          + "email TEXT, "
+          + "G_ID INTEGER, "
+          + "PRIMARY KEY (U_ID));";        
+      try (PreparedStatement prep = conn.prepareStatement(query)) {
+        prep.executeUpdate();
+        prep.close();
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+      }
+      
+      // Create 'groups' table if it doesn't exist already
+      query = "CREATE TABLE IF NOT EXISTS "
+          + "groups(G_ID INTEGER, "
+          + "code TEXT, "
+          + "departmet TEXT, "
+          + "description TEXT, "
+          + "duration DOUBLE, "
+          + "Mod INTEGER, "
+          + "PRIMARY KEY (U_ID), "
+          + "FOREIGN KEY (Mod) REFERENCES users(P_ID) ON DELETE CASCADE ON UPDATE CASCADE);";        
+      try (PreparedStatement prep = conn.prepareStatement(query)) {
+        prep.executeUpdate();
+        prep.close();
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+      }
+      // @formatter:on
+
+      // Run Spark server.
+      runSparkServer();
     }
   }
 
@@ -108,8 +141,9 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title",
-          "Study - Your dashboard");
+      Map<String, Object> variables = ImmutableMap.of("title", "Study - Your dashboard");
+      // TODO disassemble returned user information
+      // Store user info into db if not exist
       return new ModelAndView(variables, "dashboard.ftl");
     }
   }
@@ -123,15 +157,13 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title",
-          "Study - Create a new group");
+      Map<String, Object> variables = ImmutableMap.of("title", "Study - Create a new group");
       return new ModelAndView(variables, "newgroup.ftl");
     }
   }
 
   /**
-   * Handler for the page that allows you to view and moniter your current
-   * group.
+   * Handler for the page that allows you to view and moniter your current group.
    *
    * @author jsoenkse
    */
@@ -139,10 +171,7 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title",
-          "Study - Group status", "grouptitle", "Group Title", "groupclass",
-          "CLAS1234", "groupdesc", "A group with a description", "groupemails",
-          "jeffrey_demanche@brown.edu");
+      Map<String, Object> variables = ImmutableMap.of("title", "Study - Group status");
       return new ModelAndView(variables, "group.ftl");
     }
   }
@@ -153,8 +182,7 @@ public abstract class Main {
     try {
       config.setDirectoryForTemplateLoading(templates);
     } catch (IOException ioe) {
-      System.out.printf("ERROR: Unable use %s for template loading.\n",
-          templates);
+      System.out.printf("ERROR: Unable use %s for template loading.\n", templates);
       System.exit(1);
     }
     return new FreeMarkerEngine(config);
@@ -176,44 +204,6 @@ public abstract class Main {
         pw.println("</pre>");
       }
       res.body(stacktrace.toString());
-    }
-  }
-
-  /**
-   * Saves user info into users table in database for new users.
-   * 
-   * @param user Newly created user; no duplicates in db.
-   */
-  private static void saveNewUser(User user) {
-    // Create 'users' table if it doesn't exist already
-    Connection conn = grouperDB.getConnection();
-    String query = "CREATE TABLE IF NOT EXISTS "
-        + "users(U_ID INTEGER, name TEXT, email TEXT, "
-        + "G_ID INTEGER, PRIMARY KEY (U_ID));";
-
-    try (PreparedStatement prep = conn.prepareStatement(query)) {
-      prep.executeUpdate();
-      prep.close();
-    } catch (SQLException e) {
-      System.out.println(e.getMessage());
-    }
-
-    // Save the input user into 'users' table
-    int userID = user.getID();
-    String userName = user.getName();
-    String email = user.getEmail();
-    int groupID = user.getGroupID();
-    query = "INSERT INTO users VALUES(?, ?, ?, ?);";
-
-    try (PreparedStatement prep = conn.prepareStatement(query)) {
-      prep.setInt(1, userID);
-      prep.setString(2, userName);
-      prep.setString(3, email);
-      prep.setInt(4, groupID);
-      prep.addBatch();
-      prep.executeBatch();
-    } catch (SQLException e) {
-      System.out.println(e.getMessage());
     }
   }
 
