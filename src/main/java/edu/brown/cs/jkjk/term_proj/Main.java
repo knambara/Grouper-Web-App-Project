@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -36,7 +35,6 @@ public abstract class Main {
   private static final int PORT_NUM = 4567;
 
   private static DBConnector grouperDB = new DBConnector();
-  // private static DBConnector groupDB = new DBConnector();
 
   /**
    * Method entrypoint for CLI invocation.
@@ -188,8 +186,8 @@ public abstract class Main {
     // Create 'users' table if it doesn't exist already
     Connection conn = grouperDB.getConnection();
     String query = "CREATE TABLE IF NOT EXISTS "
-        + "users(U_ID INTEGER NOT NULL AUTO_INCREMENT, "
-        + "name TEXT, email TEXT, G_ID INTEGER, PRIMARY KEY (U_ID));";
+        + "users(U_ID INTEGER, name TEXT, email TEXT, "
+        + "G_ID INTEGER, PRIMARY KEY (U_ID));";
 
     try (PreparedStatement prep = conn.prepareStatement(query)) {
       prep.executeUpdate();
@@ -199,31 +197,19 @@ public abstract class Main {
     }
 
     // Save the input user into 'users' table
+    int userID = user.getID();
     String userName = user.getName();
     String email = user.getEmail();
     int groupID = user.getGroupID();
-    query = "INSERT INTO users VALUES(NULL, ?, ?, ?);";
+    query = "INSERT INTO users VALUES(?, ?, ?, ?);";
 
     try (PreparedStatement prep = conn.prepareStatement(query)) {
-      prep.setString(1, userName);
-      prep.setString(2, email);
-      prep.setInt(3, groupID);
+      prep.setInt(1, userID);
+      prep.setString(2, userName);
+      prep.setString(3, email);
+      prep.setInt(4, groupID);
       prep.addBatch();
       prep.executeBatch();
-    } catch (SQLException e) {
-      System.out.println(e.getMessage());
-    }
-
-    // Query unique id from data just entered, and set user's id
-    query = "SELECT U_ID FROM boards WHERE name = ? AND email = ?;";
-    try (PreparedStatement prep = conn.prepareStatement(query)) {
-      prep.setString(1, userName);
-      prep.setString(2, email);
-      try (ResultSet res = prep.executeQuery()) {
-        user.setUserID(res.getInt(1));
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-      }
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }
