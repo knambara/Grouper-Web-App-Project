@@ -142,7 +142,9 @@ public abstract class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables = ImmutableMap.of("title",
-          "Study - Group status");
+          "Study - Group status", "grouptitle", "Group Title", "groupclass",
+          "CLAS1234", "groupdesc", "A group with a description", "groupemails",
+          "jeffrey_demanche@brown.edu");
       return new ModelAndView(variables, "group.ftl");
     }
   }
