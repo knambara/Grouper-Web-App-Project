@@ -24,6 +24,20 @@ h1 {
   font-weight: lighter;
 }
 
+h2 {
+  font-size: 32pt;
+  font-weight: 400;
+  color: $dark_color;
+  line-height: 0%;
+}
+
+h3 {
+  font-size: 24pt;
+  font-weight: 400;
+  color: $primary_color;
+  line-height: 0%;
+}
+
 button {
   border: none;
   background-color: $primary_color;
@@ -63,6 +77,10 @@ input[type="text"] {
   height: ($default_input_height - 2px);
   width: $default_input_width;
   padding: 0px;
+}
+
+input[type="checkbox"] {
+    float: right;
 }
 
 .half-column-form {
@@ -106,4 +124,212 @@ input[type="text"] {
   margin: 10px;
   height: 200px;
   display: flex;
+}
+
+#dashboard-body {
+    height: 100%;
+    display: flex;
+    position: relative;
+}
+
+#side-menu {
+    width: 360px;
+    height: 100%;
+    border-right: gray 1px solid;
+    font-size: 14pt;
+}
+
+#side-menu-content {
+    top: 10%;
+    position: relative;
+    width: 300px;
+    margin: auto;
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+#department-selector {
+    width: 300px;
+}
+
+#class-selector {
+    height: 300px;
+    background-color: white;
+    margin-bottom: 30px;
+    margin-top: 20px;
+    border: gray 1px solid;
+}
+
+#class-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding: 20px;
+}
+
+#update-button-wrapper {
+    text-align: center;
+}
+
+#group-display {
+    width: -webkit-fill-available;
+}
+
+#sort-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 315px;
+    position: absolute;
+    right: 30px;
+    top: 30px;
+}
+
+#order, #sort {
+    height: 30px;
+}
+
+#add-group-button, .group-tile {
+    border: gray 1px solid;
+    border-radius: 22px;
+    height: 280px;
+    width: 220px;
+    margin: 15px;
+    position: relative;
+}
+
+#add-group-button a {
+    font-size: 18pt;
+    text-align: center;
+    text-decoration: none;
+    color: gray;
+    margin: 0;
+    padding: 0;
+}
+
+#add-group-button #plus-sign {
+    font-size: 124pt;
+    font-weight: 100;
+    text-align: center;
+    position: absolute;
+    right: 65px;
+}
+
+#plus-sign, #add-group {
+    margin: 0;
+    padding: 0;
+    margin: auto;
+}
+
+#add-group-button #add-group {
+    left: 55px;
+    position: absolute;
+    bottom: 45px;
+}
+
+.group-button:hover {
+    box-shadow: 2px 2px 3px $shadow_color;
+    -webkit-transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s;
+}
+
+.group-button {
+    -webkit-transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s;
+}
+
+#plus-sign {
+    line-height: 1;
+}
+
+#add-group-text {
+    width: 130px;
+    margin: auto;
+    text-align: center;
+    margin-top: 30px;
+}
+
+#group-grid {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 15px;
+    margin-top: 100px;
+}
+
+.group-tile-content {
+    padding: 15px;
+    height: 250px;
+    position: relative;
+}
+
+.group-tile-content h2 {
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+    font-size: 18pt;
+}
+
+.group-tile-content h4 {
+    margin: 0;
+    padding: 0;
+    font-weight: lighter;
+    margin-top: 7px;
+}
+
+.group-tile-content p {
+    margin: 0;
+    padding: 0;
+}
+
+#join {
+    width: 80px;
+}
+
+#group-tile-bottom {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    left: 15px;
+}
+
+#group-body {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#group-centered {
+  width: 80%;
+  margin: auto;
+}
+
+#group-details {
+  width: 100%;
+  display: flex;
+}
+
+.group-detail {
+  width: 33.33%;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#group-members {
+  height: 200px;
+}
+
+#group-options {
+  width: 100%;
+  display: flex;
+}
+
+.group-option {
+  width: 33.33%;
+  padding-left: 10px;
+  padding-right: 10p
 }

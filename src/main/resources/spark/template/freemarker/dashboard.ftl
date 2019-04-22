@@ -45,7 +45,7 @@
     </div>
 
     <div id="group-grid">
-        <div id="add-group-button">
+        <div id="add-group-button" class="group-button">
             <div id="add-group-text">
                 <a href=/study/newgroup id="plus-sign">+</a>
                 <a href=/study/newgroup id="add-group">Add Group</a>
