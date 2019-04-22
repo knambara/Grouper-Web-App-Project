@@ -12,6 +12,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import edu.brown.cs.jkjk.database.DBConnector;
+import edu.brown.cs.jkjk.grouper.UserCacheHandler;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -34,6 +35,7 @@ public abstract class Main {
   private static final int PORT_NUM = 4567;
 
   private static DBConnector GROUPER_DB = new DBConnector();
+  private static UserCacheHandler USER_CACHE = new UserCacheHandler(GROUPER_DB);
 
   /**
    * Method entrypoint for CLI invocation.
@@ -171,7 +173,9 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Study - Group status");
+      Map<String, Object> variables = ImmutableMap.of("title", "Study - Group status", "grouptitle",
+          "Group Title", "groupclass", "CLAS1234", "groupdesc", "A group with a description",
+          "groupemails", "jeffrey_demanche@brown.edu");
       return new ModelAndView(variables, "group.ftl");
     }
   }
