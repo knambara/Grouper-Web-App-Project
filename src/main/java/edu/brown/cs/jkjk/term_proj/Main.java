@@ -7,6 +7,9 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
@@ -116,12 +119,14 @@ public abstract class Main {
     Spark.exception(Exception.class, new ExceptionPrinter());
     FreeMarkerEngine freeMarker = createEngine();
 
-    Spark.get("/study", new LandingPageHandler(), freeMarker);
-    Spark.get("/study/dashboard", new DashboardHandler(), freeMarker);
-    Spark.get("/study/newgroup", new NewGroupHandler(), freeMarker);
-    Spark.get("/study/group", new GroupHandler(), freeMarker);
+    Spark.get("/grouper", new LandingPageHandler(), freeMarker);
+    Spark.get("/grouper/dashboard", new DashboardHandler(), freeMarker);
+    Spark.get("/grouper/newgroup", new NewGroupHandler(), freeMarker);
+    Spark.get("/grouper/group", new GroupHandler(), freeMarker);
 
     Spark.post("/newuser", new NewUserHandler());
+    Spark.post("/department", new DepartmentSelectHandler());
+    Spark.post("/checkedClasses", new GroupDashboardHandler());
 
   }
 
@@ -134,7 +139,7 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Study");
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper");
       return new ModelAndView(variables, "landing.ftl");
     }
   }
@@ -148,7 +153,15 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Study - Your dashboard");
+
+      // Hard coded for testing purposes.
+      List<String> departmentList = new ArrayList<String>();
+      departmentList.add("Applied Math");
+      departmentList.add("Biology");
+      departmentList.add("Computer Science");
+
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
+          "departments", departmentList);
       return new ModelAndView(variables, "dashboard.ftl");
     }
   }
@@ -162,24 +175,98 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Study - Create a new group");
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group");
       return new ModelAndView(variables, "newgroup.ftl");
     }
   }
 
   /**
-   * Handler for the page that allows you to view and moniter your current group.
-   *
-   * @author jsoenkse
+   * Handler for the page that allows you to view and monitor your current group.
    */
   private static class GroupHandler implements TemplateViewRoute {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Study - Group status", "grouptitle",
-          "Group Title", "groupclass", "CLAS1234", "groupdesc", "A group with a description",
-          "groupemails", "jeffrey_demanche@brown.edu");
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
+          "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
+          "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
       return new ModelAndView(variables, "group.ftl");
+    }
+  }
+
+  /**
+   * Handler for passing all of the classes to the front end, given the selected department
+   * 
+   * FEEL FREE TO CHANGE THIS TO SUIT YOUR BACK END NEEDS!
+   * 
+   * @author jsoenkse
+   */
+  private static class DepartmentSelectHandler implements Route {
+
+    @Override
+    public String handle(Request req, Response res) throws Exception {
+      QueryParamsMap qm = req.queryMap();
+      String dept = qm.value("department");
+
+      // Hard coded info in order to test front end connection
+      List<String> classes = new ArrayList<String>();
+      if (dept.equals("Computer Science")) {
+        classes.add("CSCI0150");
+        classes.add("CSCI0220");
+        classes.add("CSCI0320");
+      } else if (dept.equals("Biology")) {
+        classes.add("BIOL0100");
+        classes.add("BIOL1998");
+      } else if (dept.equals("Applied Math")) {
+        classes.add("APMA1650");
+        classes.add("APMA0330");
+      }
+      Map<String, Object> variables = ImmutableMap.of("classes", classes);
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handler for obtaining group information from a list of courses.
+   * 
+   * FEEL FREE TO CHANGE THIS TO SUIT YOUR BACK END NEEDS!
+   * 
+   * @author jsoenkse
+   */
+  private static class GroupDashboardHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) throws Exception {
+      QueryParamsMap qm = req.queryMap();
+      String classesUnparsed = qm.value("checked");
+
+      // Stripping and parsing input from front end into list of just class codes
+      classesUnparsed = classesUnparsed.replace("]", "");
+      classesUnparsed = classesUnparsed.replace("[", "");
+      classesUnparsed = classesUnparsed.replace("\"", "");
+      String[] classes = classesUnparsed.split(",");
+      for (String c : classes) {
+        c = c.trim();
+      }
+
+      List<List<String>> groups = new ArrayList<List<String>>();
+
+      // Hard coded examples in order to test front end
+      for (String c : classes) {
+        if (c.equals("CSCI0150")) {
+          groups.add(Arrays.asList("4", "Sketchy Meeting", "CSCI0150", "7", "Ratty", "335"));
+
+        } else if (c.equals("CSCI0220")) {
+          groups.add(Arrays.asList("1", "Studying for Midterm", "CSCI0220", "5", "CIT", "142"));
+          groups.add(Arrays.asList("2", "Drawing Logic Circuits", "CSCI0220", "4",
+              "Science Library", "43"));
+        } else if (c.equals("CSCI0320")) {
+          groups
+              .add(Arrays.asList("3", "Talking about Appliances", "CSCI0320", "37", "CIT", "252"));
+        }
+      }
+
+      Map<String, Object> variables = ImmutableMap.of("groups", groups);
+      return GSON.toJson(variables);
     }
   }
 

@@ -1,7 +1,7 @@
 <#assign content>
 <div id="landing-body">
   <div id="landing-centered" class="centered">
-    <h1>Welcome to Study!</h1>
+    <h1>Welcome to Grouper!</h1>
     <button id="login-btn">Login</button>
   </div>
 </div>

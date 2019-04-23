@@ -5,11 +5,10 @@
     <div id="side-menu-content">
         <div id="department-dropdown">
         <select id="department-selector">
-            <!-- HARD CODED OPTIONS FOR THE MOMENT; WILL BE OPTIONS FROM BACKEND IN FUTURE-->
-            <option value="Applied Math">Applied Math</option>
-            <option value="Archeology">Archeology</option>
-            <option value="Biology">Biology</option>
-            <option value="Computer Science">Computer Science</option>
+            <option value="none">---select a department---</option>
+            <#list departments as depts>
+            <option value="${depts}">${depts}</option>
+            </#list>
         </select>
         </div>
 
@@ -47,8 +46,8 @@
     <div id="group-grid">
         <div id="add-group-button" class="group-button">
             <div id="add-group-text">
-                <a href=/study/newgroup id="plus-sign">+</a>
-                <a href=/study/newgroup id="add-group">Add Group</a>
+                <a href=/grouper/newgroup id="plus-sign">+</a>
+                <a href=/grouper/newgroup id="add-group">Add Group</a>
             </div>
         </div>
     </div>

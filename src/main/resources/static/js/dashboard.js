@@ -1,9 +1,9 @@
 class GroupTile {
-    constructor(id, title, dept, code, size, loc, time_left) {
+    constructor(id, title, course, size, loc, time_left) {
         this.id = id;
         this.title = title;
-        this.dept = dept;
-        this.code =code;
+        this.dept = course.substring(0,4);
+        this.code = course.substring(4,8);
         this.size = size;
         this.loc = loc;
         this.time_left = time_left; // in minutes
@@ -48,6 +48,7 @@ class GroupTile {
     }
 }
 
+// Rebuilds the group-grid in the correctly sorted order
 function rebuildGrid(sortedTiles) {
     $group_grid.empty();
     for (i in sortedTiles) {
@@ -57,18 +58,12 @@ function rebuildGrid(sortedTiles) {
     const addGroup = document.createElement('div');
     addGroup.setAttribute('id', 'add-group-button');
     addGroup.innerHTML = "<div id='add-group-text'>" +
-        "<a href=/study/newgroup id='plus-sign'>+</a><a href=/study/newgroup id='add-group'>Add Group</a></div>";
+        "<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
     $group_grid.append(addGroup);
 }
 
 // Groups currently displayed stored in map where key = id, value = GroupTile
 let displayedGroups = new Map();
-const oldOrder = [];
-
-// Groups for Test Purposes
-const cs22_groups = [[1, "Studying for Midterm", "CSCI", "0220", 5, "CIT", 142],[2, "Drawing Logic Circuits", "CSCI", "0220", 4, "Science Library", 43]];
-const cs32_groups = [[3, "Talking about Appliances", "CSCI", "0320", 37, "CIT", 252]];
-const cs15_groups = [[4, "Sketchy Meeting", "CSCI", "0150", 7, "Ratty", 335]];
 
 const $dept_select = $('#department-selector');
 const $class_list = $('#class-list');
@@ -79,23 +74,9 @@ const $group_grid = $('#group-grid');
 
 const class_map = new Map();
 
-// Hard-coded lists for development purposes; will be aquired from back end
-const departments = ["Computer Science", "Biology", "Applied Math", "Archeology"];
-const cs_classes = ["CSCI 0150", "CSCI 0220", "CSCI 0320"];
-const bio_classes = ["BIOL 0200", "BIOL 1000"];
-const apma_classes = ["APMA 0330", "APMA 1650"];
-const arch_classes = ["ARCH 0123", "ARCH 0430"];
-const classes = [cs_classes, bio_classes, apma_classes, arch_classes];
-
-// Build map with departments and courses w/ active groups
-for (let i in departments) {
-    class_map.set(departments[i], classes[i]);
-}
-
-
 $(document).ready(() => {
 
-    // Being updating time remaining
+    // Begin updating time remaining
     updateTimeRemainingForDisplayed();
 
     // Update courses w/ active groups when the department selector is changed
@@ -106,100 +87,68 @@ $(document).ready(() => {
 
         // Get current info
         const curr_department = $dept_select.val();
-        const curr_classes = class_map.get(curr_department);
 
-        // TODO: Send POST request to get all classes with active groups?
+        // Send POST request to get all classes with active groups
+        const postParameters = {department: curr_department};
 
-        // Add each class to the list
-        for (let i in curr_classes) {
-            $class_list.append("<li>" + curr_classes[i] +
-            "<input type='checkbox' name='classes' class='class' value='"+ curr_classes[i] + "'>" +
-             "</li>");
-        }
+        $.post("/department", postParameters, responseJSON => {
 
+            const responseObject = JSON.parse(responseJSON);
+            const curr_classes = responseObject.classes;
+
+            // Add each class to the list
+            for (let i in curr_classes) {
+                $class_list.append("<li>" + curr_classes[i] +
+                "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "'>" +
+                 "</li>");
+            }
+
+        });
     });
 
     // Display active groups for selected classes when Update button is clicked
     $update_button.on('click', event => {
 
-        //const checked_classes = new Array(0);
-        const curr_classes = $('.class');
+        const shown_classes = $('.class-item');
+        const checked_classes = [];
 
-        /*
-        for (let i in curr_classes) {
-            if (curr_classes[i].checked) {
-                //console.log(curr_classes[i].value + " is checked");
-                checked_classes.push(curr_classes[i]);
-            }
-        }*/
-
-        // TODO: Display active groups for checked classes
-
-        // IDEA: POST request for all groups associated with the checked_classes =>
-        // list of group information in format [id, title, dept, code, size, location, time-remaining]
-        // for each group
-        // get groups associated w/ checked classes
-
-
-        for (i in curr_classes) {
-            //if (checked_classes[i].value === "CSCI 0220") {
-            if (curr_classes[i].value === "CSCI 0220") {
-                for (g in cs22_groups) {
-                    const group = cs22_groups[g];
-                    if (curr_classes[i].checked) {
-                        if (!displayedGroups.has(group[0])) {
-                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
-                            displayedGroups.set(tile.id, tile);
-                            tile.build();
-                            tile.updateTime();
-                        }
-                    } else {
-                        if (displayedGroups.has(group[0])) {
-                            displayedGroups.get(group[0]).hide();
-                            displayedGroups.delete(group[0]);
-                        }
-                }
-                }
-            }
-            //if (checked_classes[i].value === "CSCI 0320") {
-            if (curr_classes[i].value === "CSCI 0320") {
-                for (g in cs32_groups) {
-                    const group = cs32_groups[g];
-                    if (curr_classes[i].checked) {
-                        if (!displayedGroups.has(group[0])) {
-                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
-                            displayedGroups.set(tile.id, tile);
-                            tile.build();
-                            tile.updateTime();
-                        }
-                    } else {
-                        if (displayedGroups.has(group[0])) {
-                            displayedGroups.get(group[0]).hide();
-                            displayedGroups.delete(group[0]);
-                        }
-                    }
-                }
-            }
-            if (curr_classes[i].value === "CSCI 0150") {
-                for (g in cs15_groups) {
-                    const group = cs15_groups[g];
-                    if (curr_classes[i].checked) {
-                        if (!displayedGroups.has(group[0])) {
-                            const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
-                            displayedGroups.set(tile.id, tile);
-                            tile.build();
-                            tile.updateTime();
-                        }
-                    } else {
-                        if (displayedGroups.has(group[0])) {
-                            displayedGroups.get(group[0]).hide();
-                            displayedGroups.delete(group[0]);
-                        }
-                    }
-                }
+        for (let i = 0; i < shown_classes.length; i++) {
+            if (shown_classes[i].checked) {
+                checked_classes.push(shown_classes[i].value);
             }
         }
-        sort();
+
+        // Probably not the most effective way of removing groups associated
+        // with unchecked classes, but it seems to work.
+        $group_grid.empty();
+        displayedGroups = new Map();
+        const addGroup = document.createElement('div');
+        addGroup.setAttribute('id', 'add-group-button');
+        addGroup.innerHTML = "<div id='add-group-text'>" +
+            "<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
+        $group_grid.append(addGroup);
+
+        // Send list of course codes as strings
+        const postParameters = {checked: JSON.stringify(checked_classes)};
+
+        // POST request for all groups associated with checked classes; recieve list of
+        // active groups w/ information in formate of [id, title, course, size, location, time-remaining]
+        $.post("/checkedClasses", postParameters, responseJSON => {
+
+            const responseObject = JSON.parse(responseJSON);
+            const groups = responseObject.groups;
+
+            for (i in groups) {
+                const group = groups[i];
+                if (!displayedGroups.has(group[0])) {
+                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5]);
+                    displayedGroups.set(tile.id, tile);
+                    tile.build();
+                    tile.updateTime();
+                }
+            }
+            sort();
+        });
     });
 
     function updateTimeRemainingForDisplayed() {
@@ -223,7 +172,9 @@ $(document).ready(() => {
         sort();
     });
 
+    // Function to sort the grid based on whatever the value of each dropdown is
     function sort() {
+        // Sort based on course code
         if ($sort_select.val() === "course-code") {
             const sorted = sortByCourseCode(displayedGroups);
             if ($order_select.val() === "asc") {
@@ -232,6 +183,7 @@ $(document).ready(() => {
                 rebuildGrid(sorted.reverse());
             }
         }
+        // Sort based on time remaining
         else if ($sort_select.val() === "time-rem") {
             const sorted = sortByTimeLeft(displayedGroups);
             if ($order_select.val() === "asc") {
@@ -240,6 +192,7 @@ $(document).ready(() => {
                 rebuildGrid(sorted.reverse());
             }
         }
+        // Sort based on group size
         else if ($sort_select.val() === "group-size") {
             const sorted = sortByGroupSize(displayedGroups);
             if ($order_select.val() === "asc") {
@@ -248,6 +201,17 @@ $(document).ready(() => {
                 rebuildGrid(sorted.reverse());
             }
         }
+        // Sort based on distance to user
+        /*
+        else if ($sort_select.val() === "distance") {
+            const sorted = sortByDistance(displayedGroups);
+            if ($order_select.val() === "asc") {
+                rebuildGrid(sorted);
+            } else {
+                rebuildGrid(sorted.reverse());
+            }
+        }
+        */
     }
 
     function sortByCourseCode(groups) {
@@ -259,12 +223,10 @@ $(document).ready(() => {
             tempList.push(tempGroup);
         }
         tempList.sort(function(a,b){return b.code - a.code;});
-        console.log(tempList);
         const sortedTiles = [];
         for (i in tempList) {
             sortedTiles.push(tempList[i].tile);
         }
-        console.log(sortedTiles);
         return sortedTiles;
     }
 
@@ -277,12 +239,10 @@ $(document).ready(() => {
             tempList.push(tempGroup);
         }
         tempList.sort(function(a,b){return b.time - a.time;});
-        console.log(tempList);
         const sortedTiles = [];
         for (i in tempList) {
             sortedTiles.push(tempList[i].tile);
         }
-        console.log(sortedTiles);
         return sortedTiles;
     }
 
@@ -295,17 +255,14 @@ $(document).ready(() => {
             tempList.push(tempGroup);
         }
         tempList.sort(function(a,b){return b.size - a.size;});
-        console.log(tempList);
         const sortedTiles = [];
         for (i in tempList) {
             sortedTiles.push(tempList[i].tile);
         }
-        console.log(sortedTiles);
         return sortedTiles;
     }
 
     function sortByDistance(groups) {
 
     }
-
 });

@@ -1,6 +1,6 @@
 $(document).ready(() => {
   console.log("New Page");
-  if(window.location.href === "http://localhost:4567/study"){
+  if(window.location.href === "http://localhost:4567/grouper"){
     $("#login-btn").click(startApp());
   }
 
@@ -39,11 +39,11 @@ function attachSignin(element) {
         });
 }
 
-	
+
 function onSuccess(googleUser) {
   console.log("Sign in successful");
   var profile = googleUser.getBasicProfile();
-  console.log(profile);  
+  console.log(profile);
 
   const postParameter = {name: profile.getName(), email: profile.getEmail(), img: profile.getImageUrl()};
   $.post("/newuser", postParameter, responseJSON => {
@@ -52,6 +52,6 @@ function onSuccess(googleUser) {
   });
 
   // TODO?: page is redirects to user's last visited page
-  window.location.href = "http://localhost:4567/study/dashboard";
-  
+  window.location.href = "http://localhost:4567/grouper/dashboard";
+
 }
