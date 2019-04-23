@@ -44,6 +44,8 @@ public abstract class Main {
   private static DBConnector GROUPER_DB = new DBConnector();
   private static UserCacheHandler USER_CACHE = new UserCacheHandler(GROUPER_DB);
 
+  private static String curr_user_email = "";
+
   /**
    * Method entrypoint for CLI invocation.
    *
@@ -161,7 +163,7 @@ public abstract class Main {
       departmentList.add("Computer Science");
 
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
-          "departments", departmentList);
+          "departments", departmentList, "email", curr_user_email);
       return new ModelAndView(variables, "dashboard.ftl");
     }
   }
@@ -314,6 +316,8 @@ public abstract class Main {
       String name = qm.value("name");
       String email = qm.value("email");
       String img = qm.value("img");
+
+      curr_user_email = email;
 
       Connection conn = GROUPER_DB.getConnection();
       String query = "INSERT OR IGNORE INTO users VALUES (?, ?, ?);";

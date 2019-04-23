@@ -2,7 +2,14 @@
 <div id="dashboard-body">
 
 <div id="side-menu">
+    <div id="user-info">
+    <p>${email}</p>
+    <button id="log-out">log out</button>
+    </div>
     <div id="side-menu-content">
+        <div id="logo">
+        <h1>Grouper</h1>
+        </div>
         <div id="department-dropdown">
         <select id="department-selector">
             <option value="none">---select a department---</option>

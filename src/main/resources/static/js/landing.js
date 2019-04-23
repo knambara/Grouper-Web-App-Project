@@ -9,9 +9,10 @@ $(document).ready(() => {
 /*
  * Called when the user clicks the button.
  */
+ /*
 let onLogin = function() {
 
-}
+}*/
 
 // googleUser object containing user information
 var googleUser = {};
@@ -39,19 +40,18 @@ function attachSignin(element) {
         });
 }
 
-
 function onSuccess(googleUser) {
   console.log("Sign in successful");
   var profile = googleUser.getBasicProfile();
-  console.log(profile);
 
   const postParameter = {name: profile.getName(), email: profile.getEmail(), img: profile.getImageUrl()};
   $.post("/newuser", postParameter, responseJSON => {
     const responseObject = JSON.parse(responseJSON);
     console.log(responseObject.msg);
+    window.location.href = "http://localhost:4567/grouper/dashboard";
+
   });
 
   // TODO?: page is redirects to user's last visited page
-  window.location.href = "http://localhost:4567/grouper/dashboard";
 
 }

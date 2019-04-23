@@ -76,6 +76,26 @@ const class_map = new Map();
 
 $(document).ready(() => {
 
+    // When page is refreshed, reload all the appropriate data that has been saved
+    $(window).on('load', function(){
+
+        $dept_select.val(sessionStorage.getItem("department"));
+        $order_select.val(sessionStorage.getItem("order"));
+        $sort_select.val(sessionStorage.getItem("sort"));
+        const curr_classes = JSON.parse(sessionStorage.getItem("classList"));
+        const checked_classes = JSON.parse(sessionStorage.getItem("checkedClasses"));
+
+        for (let i in curr_classes) {
+            $class_list.append("<li>" + curr_classes[i] +
+            "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
+             "</li>");
+            if (checked_classes.includes(curr_classes[i])) {
+                $('#'+curr_classes[i]).prop('checked', true);
+            }
+        }
+        updateGrid();
+    });
+
     // Begin updating time remaining
     updateTimeRemainingForDisplayed();
 
@@ -85,8 +105,17 @@ $(document).ready(() => {
         // Remove old results
         $class_list.empty();
 
+        $group_grid.empty();
+        displayedGroups = new Map();
+        const addGroup = document.createElement('div');
+        addGroup.setAttribute('id', 'add-group-button');
+        addGroup.innerHTML = "<div id='add-group-text'>" +
+            "<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
+        $group_grid.append(addGroup);
+
         // Get current info
         const curr_department = $dept_select.val();
+        sessionStorage.setItem("department", curr_department);
 
         // Send POST request to get all classes with active groups
         const postParameters = {department: curr_department};
@@ -102,13 +131,17 @@ $(document).ready(() => {
                 "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "'>" +
                  "</li>");
             }
-
+            sessionStorage.setItem("classList", JSON.stringify(curr_classes));
         });
+
     });
 
     // Display active groups for selected classes when Update button is clicked
     $update_button.on('click', event => {
+        updateGrid()
+    });
 
+    function updateGrid() {
         const shown_classes = $('.class-item');
         const checked_classes = [];
 
@@ -148,8 +181,9 @@ $(document).ready(() => {
                 }
             }
             sort();
+            sessionStorage.setItem("checkedClasses", JSON.stringify(checked_classes));
         });
-    });
+    }
 
     function updateTimeRemainingForDisplayed() {
         const groups = displayedGroups.values();
@@ -165,10 +199,12 @@ $(document).ready(() => {
     // SORTING FUNCTIONALITY
 
     $order_select.on('change', event => {
+        sessionStorage.setItem("order", $order_select.val());
         sort();
     });
 
     $sort_select.on('change', event => {
+        sessionStorage.setItem("sort", $sort_select.val());
         sort();
     });
 
