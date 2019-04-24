@@ -176,7 +176,7 @@ input[type=checkbox] {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  border-bottom: #000000 1px solid;
+  border-bottom: gray 1px solid;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 10px;

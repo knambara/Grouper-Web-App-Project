@@ -264,6 +264,8 @@ public abstract class Main {
         } else if (c.equals("CSCI0320")) {
           groups
               .add(Arrays.asList("3", "Talking about Appliances", "CSCI0320", "37", "CIT", "252"));
+        } else if (c.equals("BIOL0100")) {
+          groups.add(Arrays.asList("5", "Problem Set 1", "BIOL0100", "6", "Barus & Holley", "62"));
         }
       }
 

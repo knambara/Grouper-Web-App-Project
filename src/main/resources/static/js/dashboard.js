@@ -79,12 +79,22 @@ $(document).ready(() => {
     // When page is refreshed, reload all the appropriate data that has been saved
     $(window).on('load', function(){
 
+        // Reset all dropdowns with previous values before refresh
         $dept_select.val(sessionStorage.getItem("department"));
         $order_select.val(sessionStorage.getItem("order"));
         $sort_select.val(sessionStorage.getItem("sort"));
         const curr_classes = JSON.parse(sessionStorage.getItem("classList"));
         const checked_classes = JSON.parse(sessionStorage.getItem("checkedClasses"));
+        //const dept_to_checked = new Map(JSON.parse(sessionStorage.getItem("dept_to_checked")));
+        //const dept_to_checked = objToStrMap(JSON.parse(sessionStorage.getItem("dept_to_checked")));
+        //console.log(dept_to_checked);
+        /*
+        let to_check;
+        if (dept_to_checked.has(sessionStorage.getItem("department"))) {
+            to_check = dept_to_checked.get(sessionStorage.getItem("department"));
+        }*/
 
+        // Re-add all classes that were listed and checked
         for (let i in curr_classes) {
             $class_list.append("<li>" + curr_classes[i] +
             "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
@@ -92,6 +102,21 @@ $(document).ready(() => {
             if (checked_classes.includes(curr_classes[i])) {
                 $('#'+curr_classes[i]).prop('checked', true);
             }
+            /*
+            if (to_check) {
+                if (to_check.includes(curr_classes[i])) {
+                    $('#'+curr_classes[i]).prop('checked', true);
+                }
+            }*/
+            $('#'+curr_classes[i]).on('click', event => {
+                // If checkbox is changed to unchecked, remove all groups
+                //associated with the class, then update the grid
+                if (!$('#'+curr_classes[i]).prop('checked')) {
+                    removeGroups(curr_classes[i]);
+                }
+                updateGrid();
+
+            });
         }
         updateGrid();
     });
@@ -99,19 +124,32 @@ $(document).ready(() => {
     // Begin updating time remaining
     updateTimeRemainingForDisplayed();
 
+    let old_dept = '';
+    const dept_to_checked = new Map();
+
     // Update courses w/ active groups when the department selector is changed
     $dept_select.on('change', event => {
 
+        // Before updating the classes, get all currently checked classes
+        const shown_classes = $('.class-item');
+        const old_checked_classes = [];
+
+        for (let i = 0; i < shown_classes.length; i++) {
+            if (shown_classes[i].checked) {
+                old_checked_classes.push(shown_classes[i].value);
+            }
+        }
+        console.log(old_checked_classes);
+
+        // Map old department to old checked classes
+        if (old_dept !== '') {
+            console.log(old_dept);
+            dept_to_checked.set(old_dept, old_checked_classes);
+        }
+        //sessionStorage.setItem("dept_to_checked", Array.from(dept_to_checked.entries()));
+
         // Remove old results
         $class_list.empty();
-
-        $group_grid.empty();
-        displayedGroups = new Map();
-        const addGroup = document.createElement('div');
-        addGroup.setAttribute('id', 'add-group-button');
-        addGroup.innerHTML = "<div id='add-group-text'>" +
-            "<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
-        $group_grid.append(addGroup);
 
         // Get current info
         const curr_department = $dept_select.val();
@@ -125,21 +163,56 @@ $(document).ready(() => {
             const responseObject = JSON.parse(responseJSON);
             const curr_classes = responseObject.classes;
 
+            // Determine which classes need to be re-checked
+            let to_check;
+            if (dept_to_checked.has(curr_department)) {
+                to_check = dept_to_checked.get(curr_department);
+            }
+
             // Add each class to the list
             for (let i in curr_classes) {
                 $class_list.append("<li>" + curr_classes[i] +
-                "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "'>" +
+                "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
                  "</li>");
+
+                 // Check if class should already be checked
+                 if (to_check) {
+                     if (to_check.includes(curr_classes[i])) {
+                         $('#'+curr_classes[i]).prop('checked', true);
+                     }
+                 }
+
+                 $('#'+curr_classes[i]).on('click', event => {
+                     // If checkbox is changed to unchecked, remove all groups
+                     //associated with the class; then, update the grid
+                     if (!$('#'+curr_classes[i]).prop('checked')) {
+                         removeGroups(curr_classes[i]);
+                     }
+                    updateGrid();
+                 });
             }
             sessionStorage.setItem("classList", JSON.stringify(curr_classes));
         });
-
+        old_dept = curr_department;
     });
 
-    // Display active groups for selected classes when Update button is clicked
-    $update_button.on('click', event => {
-        updateGrid()
-    });
+    // Remove all groups associated with the given class code
+    function removeGroups(classCode) {
+        const groups = displayedGroups.values();
+        // Create new map to add all groups that won't be removed
+        const tempDisplayedGroups = new Map();
+        for (let i = 0; i < displayedGroups.size; i++) {
+            const g = groups.next().value;
+            if (g.dept + g.code === classCode) {
+                g.hide();
+            } else {
+                tempDisplayedGroups.set(g.id, g);
+            }
+        }
+        // Update displayedGroups variable to have only groups that should still
+        // be shown after the given class code has been removed
+        displayedGroups = tempDisplayedGroups;
+    }
 
     function updateGrid() {
         const shown_classes = $('.class-item');
@@ -150,16 +223,6 @@ $(document).ready(() => {
                 checked_classes.push(shown_classes[i].value);
             }
         }
-
-        // Probably not the most effective way of removing groups associated
-        // with unchecked classes, but it seems to work.
-        $group_grid.empty();
-        displayedGroups = new Map();
-        const addGroup = document.createElement('div');
-        addGroup.setAttribute('id', 'add-group-button');
-        addGroup.innerHTML = "<div id='add-group-text'>" +
-            "<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
-        $group_grid.append(addGroup);
 
         // Send list of course codes as strings
         const postParameters = {checked: JSON.stringify(checked_classes)};
