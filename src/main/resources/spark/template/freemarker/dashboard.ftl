@@ -25,9 +25,11 @@
             </ul>
         </div>
 
+        <!--
         <div id="update-button-wrapper">
             <button id="update">Update</button>
         </div>
+        -->
     </div>
 </div>
 

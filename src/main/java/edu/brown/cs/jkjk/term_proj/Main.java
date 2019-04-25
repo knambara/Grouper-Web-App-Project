@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -82,6 +83,7 @@ public abstract class Main {
           + "users(U_ID TEXT, "
           + "name TEXT, "
           + "G_ID INTEGER, "
+          + "hash TEXT, "
           + "PRIMARY KEY (U_ID));";        
       try (PreparedStatement prep = conn.prepareStatement(query)) {
         prep.executeUpdate();
@@ -122,7 +124,7 @@ public abstract class Main {
     FreeMarkerEngine freeMarker = createEngine();
 
     Spark.get("/grouper", new LandingPageHandler(), freeMarker);
-    Spark.get("/grouper/dashboard", new DashboardHandler(), freeMarker);
+    Spark.post("/grouper/dashboard", new DashboardHandler(), freeMarker);
     Spark.get("/grouper/newgroup", new NewGroupHandler(), freeMarker);
     Spark.get("/grouper/group", new GroupHandler(), freeMarker);
 
@@ -156,15 +158,25 @@ public abstract class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
 
-      // Hard coded for testing purposes.
-      List<String> departmentList = new ArrayList<String>();
-      departmentList.add("Applied Math");
-      departmentList.add("Biology");
-      departmentList.add("Computer Science");
+      QueryParamsMap qm = req.queryMap();
+      String email = qm.value("login_email");
+      String hash = qm.value("login_hash");
 
-      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
-          "departments", departmentList, "email", curr_user_email);
-      return new ModelAndView(variables, "dashboard.ftl");
+      if (GROUPER_DB.verifyUserHash(email, hash)) {
+        // Hard coded for testing purposes.
+        List<String> departmentList = new ArrayList<String>();
+        departmentList.add("Applied Math");
+        departmentList.add("Biology");
+        departmentList.add("Computer Science");
+
+        Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
+            "departments", departmentList, "email", curr_user_email);
+        return new ModelAndView(variables, "dashboard.ftl");
+      } else {
+        Map<String, Object> variables = ImmutableMap.of("title", "Redirecting");
+        return new ModelAndView(variables, "badlogin.ftl");
+      }
+
     }
   }
 
@@ -264,6 +276,8 @@ public abstract class Main {
         } else if (c.equals("CSCI0320")) {
           groups
               .add(Arrays.asList("3", "Talking about Appliances", "CSCI0320", "37", "CIT", "252"));
+        } else if (c.equals("BIOL0100")) {
+          groups.add(Arrays.asList("5", "Problem Set 1", "BIOL0100", "6", "Barus & Holley", "62"));
         }
       }
 
@@ -319,21 +333,66 @@ public abstract class Main {
 
       curr_user_email = email;
 
-      Connection conn = GROUPER_DB.getConnection();
-      String query = "INSERT OR IGNORE INTO users VALUES (?, ?, ?);";
-      try (PreparedStatement prep = conn.prepareStatement(query)) {
-        prep.setString(1, email);
-        prep.setString(2, name);
-        prep.setInt(3, -1);
-        prep.executeUpdate();
-        prep.close();
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-      }
+      if (email.endsWith("@brown.edu")) {
 
-      Map<String, Object> variables = ImmutableMap.of("msg", "success");
-      return GSON.toJson(variables);
+        String hash = generateHash(32);
+
+        Connection conn = GROUPER_DB.getConnection();
+
+        String query1 = "UPDATE users SET hash=? WHERE U_ID=?;";
+        String query2 = "INSERT INTO users(U_ID, name, G_ID, hash) SELECT ?, ?, ?, ? WHERE "
+            + "(Select Changes() = 0);";
+        try (PreparedStatement prep = conn.prepareStatement(query1)) {
+          prep.setString(1, hash);
+          prep.setString(2, email);
+
+          prep.executeUpdate();
+          prep.close();
+        } catch (SQLException e) {
+          System.err.println(e.getMessage());
+        }
+
+        try (PreparedStatement prep = conn.prepareStatement(query2)) {
+          prep.setString(1, email);
+          prep.setString(2, name);
+          prep.setInt(3, -1);
+          prep.setString(4, hash);
+
+          prep.executeUpdate();
+          prep.close();
+        } catch (SQLException e) {
+          System.err.println(e.getMessage());
+        }
+
+        Map<String, Object> variables = ImmutableMap.of("msg", "success", "error", "", "hash",
+            hash);
+        return GSON.toJson(variables);
+
+      } else {
+
+        Map<String, Object> variables = ImmutableMap.of("msg", "error", "error",
+            "Only valid brown.edu Google accounts allowed", "hash", "");
+        return GSON.toJson(variables);
+
+      }
     }
+  }
+
+  /**
+   * Generates a random string of a given length using alpha-numeric characters.
+   * 
+   * @return The hash.
+   */
+  private static String generateHash(int length) {
+    String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    StringBuilder hash = new StringBuilder();
+    Random random = new Random();
+    while (hash.length() < length) {
+      int index = (int) (random.nextFloat() * chars.length());
+      hash.append(chars.charAt(index));
+    }
+    String outStr = hash.toString();
+    return outStr;
   }
 
 }

@@ -2,6 +2,8 @@ package edu.brown.cs.jkjk.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -31,8 +33,7 @@ public class DBConnector {
   public void connect(String dbFile) throws Exception {
     if (database != null) {
       if (database.equals(dbFile)) {
-        System.out.println("ERROR: Same database as previous one; No change in "
-            + "connection");
+        System.out.println("ERROR: Same database as previous one; No change in " + "connection");
         return;
       }
     }
@@ -59,6 +60,33 @@ public class DBConnector {
       database = null;
       throw new Exception("Database does not Exist");
     }
+  }
+
+  /**
+   * Verifies whether a hash exists in the database for a given user.
+   * 
+   * @param email The user's email (which is used as the primary_key in the table).
+   * @param hash The hash to compare against.
+   * @return True if verified.
+   */
+  public boolean verifyUserHash(String email, String hash) {
+
+    String query = "SELECT hash FROM users WHERE U_ID=?;";
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, email);
+      ResultSet results = prep.executeQuery();
+
+      while (results.next()) {
+        if (hash.equals(results.getString(1))) {
+          results.close();
+          return true;
+        }
+      }
+      results.close();
+    } catch (SQLException e) {
+      System.err.println(e.getMessage());
+    }
+    return false;
   }
 
   /**

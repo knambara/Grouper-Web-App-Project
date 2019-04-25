@@ -1,5 +1,9 @@
 package edu.brown.cs.jkjk.grouper;
 
+import java.util.concurrent.ExecutionException;
+
+import com.google.common.cache.LoadingCache;
+
 /**
  * User class. Represents individual user that logs into the app.
  * 
@@ -8,11 +12,8 @@ package edu.brown.cs.jkjk.grouper;
  */
 public class User {
 
-  private static int CURR_USER_ID = 0;
-
   private String name;
   private String email;
-  private int userID;
   private int groupID = -1;
   private boolean mod;
 
@@ -25,8 +26,6 @@ public class User {
   public User(String name, String email) {
     this.name = name;
     this.email = email;
-    this.userID = CURR_USER_ID;
-    CURR_USER_ID += 1;
   }
 
   /**
@@ -45,15 +44,6 @@ public class User {
    */
   public String getEmail() {
     return email;
-  }
-
-  /**
-   * Returns the unique ID of this user.
-   * 
-   * @return int ID
-   */
-  public int getID() {
-    return userID;
   }
 
   /**
@@ -90,5 +80,16 @@ public class User {
    */
   public void setMod(boolean m) {
     this.mod = m;
+  }
+
+  /**
+   * Returns the group object this user is in.
+   * 
+   * @param groupCache LoadingCache containing Group objects
+   * @return Group object
+   * @throws ExecutionException
+   */
+  public Group getGroup(LoadingCache<Integer, Group> groupCache) throws ExecutionException {
+    return groupCache.get(this.groupID);
   }
 }
