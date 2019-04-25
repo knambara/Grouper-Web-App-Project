@@ -128,10 +128,12 @@ public class GroupControl {
     String modId = getModeratorID(groupId);
 
     try {
-      Group g = groupCache.getGroup(groupId);
-      Set<String> users = getUsers(groupId);
+      Group g = group(groupId);
+      System.out.println("Got it from the group lol");
+      List<String> users = getUsers(groupId);
       String course = g.getCourseCode();
       String description = g.getDescription();
+      System.out.println(description);
       Integer userCount = users.size();
       String location = g.getLocation();
       String room = g.getRoom();
@@ -213,7 +215,7 @@ public class GroupControl {
     //get the group id
     Integer gId = getUserGroupID(modId);
     //get the users in the group
-    Set<String> users = getUsers(gId);
+    List<String> users = getUsers(gId);
     //set the users group id back to null
     Iterator<String> usersIt = users.iterator();
     while (usersIt.hasNext()) {
@@ -308,9 +310,9 @@ public class GroupControl {
     return gId;
   }
 
-  private Set<String> getUsers(Integer groupId) {
+  private List<String> getUsers(Integer groupId) {
     Connection conn = database.getConnection();
-    Set<String> users = new HashSet<>();
+    List<String> users = new ArrayList<>();
 
     String query = "SELECT U_ID FROM users WHERE G_ID = ?";
     try {
@@ -356,6 +358,44 @@ public class GroupControl {
     } catch (Exception e) {
       System.out.println("ERROR: Adding user to the database.");
     }
+  }
+
+  private Group group(Integer gId) {
+
+    Connection conn = database.getConnection();
+    Group g = null;
+
+    //Create and return Group with given id
+    String query = "SELECT * FROM groups WHERE G_ID = ?";
+
+    try {
+      PreparedStatement prep = conn.prepareStatement(query);
+      prep.setInt(1, gId);
+      ResultSet rs = prep.executeQuery();
+      while (rs.next()) {
+        System.out.println("Group Helper Start");
+        Integer groupId = rs.getInt("G_ID");
+        String code = rs.getString("code");
+        String department = rs.getString("department");
+        String description = rs.getString("description");
+        Double duration = rs.getDouble("duration");
+        Timestamp start = null;
+        String moderator = rs.getString("Mod");
+        String location = rs.getString("location");
+        String room = rs.getString("room");
+        String details = rs.getString("details");
+
+        g = new Group(groupId, department, location, code, description, duration, room, details);
+        g.setModerator(moderator);
+        g.setStartTime(start);
+
+        System.out.println("Group Helper End");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: " + e.getMessage());
+    }
+    return g;
   }
 
 

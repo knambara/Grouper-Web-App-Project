@@ -23,6 +23,8 @@
         <button id="button-photo-upload">Upload Photo</button><br><br>
       </div>
       <div class="half-column-form">
+        Title: <br>
+        <input type=""text" name="grouptitle" id="field-title" placeholder="Studying for ..."<br><br>
         Description:<br>
         <input type="text" name="description" id="field-description" placeholder="discussing logical things..."><br><br>
         Building:<br>

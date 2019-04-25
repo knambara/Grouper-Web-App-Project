@@ -43,7 +43,40 @@ public class GroupCacheHandler {
                 prep.setInt(1, groupID);
                 ResultSet rs = prep.executeQuery();
                 if (rs.next()) {
-                  g = groupHelper(rs).iterator().next();
+                  Set<Group> groups = new HashSet<>();
+                  try {
+                    while (rs.next()) {
+                      System.out.println("Group Helper Start");
+                      Integer groupId = rs.getInt("G_ID");
+                      String code = rs.getString("code");
+                      String department = rs.getString("department");
+                      String description = rs.getString("description");
+                      Double duration = rs.getDouble("duration");
+                      Timestamp start = rs.getTimestamp("start");
+                      String moderator = rs.getString("Mod");
+                      String location = rs.getString("location");
+                      String room = rs.getString("room");
+                      String details = rs.getString("details");
+
+                      g = new Group(groupId, department, location, code, description, duration, room, details);
+                      g.setModerator(moderator);
+                      g.setStartTime(start);
+
+                      //add the users to the group
+                      Set<User> users = getUsers(groupId);
+                      Iterator<User> usersIt = users.iterator();
+                      while (usersIt.hasNext()) {
+                        g.addUser(usersIt.next());
+                      }
+
+                      groups.add(g);
+
+                      System.out.println("Group Helper End");
+                    }
+
+                  } catch (Exception e) {
+                    System.out.println("ERROR: " + e.getMessage());
+                  }
                 }
                 prep.close();
                 rs.close();
@@ -81,12 +114,15 @@ public class GroupCacheHandler {
             }
           });
 
+
+
   private Set<Group> groupHelper(ResultSet rs) {
 
 
     Set<Group> groups = new HashSet<>();
     try {
       while (rs.next()) {
+        System.out.println("Group Helper Start");
         Integer groupId = rs.getInt("G_ID");
         String code = rs.getString("code");
         String department = rs.getString("department");
@@ -110,6 +146,8 @@ public class GroupCacheHandler {
         }
 
         groups.add(g);
+
+        System.out.println("Group Helper End");
       }
 
     } catch (Exception e) {

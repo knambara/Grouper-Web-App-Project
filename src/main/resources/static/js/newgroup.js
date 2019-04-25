@@ -32,6 +32,7 @@ const $create_group = $('#create-group');
 $create_group.on('click', event => {
 
   const dept = $select_department.val();
+  const grouptitle = $('#field-title').val();
 const course = $select_course.val();
 const hours = $('#field-duration-hours').val();
 const mins = $('#field-duration-mins').val();
@@ -43,7 +44,7 @@ console.log(dept, course, hours, mins, description, building, loc);
 
 // Also need to send User data? In order to designate moderator, add email/member?
 
-const postParameter = {department: dept, course_number: course, duration_hours: hours, duration_mins: mins, description: description, building: building, location: loc}
+const postParameter = {department: dept, grouptitle: grouptitle, course_number: course, duration_hours: hours, duration_mins: mins, description: description, building: building, location: loc}
 
 //window.location.href = "http://localhost:4567/grouper/group";
 

@@ -223,9 +223,9 @@ public abstract class Main {
     public String handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
       String dept = qm.value("department");
-      String location = qm.value("location");
+      String location = qm.value("building");
       String code = qm.value("course_number");
-      String description = qm.value("title");
+      String description = qm.value("grouptitle");
       Integer durationHours = Integer.parseInt(qm.value("duration_hours"));
       Integer durationMins = Integer.parseInt(qm.value("duration_mins"));
       Double duration = durationHours + durationMins/60.0;
@@ -284,10 +284,12 @@ public abstract class Main {
       System.out.println(curr_user_email);
       info.put("title", "Grouper - Group status");
 
-//      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
-//          "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
-//          "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
-      return new ModelAndView(info, "group.ftl");
+      Map<String, Object> variables1 = ImmutableMap.of("title", "Grouper - Group status", "grouptitle", info.get("grouptitle"), "groupclass", info.get("groupclass"), "groupdesc", info.get("groupdesc"), "groupemails", "placeholder");
+
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
+          "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
+          "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
+      return new ModelAndView(variables1, "group.ftl");
     }
   }
 
