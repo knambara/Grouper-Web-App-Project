@@ -225,13 +225,13 @@ public abstract class Main {
       String dept = qm.value("department");
       String location = qm.value("location");
       String code = qm.value("course_number");
-      String description = qm.value("description");
+      String description = qm.value("title");
       Integer durationHours = Integer.parseInt(qm.value("duration_hours"));
       Integer durationMins = Integer.parseInt(qm.value("duration_mins"));
       Double duration = durationHours + durationMins/60.0;
       String durString = Double.toString(duration);
       String room = qm.value("location");
-      String details = "Placeholder";
+      String details = qm.value("description");
 
       Map<String, String> variables = new HashMap<>();
       variables.put("department", dept);
