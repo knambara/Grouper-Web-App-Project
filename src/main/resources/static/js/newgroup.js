@@ -1,65 +1,70 @@
 $(document).ready(() => {
-  //populateDropdowns();
 
-  const $select_course = $('#select-course-number');
-  const $select_department = $('#select-department');
+    const $select_course = $('#select-course-number');
+    const $select_department = $('#select-department');
+    const $create_group = $('#create-group');
 
-$select_department.on('change', event => {
+    repopulateCourses();
 
-  const department = $select_department.val();
-const postParameter = {department: department};
-console.log(department);
+    // When department changes, repopulate course list
+    $select_department.on('change', event => {
+        repopulateCourses();
+    });
 
-$.post("/populateCourses", postParameter, responseJSON => {
-  const responseObject = JSON.parse(responseJSON);
-  console.log("Hello");
-const courses = responseObject.dept;
-console.log(courses);
 
-$select_course.empty();
+    $create_group.on('click', event => {
 
-for (i in courses) {
-  $select_course.append(
-      "<option value='" + courses[i] + "'>" + courses[i] + "</option>"
-  );
-}
+        const dept = $select_department.val();
+        const grouptitle = $('#field-title').val();
+        const course = $select_course.val();
+        const hours = $('#field-duration-hours').val();
+        const mins = $('#field-duration-mins').val();
+        const description = $('#field-description').val();
+        const building = $('#select-building').val();
+        const loc = $('#field-location').val();
+
+        console.log(dept, course, hours, mins, description, building, loc);
+
+        // Also need to send User data? In order to designate moderator, add email/member?
+
+        // Send all new group data to back end
+        const postParameter = {department: dept, grouptitle: grouptitle,
+            course_number: course, duration_hours: hours, duration_mins: mins,
+            description: description, building: building, location: loc};
+
+        // Creates new groups with data and returns the URL corresponding to
+        // that group, which the user is sent to
+        $.post("/createGroupInfo", postParameter, responseJSON => {
+
+            const responseObject = JSON.parse(responseJSON);
+            const url = responseObject.groupurl;
+            console.log(url);
+            window.location.href = url;
+        });
+
+    });
+
+    function repopulateCourses() {
+        const department = $select_department.val();
+        const postParameter = {department: department};
+
+        $.post("/populateCourses", postParameter, responseJSON => {
+            const responseObject = JSON.parse(responseJSON);
+            const courses = responseObject.dept;
+
+            // Empty old results
+            $select_course.empty();
+
+            for (i in courses) {
+                $select_course.append(
+                    "<option value='" + courses[i] + "'>" + courses[i] + "</option>"
+                );
+            }
+        });
+    }
 
 });
-});
 
-const $create_group = $('#create-group');
-
-$create_group.on('click', event => {
-
-  const dept = $select_department.val();
-  const grouptitle = $('#field-title').val();
-const course = $select_course.val();
-const hours = $('#field-duration-hours').val();
-const mins = $('#field-duration-mins').val();
-const description = $('#field-description').val();
-const building = $('#select-building').val();
-const loc = $('#field-location').val();
-
-console.log(dept, course, hours, mins, description, building, loc);
-
-// Also need to send User data? In order to designate moderator, add email/member?
-
-const postParameter = {department: dept, grouptitle: grouptitle, course_number: course, duration_hours: hours, duration_mins: mins, description: description, building: building, location: loc}
-
-//window.location.href = "http://localhost:4567/grouper/group";
-
-$.post("/createGroupInfo", postParameter, responseJSON => {
-
-  const responseObject = JSON.parse(responseJSON);
-const url = responseObject.groupurl;
-console.log(url);
-window.location.href = url;
-
-});
-
-});
-
-});
 
 // let populateDropdowns = function() {
 //   getDepartments().forEach(dep => {
