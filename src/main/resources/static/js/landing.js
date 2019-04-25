@@ -1,10 +1,26 @@
 $(document).ready(() => {
-  console.log("New Page");
-  if(window.location.href === "http://localhost:4567/grouper"){
+
+  if($("#login-btn").length){
     $("#login-btn").click(startApp());
   }
 
+  if (doesSessionExist() && $("#landing-body").length) {
+    redirectToDashboard();
+  }
+
 });
+
+/*
+ * Apparently this is an acceptable way of sending a redicrect request with POST info.
+ */
+function redirectToDashboard() {
+  var form = $("<form action='/grouper/dashboard' method='POST'>" +
+    "<input type='hidden' name='login_email' value ='" + localStorage.getItem("grouper_email") + "'>" +
+    "<input type='hidden' name='login_hash' value ='" + localStorage.getItem("grouper_hash") + "'>" +
+  "</form>");
+  $("body").append(form);
+  form.submit();
+}
 
 /*
  * Called when the user clicks the button.
@@ -46,9 +62,15 @@ function onSuccess(googleUser) {
   const postParameter = {name: profile.getName(), email: profile.getEmail(), img: profile.getImageUrl()};
   $.post("/newuser", postParameter, responseJSON => {
     const responseObject = JSON.parse(responseJSON);
-    console.log(responseObject.msg);
-    window.location.href = "http://localhost:4567/grouper/dashboard";
-
+    if (responseObject.msg == "success" && responseObject.hash != "") {
+      console.log(responseObject.hash);
+      // This adds the login email and hash returned by the server into
+      // localStorage, which can be accessed later (see session.js).
+      addUserSession(profile.getEmail(), responseObject.hash);
+      redirectToDashboard();
+    } else {
+      alert(responseObject.error);
+    }
   });
 
   // TODO?: page is redirects to user's last visited page

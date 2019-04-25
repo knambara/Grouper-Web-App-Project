@@ -66,6 +66,7 @@ function rebuildGrid(sortedTiles) {
 let displayedGroups = new Map();
 
 const $dept_select = $('#department-selector');
+const $logout_button = $('#log-out');
 const $class_list = $('#class-list');
 const $update_button = $('#update');
 const $order_select = $('#order');
@@ -364,4 +365,10 @@ $(document).ready(() => {
     function sortByDistance(groups) {
 
     }
+
+    // Log out functionality
+    $logout_button.on('click', (e) => {
+      removeSession();
+      window.location.href = "/grouper";
+    });
 });
