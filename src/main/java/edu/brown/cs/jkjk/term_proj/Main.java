@@ -12,12 +12,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
 import edu.brown.cs.jkjk.database.DBConnector;
+import edu.brown.cs.jkjk.grouper.GroupControl;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
+import edu.brown.cs.jkjk.database.DataReader;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -44,6 +50,7 @@ public abstract class Main {
 
   private static DBConnector GROUPER_DB = new DBConnector();
   private static UserCacheHandler USER_CACHE = new UserCacheHandler(GROUPER_DB);
+  private static GroupControl GROUP_CONTROL = new GroupControl(GROUPER_DB);
 
   private static String curr_user_email = "";
 
@@ -93,15 +100,22 @@ public abstract class Main {
       }
       
       // Create 'groups' table if it doesn't exist already
-      query = "CREATE TABLE IF NOT EXISTS "
-          + "groups(G_ID INTEGER NOT NULL AUTO_INCREMENT, "
-          + "code TEXT, "
-          + "departmet TEXT, "
-          + "description TEXT, "
-          + "duration DOUBLE, "
-          + "Mod TEXT, "
-          + "PRIMARY KEY (G_ID), "
-          + "FOREIGN KEY (Mod) REFERENCES users(U_ID) ON DELETE CASCADE ON UPDATE CASCADE);";        
+      conn = GROUPER_DB.getConnection();
+      // Create 'groups' table if it doesn't exist already
+      query = "CREATE TABLE IF NOT EXISTS"
+              + "groups(G_ID INTEGER, "
+              + "code TEXT, "
+              + "department TEXT, "
+              + "description TEXT, "
+              + "duration REAL, "
+              + "start TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, "
+              + "Mod TEXT, "
+              + "location TEXT, "
+              + "visible INTEGER DEFAULT 1, "
+              + "room TEXT, "
+              + "details TEXT, "
+              + "PRIMARY KEY (G_ID), "
+              + "FOREIGN KEY (Mod) REFERENCES users(U_ID) ON DELETE CASCADE ON UPDATE CASCADE);";
       try (PreparedStatement prep = conn.prepareStatement(query)) {
         prep.executeUpdate();
         prep.close();
@@ -131,6 +145,8 @@ public abstract class Main {
     Spark.post("/newuser", new NewUserHandler());
     Spark.post("/department", new DepartmentSelectHandler());
     Spark.post("/checkedClasses", new GroupDashboardHandler());
+    Spark.post("/populateCourses", new CourseHandler());
+    Spark.post("/createGroupInfo", new CreateGroupHandler());
 
   }
 
@@ -164,10 +180,8 @@ public abstract class Main {
 
       if (GROUPER_DB.verifyUserHash(email, hash)) {
         // Hard coded for testing purposes.
-        List<String> departmentList = new ArrayList<String>();
-        departmentList.add("Applied Math");
-        departmentList.add("Biology");
-        departmentList.add("Computer Science");
+        DataReader dr = new DataReader();
+        List<String> departmentList = dr.departments("data/departments_sample.csv");
 
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
             "departments", departmentList, "email", curr_user_email);
@@ -189,10 +203,63 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group");
+      DataReader dr = new DataReader();
+      List<String> depts = dr.departments("data/departments_sample.csv");
+      List<String> buildings = new ArrayList<>();
+      buildings.add("Sci Li");
+      buildings.add("The Rock");
+      buildings.add("Walter J Wilson");
+
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group", "departments", depts, "buildings", buildings);
       return new ModelAndView(variables, "newgroup.ftl");
     }
   }
+
+  private static class CreateGroupHandler implements Route {
+
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String dept = qm.value("department");
+      String location = qm.value("location");
+      String code = qm.value("course_number");
+      String description = qm.value("description");
+      Integer durationHours = Integer.parseInt(qm.value("duration_hours"));
+      Integer durationMins = Integer.parseInt(qm.value("duration_mins"));
+      Double duration = durationHours + durationMins/60.0;
+      String durString = Double.toString(duration);
+      String room = qm.value("location");
+      String details = "Placeholder";
+
+      Map<String, String> variables = new HashMap<>();
+      variables.put("department", dept);
+      variables.put("location", location);
+      variables.put("code", code);
+      variables.put("description", description);
+      variables.put("duration", durString);
+      variables.put("room", room);
+      variables.put("details", details);
+
+      Integer gId = GROUP_CONTROL.newGroup(variables, curr_user_email);
+      String gIdString = Integer.toString(gId);
+
+      String url = null;
+
+
+      //return the URL to the new page (group view)
+      try {
+        url = "/grouper/group" + URLEncoder.encode(gIdString, "UTF-8");
+      } catch (Exception e) {
+        System.out.println("ERROR: Could not encode url");
+      }
+
+      Map<String, Object> info = ImmutableMap.of("groupurl", url);
+
+      return GSON.toJson(info);
+
+    }
+  }
+
 
   /**
    * Handler for the page that allows you to view and monitor your current group.
@@ -201,10 +268,13 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
-          "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
-          "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
-      return new ModelAndView(variables, "group.ftl");
+      Map<String, Object> info = GROUP_CONTROL.getGroupView(curr_user_email);
+      info.put("title", "Grouper - Group status");
+
+//      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
+//          "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
+//          "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
+      return new ModelAndView(info, "group.ftl");
     }
   }
 
@@ -282,6 +352,31 @@ public abstract class Main {
       }
 
       Map<String, Object> variables = ImmutableMap.of("groups", groups);
+      return GSON.toJson(variables);
+    }
+  }
+
+  private static class CourseHandler implements Route {
+
+    @Override
+    public String handle(Request req, Response res) {
+      DataReader dr = new DataReader();
+      Map<String, Set<String>> courses = dr.courses("data/sample_courses.csv");
+
+      QueryParamsMap qm = req.queryMap();
+      String dept = qm.value("department");
+      Set<String> deptCourses;
+
+      if (courses.containsKey(dept)) {
+        deptCourses= courses.get(dept);
+      } else {
+        deptCourses = new HashSet<>();
+        deptCourses.add("NONE");
+      }
+
+
+      Map<String, Object> variables = ImmutableMap.of("dept", deptCourses);
+
       return GSON.toJson(variables);
     }
   }
