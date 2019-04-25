@@ -115,15 +115,40 @@ public class GroupControl {
 
   /**
    *
-   * @param groupId
+   * @param
    * @return
    */
-  public Map<String, Object> getGroupView(Integer groupId) {
+  public Map<String, Object> getGroupView(String userId) {
     GroupCacheHandler groupCache = new GroupCacheHandler(database);
+
+    Integer groupId = getUserGroupID(userId);
     Map<String, Object> info = new HashMap<>();
+
+    //check if the user is the moderator, if so they also get visibility status
+    String modId = getModeratorID(groupId);
 
     try {
       Group g = groupCache.getGroup(groupId);
+      Set<String> users = getUsers(groupId);
+      String course = g.getCourseCode();
+      String description = g.getDescription();
+      Integer userCount = users.size();
+      String location = g.getLocation();
+      String room = g.getRoom();
+      String details = g.getDetails();
+
+      info.put("grouptitle", description);
+      info.put("groupclass", course);
+      //info.put("members", userCount);
+      info.put("groupemails", users);
+      //info.put("location", location);
+      //info.put("room", room);
+      info.put("groupdesc", details);
+
+      if (modId.equals(userId)) {
+        Boolean visible = g.getVisibility();
+        info.put("visibility", visible);
+      }
 
     } catch (Exception e) {
       System.out.println("ERROR: Could not get detailed group info.");
@@ -138,7 +163,7 @@ public class GroupControl {
    *
    * @param variables the variables inputted by the user for the group
    */
-  public void newGroup(Map<String, String> variables, Integer modId) {
+  public Integer newGroup(Map<String, String> variables, String modId) {
     String department = variables.get("department");
     String location = variables.get("location");
     String code = variables.get("code");
@@ -164,17 +189,18 @@ public class GroupControl {
       prep.setString(3, department);
       prep.setString(4, description);
       prep.setDouble(5, duration);
-      prep.setInt(6, modId);
+      prep.setString(6, modId);
       prep.setString(7, location);
       prep.setString(8, room);
       prep.setString(9, details);
       prep.addBatch();
       prep.executeBatch();
-
       prep.close();
+      addToGroup(modId, gId);
     } catch (Exception e) {
       System.out.println("ERROR: Could not add group to db.");
     }
+    return gId;
   }
 
   /**
@@ -182,15 +208,24 @@ public class GroupControl {
    *
    * @param modId moderator id
    */
-  public void deleteGroup(Integer modId) {
-    //TODO: Update the users database to reflect they are no longer in a group
+  public void deleteGroup(String modId) {
+
+    //get the group id
+    Integer gId = getUserGroupID(modId);
+    //get the users in the group
+    Set<String> users = getUsers(gId);
+    //set the users group id back to null
+    Iterator<String> usersIt = users.iterator();
+    while (usersIt.hasNext()) {
+      removeFromGroup(usersIt.next());
+    }
 
     Connection conn = database.getConnection();
     String delete = "DELETE FROM groups WHERE Mod = ?";
 
     try {
       PreparedStatement prep = conn.prepareStatement(delete);
-      prep.setInt(1, modId);
+      prep.setString(1, modId);
       prep.executeUpdate();
       prep.close();
     } catch (Exception e) {
@@ -204,7 +239,7 @@ public class GroupControl {
    * @param modId integer moderator id
    * @param visible boolean representing if they want group to be visible
    */
-  public void updateVisibility(Integer modId, Boolean visible) {
+  public void updateVisibility(String modId, Boolean visible) {
     int visibility;
     if (visible) {
       visibility = 1;
@@ -218,7 +253,7 @@ public class GroupControl {
     try {
       PreparedStatement prep = conn.prepareStatement(update);
       prep.setInt(1, visibility);
-      prep.setInt(2, modId);
+      prep.setString(2, modId);
       prep.executeUpdate();
       prep.close();
     } catch (Exception e) {
@@ -226,23 +261,41 @@ public class GroupControl {
     }
   }
 
-
-
   /**
    * Uses a moderator id to find the group id. To be used when a moderator is
    * changing attributes of the group.
    *
-   * @param modId moderator id
+   * @param groupId moderator id
    * @return the group id of which they are the moderator
    */
-  private Integer getModeratorGroupID(Integer modId) {
+  private String getModeratorID(Integer groupId) {
+    Connection conn = database.getConnection();
+    String mId = null;
+
+    String query = "SELECT Mod FROM groups WHERE G_ID = ?";
+    try {
+      PreparedStatement prep = conn.prepareStatement(query);
+      prep.setInt(1, groupId);
+      ResultSet rs = prep.executeQuery();
+      if (rs.next()) {
+        mId = rs.getString("Mod");
+      }
+      prep.close();
+      rs.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: Could not get Mod ID from  G_ID");
+    }
+    return mId;
+  }
+
+  private Integer getUserGroupID(String userId) {
     Connection conn = database.getConnection();
     Integer gId = null;
 
-    String query = "SELECT G_ID FROM groups WHERE Mod = ?";
+    String query = "SELECT G_ID FROM users WHERE U_ID = ?";
     try {
       PreparedStatement prep = conn.prepareStatement(query);
-      prep.setInt(1, modId);
+      prep.setString(1, userId);
       ResultSet rs = prep.executeQuery();
       if (rs.next()) {
         gId = rs.getInt("G_ID");
@@ -250,14 +303,59 @@ public class GroupControl {
       prep.close();
       rs.close();
     } catch (Exception e) {
-      System.out.println("ERROR: Could not get G_ID from Mod ID");
+      System.out.println("ERROR: Could not get G_ID from user ID");
     }
     return gId;
   }
 
-  private Integer getUserGroupID(Integer userId) {
-    //TODO: statement to get the group id
-    return 0;
+  private Set<String> getUsers(Integer groupId) {
+    Connection conn = database.getConnection();
+    Set<String> users = new HashSet<>();
+
+    String query = "SELECT U_ID FROM users WHERE G_ID = ?";
+    try {
+      PreparedStatement prep = conn.prepareStatement(query);
+      prep.setInt(1, groupId);
+      ResultSet rs = prep.executeQuery();
+      while (rs.next()) {
+        users.add(rs.getString(1));
+      }
+      rs.close();
+      prep.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: Could not get users from G_ID");
+    }
+
+    return users;
+  }
+
+  private void removeFromGroup(String userId) {
+    Connection conn = database.getConnection();
+
+    String update = "UPDATE users SET G_ID = -1 WHERE U_ID = ?";
+    try {
+      PreparedStatement prep = conn.prepareStatement(update);
+      prep.setString(1, userId);
+      prep.executeUpdate();
+      prep.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: Could not update Users' group to null.");
+    }
+  }
+
+  private void addToGroup(String userId, Integer gId) {
+    Connection conn = database.getConnection();
+
+    String update = "UPDATE users SET G_ID = ? WHERE U_ID = ?";
+    try {
+      PreparedStatement prep = conn.prepareStatement(update);
+      prep.setInt(1, gId);
+      prep.setString(2, userId);
+      prep.executeUpdate();
+      prep.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: Adding user to the database.");
+    }
   }
 
 

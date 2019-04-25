@@ -3,11 +3,17 @@
 
   <div id="newgroup-content">
     <h1>New Group</h1>
-    <form id="new-group-form" method="POST">
+    <!-- form id="new-group-form" method="POST" -->
+
+    <div id=""new-group-form">
+
       <div class="half-column-form">
         Department:<br>
         <select name="department" id="select-department">
-        </select><br><br>
+          <#list departments as depts>
+            <option value="${depts}">${depts}</option>
+          </#list>
+        </select><br><br>>
         Course Number:<br>
         <select name="course_number" id="select-course-number">
         </select><br><br>
@@ -21,13 +27,18 @@
         <input type="text" name="description" id="field-description" placeholder="discussing logical things..."><br><br>
         Building:<br>
         <select name="building" id="select-building">
+          <#list buildings as builds>
+            <option value="${builds}">${builds}</option>
+          </#list>
         </select><br><br>
         Precise Location:<br>
         <input type="text" name="location" id="field-location" placeholder="fifth floor, by the elevator..."><br><br>
-        <input type="submit" value="Create Group"></input>
+        <!-- input type="submit" value="Create Group"></input -->
+        <button id="create-group">Create Group</button>
       </div>
-    </form>
+    <--/form-->
   </div>
+</div>
 
 </div>
 </#assign>

@@ -2,6 +2,7 @@ package edu.brown.cs.jkjk.grouper;
 
 import java.sql.*;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +82,8 @@ public class GroupCacheHandler {
           });
 
   private Set<Group> groupHelper(ResultSet rs) {
+
+
     Set<Group> groups = new HashSet<>();
     try {
       while (rs.next()) {
@@ -90,7 +93,7 @@ public class GroupCacheHandler {
         String description = rs.getString("description");
         Double duration = rs.getDouble("duration");
         Timestamp start = rs.getTimestamp("start");
-        Integer moderator = rs.getInt("Mod");
+        String moderator = rs.getString("Mod");
         String location = rs.getString("location");
         String room = rs.getString("room");
         String details = rs.getString("details");
@@ -99,7 +102,12 @@ public class GroupCacheHandler {
         g.setModerator(moderator);
         g.setStartTime(start);
 
-        //todo: add the users to the group
+        //add the users to the group
+        Set<User> users = getUsers(groupId);
+        Iterator<User> usersIt = users.iterator();
+        while (usersIt.hasNext()) {
+          g.addUser(usersIt.next());
+        }
 
         groups.add(g);
       }
@@ -129,6 +137,30 @@ public class GroupCacheHandler {
 
   public Set<Group> getDepartmentGroups(String department) throws ExecutionException {
     return departmentCache.get(department);
+  }
+
+  private Set<User> getUsers(Integer groupId) {
+    UserCacheHandler userCache = new UserCacheHandler(database);
+
+    Connection conn = database.getConnection();
+    Set<User> users = new HashSet<>();
+
+    String query = "SELECT U_ID FROM users WHERE G_ID = ?";
+    try {
+      PreparedStatement prep = conn.prepareStatement(query);
+      prep.setInt(1, groupId);
+      ResultSet rs = prep.executeQuery();
+      while (rs.next()) {
+        //User u = userCache.getUser(rs.getString(1));
+        //users.add(u);
+      }
+      rs.close();
+      prep.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: Could not get users from G_ID");
+    }
+
+    return users;
   }
 
 

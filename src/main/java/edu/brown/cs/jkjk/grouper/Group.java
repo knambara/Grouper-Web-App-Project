@@ -18,7 +18,7 @@ public class Group {
   private String description;
   private double duration;
   private Timestamp start;
-  private Integer moderator;
+  private String moderator;
   private String room;
   private Boolean visible;
   private String details;
@@ -85,9 +85,9 @@ public class Group {
 
   public void setStartTime(Timestamp start) { this.start = start; }
 
-  public void setModerator(Integer moderator) {this.moderator = moderator; }
+  public void setModerator(String moderator) {this.moderator = moderator; }
 
-  public Integer getModerator() {return moderator; }
+  public String getModerator() {return moderator; }
 
   public void setVisible() { visible = true; }
 
