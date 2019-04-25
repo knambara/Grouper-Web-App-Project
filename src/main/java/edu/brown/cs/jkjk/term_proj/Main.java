@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -100,9 +101,9 @@ public abstract class Main {
       }
       
       // Create 'groups' table if it doesn't exist already
-      conn = GROUPER_DB.getConnection();
+      Connection conn1 = GROUPER_DB.getConnection();
       // Create 'groups' table if it doesn't exist already
-      query = "CREATE TABLE IF NOT EXISTS"
+      String query1 = "CREATE TABLE IF NOT EXISTS "
               + "groups(G_ID INTEGER, "
               + "code TEXT, "
               + "department TEXT, "
@@ -116,9 +117,9 @@ public abstract class Main {
               + "details TEXT, "
               + "PRIMARY KEY (G_ID), "
               + "FOREIGN KEY (Mod) REFERENCES users(U_ID) ON DELETE CASCADE ON UPDATE CASCADE);";
-      try (PreparedStatement prep = conn.prepareStatement(query)) {
-        prep.executeUpdate();
-        prep.close();
+      try (PreparedStatement prep1 = conn1.prepareStatement(query1)) {
+        prep1.executeUpdate();
+        prep1.close();
       } catch (SQLException e) {
         System.out.println(e.getMessage());
       }
@@ -147,6 +148,7 @@ public abstract class Main {
     Spark.post("/checkedClasses", new GroupDashboardHandler());
     Spark.post("/populateCourses", new CourseHandler());
     Spark.post("/createGroupInfo", new CreateGroupHandler());
+    Spark.post("/grouper/group", new GroupHandler(), freeMarker);
 
   }
 
@@ -248,7 +250,7 @@ public abstract class Main {
 
       //return the URL to the new page (group view)
       try {
-        url = "/grouper/group" + URLEncoder.encode(gIdString, "UTF-8");
+        url = "/grouper/group";// + URLEncoder.encode(gIdString, "UTF-8");
       } catch (Exception e) {
         System.out.println("ERROR: Could not encode url");
       }
@@ -268,7 +270,18 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
+      //Get URL
+//      String id = req.params("");
+//      try {
+//        id = URLDecoder.decode(id, "UTF-8");
+//        System.out.println(id);
+//      } catch (Exception e) {
+//        System.out.println("ERROR: Problem with decoding group ID.");
+//      }
+
+
       Map<String, Object> info = GROUP_CONTROL.getGroupView(curr_user_email);
+      System.out.println(curr_user_email);
       info.put("title", "Grouper - Group status");
 
 //      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",

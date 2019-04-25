@@ -145,10 +145,10 @@ public class GroupControl {
       //info.put("room", room);
       info.put("groupdesc", details);
 
-      if (modId.equals(userId)) {
-        Boolean visible = g.getVisibility();
-        info.put("visibility", visible);
-      }
+//      if (modId.equals(userId)) {
+//        Boolean visible = g.getVisibility();
+//        info.put("visibility", visible);
+//      }
 
     } catch (Exception e) {
       System.out.println("ERROR: Could not get detailed group info.");

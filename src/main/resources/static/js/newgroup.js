@@ -51,7 +51,7 @@ $.post("/createGroupInfo", postParameter, responseJSON => {
 
   const responseObject = JSON.parse(responseJSON);
 const url = responseObject.groupurl;
-
+console.log(url);
 window.location.href = url;
 
 });
