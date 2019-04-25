@@ -25,25 +25,25 @@ public class UserCacheHandler {
   private static final int MAX_SIZE = 1000;
 
   private DBConnector database;
-  private LoadingCache<Integer, User> userCache = CacheBuilder.newBuilder()
+  private LoadingCache<String, User> userCache = CacheBuilder.newBuilder()
       .expireAfterWrite(TIME_LIMIT, TimeUnit.HOURS).maximumSize(MAX_SIZE)
-      .build(new CacheLoader<Integer, User>() {
+      .build(new CacheLoader<String, User>() {
         @Override
-        public User load(Integer userID) throws Exception {
+        public User load(String email) throws Exception {
 
           Connection conn = database.getConnection();
           User u = null;
 
           // Create and return User with given id
-          String query = "SELECT * FROM users WHERE P_ID = ?";
+          String query = "SELECT * FROM users WHERE U_ID = ?";
           try (PreparedStatement prep = conn.prepareStatement(query)) {
-            prep.setInt(1, userID);
+            prep.setString(1, email);
             try (ResultSet res = prep.executeQuery()) {
               if (res.next()) {
-                String name = res.getString(2);
-                String email = res.getString(3);
-                int groupID = res.getInt(4);
-                u = new User(name, email);
+                String user_email = res.getString(1);
+                String user_name = res.getString(2);
+                int groupID = res.getInt(3);
+                u = new User(user_name, user_email);
                 u.setGroupID(groupID);
               }
             } catch (SQLException e) {
@@ -68,11 +68,11 @@ public class UserCacheHandler {
   /**
    * Returns specified User object from cache.
    * 
-   * @param id int id
+   * @param id String id
    * @return User user
    * @throws ExecutionException Upon connection error to the database
    */
-  public User getUser(int id) throws ExecutionException {
+  public User getUser(String id) throws ExecutionException {
     return userCache.get(id);
   }
 }
