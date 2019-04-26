@@ -28,6 +28,7 @@ the page is written in -->
     <script src="/js/landing.js"></script>
     <script src="/js/group.js"></script>
     <script src="/js/newgroup.js"></script>
+    <script src="/js/websockets.js"></script>
     <script src="https://apis.google.com/js/api:client.js"></script>
 
   </body>

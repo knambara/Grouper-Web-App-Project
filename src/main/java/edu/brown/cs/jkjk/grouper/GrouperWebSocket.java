@@ -25,6 +25,7 @@ public class GrouperWebSocket {
 
   @OnWebSocketConnect
   public void connected(Session session) throws IOException {
+    System.out.println("New session!");
     // Add the session to the queue
     sessions.add(session);
     // Build the CONNECT message
@@ -42,7 +43,7 @@ public class GrouperWebSocket {
   @OnWebSocketClose
   public void closed(Session session, int statusCode, String reason) {
     // TODO Remove the session from the queue
-    System.out.println("test");
+    System.out.println("session closed");
     sessions.remove(session);
   }
 
@@ -51,15 +52,27 @@ public class GrouperWebSocket {
     JsonObject received = GSON.fromJson(message, JsonObject.class);
 
     // TODO: Handles client request for updated list of groups
+    // At this point available_groups contains the newly created group
     if (received.get("type").getAsInt() == MESSAGE_TYPE.GROUPS.ordinal()) {
+
+      // Get session id from payload
       JsonObject payload = received.get("payload").getAsJsonObject();
-      String groupIDList = payload.get("groups").getAsString();
+      int id = payload.get("id").getAsInt();
+
+      JsonObject updateMsg = new JsonObject();
+      JsonObject updatePayload = new JsonObject();
+      updatePayload.addProperty("id", id);
+
+      updateMsg.addProperty("type", MESSAGE_TYPE.UPDATE_DASHBOARD.ordinal());
+      updateMsg.add("payload", updatePayload);
+
+      for (Session s : sessions) {
+        s.getRemote().sendString(GSON.toJson(updateMsg));
+      }
     }
 
     // TODO: Handles client request for updated list of group members
     if (received.get("type").getAsInt() == MESSAGE_TYPE.MEMBERS.ordinal()) {
-      JsonObject payload = received.get("payload").getAsJsonObject();
-      String groupIDList = payload.get("members").getAsString();
     }
 
   }

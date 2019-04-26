@@ -42,6 +42,8 @@ $(document).ready(() => {
             window.location.href = url;
         });
 
+        // Call fuction in websockets.js
+        new_group();
     });
 
     function repopulateCourses() {

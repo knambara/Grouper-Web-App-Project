@@ -1,14 +1,19 @@
 package edu.brown.cs.jkjk.grouper;
 
-import edu.brown.cs.jkjk.database.DBConnector;
-
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+
+import edu.brown.cs.jkjk.database.DBConnector;
 
 /**
  * Handles the group logic.
@@ -29,9 +34,8 @@ public class GroupControl {
   }
 
   /**
-   * To be used on the initial filter page, once the academic department has
-   * been entered by the user. Returns all course codes with active and visible
-   * groups.
+   * To be used on the initial filter page, once the academic department has been entered by the
+   * user. Returns all course codes with active and visible groups.
    *
    * @param department an academic department
    * @return the set of courses with existing groups
@@ -55,8 +59,8 @@ public class GroupControl {
   }
 
   /**
-   * To be used on the filter page, once the user has selected the courses to
-   * search within.
+   * To be used on the filter page, once the user has selected the courses to search within.
+   * 
    * @param courses Set of strings which are course codes
    * @return the set of visible groups for the given courses
    */
@@ -65,8 +69,7 @@ public class GroupControl {
     Set<Group> groups = new HashSet<>();
 
     try {
-      Iterator<Group> deptGroups = deptCache.getDepartmentGroups(department)
-              .iterator();
+      Iterator<Group> deptGroups = deptCache.getDepartmentGroups(department).iterator();
       while (deptGroups.hasNext()) {
         Group g = deptGroups.next();
         if (courses.contains(g.getCourseCode())) {
@@ -98,7 +101,7 @@ public class GroupControl {
 
       Integer users = g.getUsers().size();
 
-      //todo: find the time remaining
+      // todo: find the time remaining
       String timeRemainingPlaceHolder = "HH:MM left";
 
       Map<String, Object> gInfo = new HashMap<>();
@@ -124,16 +127,14 @@ public class GroupControl {
     Integer groupId = getUserGroupID(userId);
     Map<String, Object> info = new HashMap<>();
 
-    //check if the user is the moderator, if so they also get visibility status
+    // check if the user is the moderator, if so they also get visibility status
     String modId = getModeratorID(groupId);
 
     try {
       Group g = group(groupId);
-      System.out.println("Got it from the group lol");
       List<String> users = getUsers(groupId);
       String course = g.getCourseCode();
       String description = g.getDescription();
-      System.out.println(description);
       Integer userCount = users.size();
       String location = g.getLocation();
       String room = g.getRoom();
@@ -141,16 +142,16 @@ public class GroupControl {
 
       info.put("grouptitle", description);
       info.put("groupclass", course);
-      //info.put("members", userCount);
+      // info.put("members", userCount);
       info.put("groupemails", users);
-      //info.put("location", location);
-      //info.put("room", room);
+      // info.put("location", location);
+      // info.put("room", room);
       info.put("groupdesc", details);
 
-//      if (modId.equals(userId)) {
-//        Boolean visible = g.getVisibility();
-//        info.put("visibility", visible);
-//      }
+      // if (modId.equals(userId)) {
+      // Boolean visible = g.getVisibility();
+      // info.put("visibility", visible);
+      // }
 
     } catch (Exception e) {
       System.out.println("ERROR: Could not get detailed group info.");
@@ -160,12 +161,12 @@ public class GroupControl {
   }
 
   /**
-   * Takes in the group variables as a map and sets creates a group to be
-   * inserted into the database.
+   * Takes in the group variables as a map and sets creates a group to be inserted into the
+   * database.
    *
    * @param variables the variables inputted by the user for the group
    */
-  public Integer newGroup(Map<String, String> variables, String modId) {
+  public Group newGroup(Map<String, String> variables, String modId) {
     String department = variables.get("department");
     String location = variables.get("location");
     String code = variables.get("code");
@@ -174,15 +175,14 @@ public class GroupControl {
     String room = variables.get("room");
     String details = variables.get("details");
 
-    //need to make a new group to get the group id
+    // need to make a new group to get the group id
     Group g = new Group(department, location, code, description, duration, room, details);
 
     Integer gId = g.getGroupID();
     g.setModerator(modId);
-
     Connection conn = database.getConnection();
-    String insert = "INSERT INTO groups (G_ID, code, department, description," +
-            "duration, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    String insert = "INSERT INTO groups (G_ID, code, department, description,"
+        + "duration, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     try {
       PreparedStatement prep = conn.prepareStatement(insert);
@@ -201,8 +201,9 @@ public class GroupControl {
       addToGroup(modId, gId);
     } catch (Exception e) {
       System.out.println("ERROR: Could not add group to db.");
+      e.printStackTrace();
     }
-    return gId;
+    return g;
   }
 
   /**
@@ -212,11 +213,11 @@ public class GroupControl {
    */
   public void deleteGroup(String modId) {
 
-    //get the group id
+    // get the group id
     Integer gId = getUserGroupID(modId);
-    //get the users in the group
+    // get the users in the group
     List<String> users = getUsers(gId);
-    //set the users group id back to null
+    // set the users group id back to null
     Iterator<String> usersIt = users.iterator();
     while (usersIt.hasNext()) {
       removeFromGroup(usersIt.next());
@@ -264,8 +265,8 @@ public class GroupControl {
   }
 
   /**
-   * Uses a moderator id to find the group id. To be used when a moderator is
-   * changing attributes of the group.
+   * Uses a moderator id to find the group id. To be used when a moderator is changing attributes of
+   * the group.
    *
    * @param groupId moderator id
    * @return the group id of which they are the moderator
@@ -365,7 +366,7 @@ public class GroupControl {
     Connection conn = database.getConnection();
     Group g = null;
 
-    //Create and return Group with given id
+    // Create and return Group with given id
     String query = "SELECT * FROM groups WHERE G_ID = ?";
 
     try {
@@ -398,20 +399,19 @@ public class GroupControl {
     return g;
   }
 
+  // Date date = new Date();
+  // long time = date.getTime();
+  // Timestamp now = new Timestamp(time);
+  // Date date2 = new Date(System.currentTimeMillis()+5*60*1000);
+  // long time2 = date2.getTime();
+  // Timestamp then = new Timestamp(time2);
+  //
+  // long diff = then.getTime() - now.getTime();
+  //
+  // long hours = TimeUnit.MILLISECONDS.toHours(diff);
+  // long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
 
-//  Date date = new Date();
-//  long time = date.getTime();
-//  Timestamp now = new Timestamp(time);
-//  Date date2 = new Date(System.currentTimeMillis()+5*60*1000);
-//  long time2 = date2.getTime();
-//  Timestamp then = new Timestamp(time2);
-//
-//  long diff = then.getTime() - now.getTime();
-//
-//  long hours = TimeUnit.MILLISECONDS.toHours(diff);
-//  long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
-
-  //System.out.println(hours); 0
-  //System.out.println(minutes); 5
+  // System.out.println(hours); 0
+  // System.out.println(minutes); 5
 
 }

@@ -62,6 +62,83 @@ function rebuildGrid(sortedTiles) {
     $group_grid.append(addGroup);
 }
 
+function updateGrid() {
+        const shown_classes = $('.class-item');
+        const checked_classes = [];
+
+        for (let i = 0; i < shown_classes.length; i++) {
+            if (shown_classes[i].checked) {
+                checked_classes.push(shown_classes[i].value);
+            }
+        }
+
+        // Send list of course codes as strings
+        const postParameters = {checked: JSON.stringify(checked_classes)};
+
+        // POST request for all groups associated with checked classes; recieve list of
+        // active groups w/ information in formate of [id, title, course, size, location, time-remaining]
+        $.post("/checkedClasses", postParameters, responseJSON => {
+
+            const responseObject = JSON.parse(responseJSON);
+            const groups = responseObject.groups;
+
+            for (i in groups) {
+                const group = groups[i];
+                if (!displayedGroups.has(group[0])) {
+                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5]);
+                    displayedGroups.set(tile.id, tile);
+                    tile.build();
+                    tile.updateTime();
+                }
+            }
+            sort();
+            sessionStorage.setItem("checkedClasses", JSON.stringify(checked_classes));
+        });
+    }
+
+
+// Function to sort the grid based on whatever the value of each dropdown is
+function sort() {
+    // Sort based on course code
+    if ($sort_select.val() === "course-code") {
+        const sorted = sortByCourseCode(displayedGroups);
+        if ($order_select.val() === "asc") {
+            rebuildGrid(sorted);
+        } else {
+            rebuildGrid(sorted.reverse());
+        }
+    }
+    // Sort based on time remaining
+    else if ($sort_select.val() === "time-rem") {
+        const sorted = sortByTimeLeft(displayedGroups);
+        if ($order_select.val() === "asc") {
+            rebuildGrid(sorted);
+        } else {
+            rebuildGrid(sorted.reverse());
+        }
+    }
+    // Sort based on group size
+    else if ($sort_select.val() === "group-size") {
+        const sorted = sortByGroupSize(displayedGroups);
+        if ($order_select.val() === "asc") {
+            rebuildGrid(sorted);
+        } else {
+            rebuildGrid(sorted.reverse());
+        }
+    }
+    // Sort based on distance to user
+    /*
+    else if ($sort_select.val() === "distance") {
+        const sorted = sortByDistance(displayedGroups);
+        if ($order_select.val() === "asc") {
+            rebuildGrid(sorted);
+        } else {
+            rebuildGrid(sorted.reverse());
+        }
+    }
+    */
+}
+
 // Groups currently displayed stored in map where key = id, value = GroupTile
 let displayedGroups = new Map();
 
@@ -108,7 +185,7 @@ $(document).ready(() => {
                 if (to_check.includes(curr_classes[i])) {
                     $('#'+curr_classes[i]).prop('checked', true);
                 }
-            }*/
+            }*/            
             $('#'+curr_classes[i]).on('click', event => {
                 // If checkbox is changed to unchecked, remove all groups
                 //associated with the class, then update the grid
@@ -117,7 +194,7 @@ $(document).ready(() => {
                 }
                 updateGrid();
 
-            });
+            });            
         }
         updateGrid();
     });
@@ -213,41 +290,7 @@ $(document).ready(() => {
         // Update displayedGroups variable to have only groups that should still
         // be shown after the given class code has been removed
         displayedGroups = tempDisplayedGroups;
-    }
-
-    function updateGrid() {
-        const shown_classes = $('.class-item');
-        const checked_classes = [];
-
-        for (let i = 0; i < shown_classes.length; i++) {
-            if (shown_classes[i].checked) {
-                checked_classes.push(shown_classes[i].value);
-            }
-        }
-
-        // Send list of course codes as strings
-        const postParameters = {checked: JSON.stringify(checked_classes)};
-
-        // POST request for all groups associated with checked classes; recieve list of
-        // active groups w/ information in formate of [id, title, course, size, location, time-remaining]
-        $.post("/checkedClasses", postParameters, responseJSON => {
-
-            const responseObject = JSON.parse(responseJSON);
-            const groups = responseObject.groups;
-
-            for (i in groups) {
-                const group = groups[i];
-                if (!displayedGroups.has(group[0])) {
-                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5]);
-                    displayedGroups.set(tile.id, tile);
-                    tile.build();
-                    tile.updateTime();
-                }
-            }
-            sort();
-            sessionStorage.setItem("checkedClasses", JSON.stringify(checked_classes));
-        });
-    }
+    }    
 
     function updateTimeRemainingForDisplayed() {
         const groups = displayedGroups.values();
@@ -271,48 +314,7 @@ $(document).ready(() => {
         sessionStorage.setItem("sort", $sort_select.val());
         sort();
     });
-
-    // Function to sort the grid based on whatever the value of each dropdown is
-    function sort() {
-        // Sort based on course code
-        if ($sort_select.val() === "course-code") {
-            const sorted = sortByCourseCode(displayedGroups);
-            if ($order_select.val() === "asc") {
-                rebuildGrid(sorted);
-            } else {
-                rebuildGrid(sorted.reverse());
-            }
-        }
-        // Sort based on time remaining
-        else if ($sort_select.val() === "time-rem") {
-            const sorted = sortByTimeLeft(displayedGroups);
-            if ($order_select.val() === "asc") {
-                rebuildGrid(sorted);
-            } else {
-                rebuildGrid(sorted.reverse());
-            }
-        }
-        // Sort based on group size
-        else if ($sort_select.val() === "group-size") {
-            const sorted = sortByGroupSize(displayedGroups);
-            if ($order_select.val() === "asc") {
-                rebuildGrid(sorted);
-            } else {
-                rebuildGrid(sorted.reverse());
-            }
-        }
-        // Sort based on distance to user
-        /*
-        else if ($sort_select.val() === "distance") {
-            const sorted = sortByDistance(displayedGroups);
-            if ($order_select.val() === "asc") {
-                rebuildGrid(sorted);
-            } else {
-                rebuildGrid(sorted.reverse());
-            }
-        }
-        */
-    }
+    
 
     function sortByCourseCode(groups) {
         const tempList = [];

@@ -4,27 +4,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.HashSet;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
 import edu.brown.cs.jkjk.database.DBConnector;
-import edu.brown.cs.jkjk.grouper.GroupControl;
-import edu.brown.cs.jkjk.grouper.UserCacheHandler;
 import edu.brown.cs.jkjk.database.DataReader;
+import edu.brown.cs.jkjk.grouper.Group;
+import edu.brown.cs.jkjk.grouper.GroupControl;
+import edu.brown.cs.jkjk.grouper.GrouperWebSocket;
+import edu.brown.cs.jkjk.grouper.UserCacheHandler;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -52,6 +52,7 @@ public abstract class Main {
   private static DBConnector GROUPER_DB = new DBConnector();
   private static UserCacheHandler USER_CACHE = new UserCacheHandler(GROUPER_DB);
   private static GroupControl GROUP_CONTROL = new GroupControl(GROUPER_DB);
+  private static Map<Integer, Group> online_groups = new HashMap<>();
 
   private static String curr_user_email = "";
 
@@ -138,6 +139,8 @@ public abstract class Main {
     Spark.exception(Exception.class, new ExceptionPrinter());
     FreeMarkerEngine freeMarker = createEngine();
 
+    Spark.webSocket("/websocket", GrouperWebSocket.class);
+
     Spark.get("/grouper", new LandingPageHandler(), freeMarker);
     Spark.post("/grouper/dashboard", new DashboardHandler(), freeMarker);
     Spark.get("/grouper/newgroup", new NewGroupHandler(), freeMarker);
@@ -212,7 +215,8 @@ public abstract class Main {
       buildings.add("The Rock");
       buildings.add("Walter J Wilson");
 
-      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group", "departments", depts, "buildings", buildings);
+      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group",
+          "departments", depts, "buildings", buildings);
       return new ModelAndView(variables, "newgroup.ftl");
     }
   }
@@ -228,7 +232,7 @@ public abstract class Main {
       String description = qm.value("grouptitle");
       Integer durationHours = Integer.parseInt(qm.value("duration_hours"));
       Integer durationMins = Integer.parseInt(qm.value("duration_mins"));
-      Double duration = durationHours + durationMins/60.0;
+      Double duration = durationHours + durationMins / 60.0;
       String durString = Double.toString(duration);
       String room = qm.value("location");
       String details = qm.value("description");
@@ -242,26 +246,25 @@ public abstract class Main {
       variables.put("room", room);
       variables.put("details", details);
 
-      Integer gId = GROUP_CONTROL.newGroup(variables, curr_user_email);
-      String gIdString = Integer.toString(gId);
+      Group g = GROUP_CONTROL.newGroup(variables, curr_user_email);
+      online_groups.put(g.getGroupID(), g);
+      // String gIdString = Integer.toString(gId);
 
       String url = null;
 
-
-      //return the URL to the new page (group view)
+      // return the URL to the new page (group view)
       try {
         url = "/grouper/group";// + URLEncoder.encode(gIdString, "UTF-8");
       } catch (Exception e) {
         System.out.println("ERROR: Could not encode url");
       }
 
-      Map<String, Object> info = ImmutableMap.of("groupurl", url);
+      Map<String, Object> info = ImmutableMap.of("groupurl", url, "id",
+          Integer.toString(g.getGroupID()));
 
       return GSON.toJson(info);
-
     }
   }
-
 
   /**
    * Handler for the page that allows you to view and monitor your current group.
@@ -270,26 +273,27 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      //Get URL
-//      String id = req.params("");
-//      try {
-//        id = URLDecoder.decode(id, "UTF-8");
-//        System.out.println(id);
-//      } catch (Exception e) {
-//        System.out.println("ERROR: Problem with decoding group ID.");
-//      }
-
+      // Get URL
+      // String id = req.params("");
+      // try {
+      // id = URLDecoder.decode(id, "UTF-8");
+      // System.out.println(id);
+      // } catch (Exception e) {
+      // System.out.println("ERROR: Problem with decoding group ID.");
+      // }
 
       Map<String, Object> info = GROUP_CONTROL.getGroupView(curr_user_email);
       System.out.println(curr_user_email);
       info.put("title", "Grouper - Group status");
 
-      Map<String, Object> variables1 = ImmutableMap.of("title", "Grouper - Group status", "grouptitle", info.get("grouptitle"), "groupclass", info.get("groupclass"), "groupdesc", info.get("groupdesc"), "groupemails", "placeholder");
-
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
-          "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
-          "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
-      return new ModelAndView(variables1, "group.ftl");
+          "grouptitle", info.get("grouptitle"), "groupclass", info.get("groupclass"), "groupdesc",
+          info.get("groupdesc"), "groupemails", info.get("groupemails"));
+
+      // Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
+      // "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
+      // "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
+      return new ModelAndView(variables, "group.ftl");
     }
   }
 
@@ -351,19 +355,34 @@ public abstract class Main {
 
       // Hard coded examples in order to test front end
       for (String c : classes) {
-        if (c.equals("CSCI0150")) {
-          groups.add(Arrays.asList("4", "Sketchy Meeting", "CSCI0150", "7", "Ratty", "335"));
-
-        } else if (c.equals("CSCI0220")) {
-          groups.add(Arrays.asList("1", "Studying for Midterm", "CSCI0220", "5", "CIT", "142"));
-          groups.add(Arrays.asList("2", "Drawing Logic Circuits", "CSCI0220", "4",
-              "Science Library", "43"));
-        } else if (c.equals("CSCI0320")) {
-          groups
-              .add(Arrays.asList("3", "Talking about Appliances", "CSCI0320", "37", "CIT", "252"));
-        } else if (c.equals("BIOL0100")) {
-          groups.add(Arrays.asList("5", "Problem Set 1", "BIOL0100", "6", "Barus & Holley", "62"));
+        for (Group g : online_groups.values()) {
+          if (g.getCourseCode().equals(c)) {
+            String id = Integer.toString(g.getGroupID());
+            String title = g.getDescription();
+            String course = c;
+            String size = Integer.toString(g.getUsers().size());
+            String loc = g.getLocation();
+            String time_rem = Double.toString(g.getDuration());
+            groups.add(Arrays.asList(id, title, course, size, loc, time_rem));
+          }
         }
+        // @formatter: off
+        // if (c.equals("CSCI0150")) {
+        // groups.add(Arrays.asList("4", "Sketchy Meeting", "CSCI0150", "7", "Ratty", "335"));
+        //
+        // } else if (c.equals("CSCI0220")) {
+        // groups.add(Arrays.asList("1", "Studying for Midterm", "CSCI0220", "5", "CIT", "142"));
+        // groups.add(Arrays.asList("2", "Drawing Logic Circuits", "CSCI0220", "4",
+        // "Science Library", "43"));
+        // } else if (c.equals("CSCI0320")) {
+        // groups
+        // .add(Arrays.asList("3", "Talking about Appliances", "CSCI0320", "37", "CIT", "252"));
+        // } else if (c.equals("BIOL0100")) {
+        // groups.add(Arrays.asList("5", "Problem Set 1", "BIOL0100", "6", "Barus & Holley", "62"));
+        // }
+        // @formatter: on
+
+        // loop thorough saved list of classes
       }
 
       Map<String, Object> variables = ImmutableMap.of("groups", groups);
@@ -383,12 +402,11 @@ public abstract class Main {
       Set<String> deptCourses;
 
       if (courses.containsKey(dept)) {
-        deptCourses= courses.get(dept);
+        deptCourses = courses.get(dept);
       } else {
         deptCourses = new HashSet<>();
         deptCourses.add("NONE");
       }
-
 
       Map<String, Object> variables = ImmutableMap.of("dept", deptCourses);
 

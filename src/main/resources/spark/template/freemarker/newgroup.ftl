@@ -52,3 +52,10 @@
 </div>
 </#assign>
 <#include "main.ftl">
+
+<script>
+$(document).ready(function() {
+  console.log("newgroup");
+  setup_live_groups();
+});
+</script>

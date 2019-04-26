@@ -21,7 +21,9 @@
       <span style="bold">Description: </span>${groupdesc}
     </div>
     <div id="group-members">
-      ${groupemails}
+      <#list groupemails as email>
+		${email}
+	  </#list>
     </div>
     <div id="group-options">
       <div id="group-option-invisible" class="group-option">
@@ -38,3 +40,4 @@
 </div>
 </#assign>
 <#include "main.ftl">
+

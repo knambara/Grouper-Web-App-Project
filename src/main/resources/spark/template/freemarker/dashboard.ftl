@@ -66,3 +66,10 @@
 </div>
 </#assign>
 <#include "main.ftl">
+
+<script>
+$(document).ready(function() {
+  console.log("dashboard");
+  setup_live_groups();
+});
+</script>

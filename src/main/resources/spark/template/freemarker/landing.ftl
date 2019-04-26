@@ -6,6 +6,7 @@
     <button id="login-btn">Login</button>
   </div>
 </div>
+
 <script src="js/landing.js"></script>
 </#assign>
 <#include "main.ftl">
