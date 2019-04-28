@@ -114,6 +114,10 @@ public class GrouperDBManager {
     } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
+
+    // Assert that user is properly stored in the cache
+    User u = userCache.getUser(email);
+    assert u.getEmail().equals(email);
   }
 
   /**
@@ -169,9 +173,9 @@ public class GrouperDBManager {
     updateUserGroupID(mod, thisGroupID);
     mod.setMod(true);
 
-    // Assert that therer are no discrepancy between cache and db
+    // Assert that group is properly stored in the cache
     Group g = groupCache.getGroup(thisGroupID);
-    assert g.getModerator().equals(modID);
+    assert g.getGroupID() == thisGroupID;
   }
 
   /**
@@ -207,6 +211,38 @@ public class GrouperDBManager {
   }
 
   /**
+   * Handles database and cache when adding user to a group.
+   * 
+   * @param userID String userID
+   * @param groupID int groupID
+   */
+  public void addUserToGroup(String userID, int groupID) {
+    // Get references to both user and group objects
+    Group g = groupCache.getGroup(groupID);
+    User u = userCache.getUser(userID);
+    // Add user into specified group
+    g.addUser(u);
+    // Change group id for user in cache and db
+    updateUserGroupID(u, groupID);
+  }
+
+  /**
+   * Handles database and cache when adding user to a group.
+   * 
+   * @param userID String userID
+   * @param groupID int groupID
+   */
+  public void removeUserFromGroup(String userID, int groupID) {
+    // Get references to both user and group objects
+    Group g = groupCache.getGroup(groupID);
+    User u = userCache.getUser(userID);
+    // Remove user from specified group
+    g.removeUser(u);
+    // Change group id for user back to -1
+    updateUserGroupID(u, -1);
+  }
+
+  /**
    * Invoked when server closes; all groups should be removed.
    */
   public void deleteAllGroups() {
@@ -218,6 +254,29 @@ public class GrouperDBManager {
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }
+  }
+
+  /**
+   * Returns the userID that matches given hash.
+   * 
+   * @param hash
+   * @return String userID
+   */
+  public String getUserIDFromHash(String hash) {
+    Connection conn = grouperDB.getConnection();
+    String query = "SELECT U_ID FROM users WHERE hash = ?;";
+    String userID = null;
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, hash);
+      try (ResultSet res = prep.executeQuery()) {
+        userID = res.getString(1);
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+      }
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+    return userID;
   }
 
   /**

@@ -30,7 +30,7 @@ $(document).ready(() => {
         // Send all new group data to back end
         const postParameter = {department: dept, grouptitle: grouptitle,
             course_number: course, duration_hours: hours, duration_mins: mins,
-            description: description, building: building, location: loc};
+            description: description, building: building, location: loc, email: localStorage.getItem("grouper_email")};
 
         // Creates new groups with data and returns the URL corresponding to
         // that group, which the user is sent to
@@ -38,8 +38,9 @@ $(document).ready(() => {
 
             const responseObject = JSON.parse(responseJSON);
             const url = responseObject.groupurl;
+            const id = responseObject.groupid;
             console.log(url);
-            window.location.href = url;
+            window.location.href = url + "?id="+id+"_modPage";
         });
 
         // Call fuction in websockets.js

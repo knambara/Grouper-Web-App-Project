@@ -22,18 +22,12 @@
     </div>
     <div id="group-members">
       <#list groupusers as user>
-		${user.getEmail()}
+		${user.getEmail()}<br/>
 	  </#list>
     </div>
-    <div id="group-options">
-      <div id="group-option-invisible" class="group-option">
-        invisible
-      </div>
-      <div id="group-option-extend" class="group-option">
-        <button id="extend-button">EXTEND TIME</button>
-      </div>
-      <div id="group-option-end" class="group-option">
-        <button id="end-button">END TIME</button>
+    <div id="group-options">      
+      <div id="group-option-leave" class="group-option">
+        <button id="leave-button">LEAVE</button>
       </div>
     </div>
   </div>
@@ -43,7 +37,7 @@
 
 <script>
 $(document).ready(function() {
-  console.log("group_modPage");
+  console.log("group_userPage");
   setup_live_groups();
 });
 </script>

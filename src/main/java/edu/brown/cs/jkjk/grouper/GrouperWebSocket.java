@@ -51,10 +51,8 @@ public class GrouperWebSocket {
   public void message(Session session, String message) throws IOException {
     JsonObject received = GSON.fromJson(message, JsonObject.class);
 
-    // TODO: Handles client request for updated list of groups
-    // At this point available_groups contains the newly created group
+    // Handles client request for updated list of groups
     if (received.get("type").getAsInt() == MESSAGE_TYPE.GROUPS.ordinal()) {
-
       // Get session id from payload
       JsonObject payload = received.get("payload").getAsJsonObject();
       int id = payload.get("id").getAsInt();
@@ -73,6 +71,24 @@ public class GrouperWebSocket {
 
     // TODO: Handles client request for updated list of group members
     if (received.get("type").getAsInt() == MESSAGE_TYPE.MEMBERS.ordinal()) {
+      // Get session id from payload
+      JsonObject payload = received.get("payload").getAsJsonObject();
+      int id = payload.get("id").getAsInt();
+      String email = payload.get("email").getAsString();
+
+      JsonObject updateMsg = new JsonObject();
+      JsonObject updatePayload = new JsonObject();
+      updatePayload.addProperty("id", id);
+      updatePayload.addProperty("email", email);
+
+      updateMsg.addProperty("type", MESSAGE_TYPE.UPDATE_GROUP.ordinal());
+      updateMsg.add("payload", updatePayload);
+
+      for (Session s : sessions) {
+        if (s != session) {
+          s.getRemote().sendString(GSON.toJson(updateMsg));
+        }
+      }
     }
 
   }

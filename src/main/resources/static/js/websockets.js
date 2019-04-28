@@ -39,16 +39,25 @@ const setup_live_groups = () => {
       case MESSAGE_TYPE.UPDATE_GROUP:
         // TODO: Update the members within a group
         console.log("update group invoked");
-
+        updateGroupContent(data.payload.email);
     }
   };
 }
 
 // Should be called when a user makes or deletes a new group.
 const update_dash = () => {
-  // Send a GROUPS message to the server using `conn
+  // Send a GROUPS message to the server using 'conn'
   const p = {"id" : myId};
   const JSONObj = {"type" : MESSAGE_TYPE.GROUPS, "payload" : p};     
+  conn.send(JSON.stringify(JSONObj));
+}
+
+//Should be called when a user joins or leaves a group
+const update_group = (email) => {
+  // Send a MEMBERS message to the server using 'conn'
+  console.log("in update group");
+  const p = {"id" : myId, "email" : email};
+  const JSONObj = {"type" : MESSAGE_TYPE.MEMBERS, "payload" : p};     
   conn.send(JSON.stringify(JSONObj));
 }
 

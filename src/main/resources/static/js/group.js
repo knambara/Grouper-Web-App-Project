@@ -1,3 +1,12 @@
+function updateGroupContent(email) {
+  const $groupSize = $('#group-detail-size');
+  const $groupMembers = $('#group-members');
+
+  let num = Number($groupSize.html()) + 1; 
+  $groupSize.html(num.toString());
+  $groupMembers.html( $groupMembers.html() + "<br />" + email);
+}
+
 $(document).ready(() => {
 
   const $end_button = $('#end-button');
@@ -20,5 +29,10 @@ $(document).ready(() => {
     // Redirect current user's page to dashboard
     redirectToDashboard();
   });
+
+  if(window.location.href.split('?')[0] === "http://localhost:4567/grouper/group"){
+    console.log("commencing update group");
+    update_group(localStorage.getItem("grouper_email"));
+  }
 
 });

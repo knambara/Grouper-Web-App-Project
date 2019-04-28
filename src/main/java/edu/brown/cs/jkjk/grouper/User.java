@@ -90,6 +90,6 @@ public class User {
    * @throws ExecutionException
    */
   public Group getGroup(LoadingCache<Integer, Group> groupCache) throws ExecutionException {
-    return groupCache.get(this.groupID);
+    return groupCache.getUnchecked(this.groupID);
   }
 }

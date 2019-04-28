@@ -56,8 +56,6 @@ public abstract class Main {
   private static GrouperDBManager grouperDBManager = new GrouperDBManager(userCache, groupCache,
       grouperDB);
 
-  private static String currUserEmail = "";
-
   /**
    * Method entrypoint for CLI invocation.
    *
@@ -161,7 +159,7 @@ public abstract class Main {
         List<String> departmentList = dr.departments("data/departments_sample.csv");
 
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
-            "departments", departmentList, "email", currUserEmail);
+            "departments", departmentList, "email", email);
         return new ModelAndView(variables, "dashboard.ftl");
       } else {
         Map<String, Object> variables = ImmutableMap.of("title", "Redirecting");
@@ -209,6 +207,8 @@ public abstract class Main {
       String room = qm.value("location");
       String details = qm.value("description");
 
+      String thisUserEmail = qm.value("email");
+
       Map<String, String> variables = new HashMap<>();
       variables.put("department", dept);
       variables.put("location", location);
@@ -219,7 +219,8 @@ public abstract class Main {
       variables.put("details", details);
 
       // Add new group info into 'groups' table of database
-      grouperDBManager.addNewGroup(variables, currUserEmail);
+      grouperDBManager.addNewGroup(variables, thisUserEmail);
+      int groupID = userCache.getUser(thisUserEmail).getGroupID();
 
       // return the URL to the new page (group view)
       String url = null;
@@ -228,7 +229,8 @@ public abstract class Main {
       } catch (Exception e) {
         System.out.println("ERROR: Could not encode url");
       }
-      Map<String, Object> info = ImmutableMap.of("groupurl", url);
+      Map<String, Object> info = ImmutableMap.of("groupurl", url, "groupid",
+          Integer.toString(groupID));
 
       return GSON.toJson(info);
     }
@@ -260,18 +262,46 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
+      String g_id = req.queryParams("id");
 
-      Map<String, Object> info = groupController.getGroupView(currUserEmail);
-      info.put("title", "Grouper - Group status");
+      // Handle get request for moderator group page is called
+      if (g_id.contains("modPage")) {
+        int groupID = Integer.parseInt(String.valueOf(g_id.charAt(0)));
+        // TODO: getGroupView method is redundant
+        Group g = groupCache.getGroup(groupID);
+        String groupSize = Integer.toString(g.getUsers().size());
+        // @formatter:off
+        Map<String, Object> variables = ImmutableMap.<String, Object>builder()
+            .put("title", "Grouper - Group status")
+            .put("grouptitle", g.getDescription())
+            .put("groupclass", g.getCourseCode())
+            .put("groupSize", groupSize)
+            .put("groupdesc", g.getDetails())
+            .put("groupusers", g.getUsers())
+            .build();
+        // @formatter: on
+        return new ModelAndView(variables, "group.ftl");
+      }
+      // Handle get request for joined group page
+      int groupID = Integer.parseInt(String.valueOf(g_id.charAt(0)));
+      String userHash = g_id.substring(2);
+      String userID = grouperDBManager.getUserIDFromHash(userHash);
 
-      Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
-          "grouptitle", info.get("grouptitle"), "groupclass", info.get("groupclass"), "groupdesc",
-          info.get("groupdesc"), "groupusers", info.get("groupusers"));
-
-      // Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
-      // "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
-      // "A group with a description", "groupemails", "jeffrey_demanche@brown.edu");
-      return new ModelAndView(variables, "group.ftl");
+      grouperDBManager.addUserToGroup(userID, groupID);
+     // TODO: getGroupView method is redundant
+      Group g = groupCache.getGroup(groupID);
+      String groupSize = Integer.toString(g.getUsers().size());
+      // @formatter:off
+      Map<String, Object> variables = ImmutableMap.<String, Object>builder()
+          .put("title", "Grouper - Group status")
+          .put("grouptitle", g.getDescription())
+          .put("groupclass", g.getCourseCode())
+          .put("groupSize", groupSize)
+          .put("groupdesc", g.getDetails())
+          .put("groupusers", g.getUsers())
+          .build();
+      // @formatter: on
+      return new ModelAndView(variables, "group_joined.ftl");
     }
   }
 
@@ -437,9 +467,7 @@ public abstract class Main {
       String email = qm.value("email");
       String img = qm.value("img");
 
-      currUserEmail = email;
-
-      if (email.endsWith("@brown.edu")) {
+      if (/* email.endsWith("@brown.edu") */true) { // for testing purposes
         String hash = generateHash(32);
         grouperDBManager.addNewUser(hash, name, email);
         Map<String, Object> variables = ImmutableMap.of("msg", "success", "error", "", "hash",
