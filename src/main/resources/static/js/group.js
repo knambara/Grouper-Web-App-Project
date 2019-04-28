@@ -1,6 +1,6 @@
 $(document).ready(() => {
 
-  const $end_button = $('#end_button');
+  const $end_button = $('#end-button');
 
   $end_button.on('click', event => {
     // Send mod email to backend
@@ -11,13 +11,14 @@ $(document).ready(() => {
     $.post("/deleteGroup", postParameter, responseJSON => {
 
         const responseObject = JSON.parse(responseJSON);
-        const url = responseObject.groupurl;
-        console.log(url);
-        window.location.href = url;
+        const msg = responseObject.msg;
+        console.log(msg);
     });
 
     // Call function in websockets.js
     update_dash();
+    // Redirect current user's page to dashboard
+    redirectToDashboard();
   });
 
 });

@@ -24,7 +24,6 @@ import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
 import edu.brown.cs.jkjk.grouper.GroupControl;
 import edu.brown.cs.jkjk.grouper.GrouperWebSocket;
-import edu.brown.cs.jkjk.grouper.User;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
@@ -222,10 +221,6 @@ public abstract class Main {
       // Add new group info into 'groups' table of database
       grouperDBManager.addNewGroup(variables, currUserEmail);
 
-      User mod = userCache.getUser(currUserEmail);
-      Group g = groupCache.getGroup(mod.getGroupID());
-      assert g.getModerator().equals(currUserEmail);
-
       // return the URL to the new page (group view)
       String url = null;
       try {
@@ -235,6 +230,25 @@ public abstract class Main {
       }
       Map<String, Object> info = ImmutableMap.of("groupurl", url);
 
+      return GSON.toJson(info);
+    }
+  }
+
+  /**
+   * Handles deleting group itself form db and deleting its info from each user.
+   * 
+   * @author Kento
+   *
+   */
+  private static class DeleteGroupHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String mod_email = qm.value("mod");
+      // Handles removing group and updatin info in db and cache
+      grouperDBManager.removeGroup(mod_email);
+
+      Map<String, Object> info = ImmutableMap.of("msg", "success");
       return GSON.toJson(info);
     }
   }
@@ -455,33 +469,6 @@ public abstract class Main {
     }
     String outStr = hash.toString();
     return outStr;
-  }
-
-  /**
-   * Handles deleting group itself form db and deleting its info from each user.
-   * 
-   * @author Kento
-   *
-   */
-  private static class DeleteGroupHandler implements Route {
-    @Override
-    public String handle(Request req, Response res) {
-      QueryParamsMap qm = req.queryMap();
-      String mod_email = qm.value("mod");
-      // Handles removing group and updatin info in db and cache
-      grouperDBManager.removeGroup(mod_email);
-
-      String url = null;
-      // return the URL to the new page (group view)
-      try {
-        url = "/grouper/dashboard";// + URLEncoder.encode(gIdString, "UTF-8");
-      } catch (Exception e) {
-        System.out.println("ERROR: Could not encode url");
-      }
-
-      Map<String, Object> info = ImmutableMap.of("groupurl", url);
-      return GSON.toJson(info);
-    }
   }
 
 }

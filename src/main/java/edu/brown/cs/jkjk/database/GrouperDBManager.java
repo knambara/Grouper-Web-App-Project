@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
 import edu.brown.cs.jkjk.grouper.User;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
@@ -167,6 +168,10 @@ public class GrouperDBManager {
     }
     updateUserGroupID(mod, thisGroupID);
     mod.setMod(true);
+
+    // Assert that therer are no discrepancy between cache and db
+    Group g = groupCache.getGroup(thisGroupID);
+    assert g.getModerator().equals(modID);
   }
 
   /**
@@ -199,7 +204,6 @@ public class GrouperDBManager {
 
     // Remove group from cache
     groupCache.getCache().invalidate(groupID);
-
   }
 
   /**
