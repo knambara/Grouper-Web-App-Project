@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
@@ -70,9 +69,8 @@ public class UserCacheHandler {
    * 
    * @param id String id
    * @return User user
-   * @throws ExecutionException Upon connection error to the database
    */
-  public User getUser(String id) throws ExecutionException {
-    return userCache.get(id);
+  public User getUser(String id) {
+    return userCache.getUnchecked(id);
   }
 }

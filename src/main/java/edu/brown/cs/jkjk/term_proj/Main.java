@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +19,12 @@ import com.google.gson.Gson;
 
 import edu.brown.cs.jkjk.database.DBConnector;
 import edu.brown.cs.jkjk.database.DataReader;
+import edu.brown.cs.jkjk.database.GrouperDBManager;
 import edu.brown.cs.jkjk.grouper.Group;
+import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
 import edu.brown.cs.jkjk.grouper.GroupControl;
 import edu.brown.cs.jkjk.grouper.GrouperWebSocket;
+import edu.brown.cs.jkjk.grouper.User;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
@@ -49,12 +50,14 @@ public abstract class Main {
   private static final int PORT_NUM = 4567;
   private static final Gson GSON = new Gson();
 
-  private static DBConnector GROUPER_DB = new DBConnector();
-  private static UserCacheHandler USER_CACHE = new UserCacheHandler(GROUPER_DB);
-  private static GroupControl GROUP_CONTROL = new GroupControl(GROUPER_DB);
-  private static Map<Integer, Group> online_groups = new HashMap<>();
+  private static DBConnector grouperDB = new DBConnector();
+  private static UserCacheHandler userCache = new UserCacheHandler(grouperDB);
+  private static GroupCacheHandler groupCache = new GroupCacheHandler(grouperDB, userCache);
+  private static GroupControl groupController = new GroupControl(userCache, groupCache);
+  private static GrouperDBManager grouperDBManager = new GrouperDBManager(userCache, groupCache,
+      grouperDB);
 
-  private static String curr_user_email = "";
+  private static String currUserEmail = "";
 
   /**
    * Method entrypoint for CLI invocation.
@@ -63,12 +66,10 @@ public abstract class Main {
    * @throws SQLException
    */
   public static void main(String[] args) {
+
     OptionParser parser = new OptionParser();
-
     parser.accepts("gui");
-
     OptionSpec<Integer> portSpec = parser.accepts("port").withRequiredArg().ofType(Integer.class);
-
     OptionSet options = parser.parse(args);
 
     if (options.has("gui")) {
@@ -77,63 +78,34 @@ public abstract class Main {
       } else {
         Spark.port(PORT_NUM);
       }
-
       // Connect to database
       try {
-        GROUPER_DB.connect("data/grouperDB.sqlite3");
+        grouperDB.connect("data/grouperDB.sqlite3");
       } catch (Exception e) {
         System.out.println(e.getMessage());
       }
-
-      // @formatter:off
-      // Create 'users' table if it doesn't exist already
-      Connection conn = GROUPER_DB.getConnection();
-      String query = "CREATE TABLE IF NOT EXISTS "
-          + "users(U_ID TEXT, "
-          + "name TEXT, "
-          + "G_ID INTEGER, "
-          + "hash TEXT, "
-          + "PRIMARY KEY (U_ID));";        
-      try (PreparedStatement prep = conn.prepareStatement(query)) {
-        prep.executeUpdate();
-        prep.close();
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
+      // Set up users and groups table in database
+      try {
+        grouperDBManager.setUpUsersAndGroupsTable();
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-      
-      // Create 'groups' table if it doesn't exist already
-      Connection conn1 = GROUPER_DB.getConnection();
-      // Create 'groups' table if it doesn't exist already
-      String query1 = "CREATE TABLE IF NOT EXISTS "
-              + "groups(G_ID INTEGER, "
-              + "code TEXT, "
-              + "department TEXT, "
-              + "description TEXT, "
-              + "duration REAL, "
-              + "start TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, "
-              + "Mod TEXT, "
-              + "location TEXT, "
-              + "visible INTEGER DEFAULT 1, "
-              + "room TEXT, "
-              + "details TEXT, "
-              + "PRIMARY KEY (G_ID), "
-              + "FOREIGN KEY (Mod) REFERENCES users(U_ID) ON DELETE CASCADE ON UPDATE CASCADE);";
-      try (PreparedStatement prep1 = conn1.prepareStatement(query1)) {
-        prep1.executeUpdate();
-        prep1.close();
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-      }
-      // @formatter:on
-
-      // Run Spark server.
+      // Run Spark server
       runSparkServer();
     }
+
+    // Delete groups database upon server crash/server exit
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        grouperDBManager.deleteAllGroups();
+      }
+    }, "Shutdown-thread"));
   }
 
   /**
    * Method to start Spark server and create Spark routes.
    */
+  @SuppressWarnings("unchecked")
   public static void runSparkServer() {
     Spark.externalStaticFileLocation("src/main/resources/static");
     Spark.exception(Exception.class, new ExceptionPrinter());
@@ -152,6 +124,7 @@ public abstract class Main {
     Spark.post("/populateCourses", new CourseHandler());
     Spark.post("/createGroupInfo", new CreateGroupHandler());
     Spark.post("/grouper/group", new GroupHandler(), freeMarker);
+    Spark.post("/deleteGroup", new DeleteGroupHandler());
 
   }
 
@@ -183,13 +156,13 @@ public abstract class Main {
       String email = qm.value("login_email");
       String hash = qm.value("login_hash");
 
-      if (GROUPER_DB.verifyUserHash(email, hash)) {
+      if (grouperDB.verifyUserHash(email, hash)) {
         // Hard coded for testing purposes.
         DataReader dr = new DataReader();
         List<String> departmentList = dr.departments("data/departments_sample.csv");
 
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
-            "departments", departmentList, "email", curr_user_email);
+            "departments", departmentList, "email", currUserEmail);
         return new ModelAndView(variables, "dashboard.ftl");
       } else {
         Map<String, Object> variables = ImmutableMap.of("title", "Redirecting");
@@ -246,21 +219,21 @@ public abstract class Main {
       variables.put("room", room);
       variables.put("details", details);
 
-      Group g = GROUP_CONTROL.newGroup(variables, curr_user_email);
-      online_groups.put(g.getGroupID(), g);
-      // String gIdString = Integer.toString(gId);
+      // Add new group info into 'groups' table of database
+      grouperDBManager.addNewGroup(variables, currUserEmail);
 
-      String url = null;
+      User mod = userCache.getUser(currUserEmail);
+      Group g = groupCache.getGroup(mod.getGroupID());
+      assert g.getModerator().equals(currUserEmail);
 
       // return the URL to the new page (group view)
+      String url = null;
       try {
         url = "/grouper/group";// + URLEncoder.encode(gIdString, "UTF-8");
       } catch (Exception e) {
         System.out.println("ERROR: Could not encode url");
       }
-
-      Map<String, Object> info = ImmutableMap.of("groupurl", url, "id",
-          Integer.toString(g.getGroupID()));
+      Map<String, Object> info = ImmutableMap.of("groupurl", url);
 
       return GSON.toJson(info);
     }
@@ -273,22 +246,13 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      // Get URL
-      // String id = req.params("");
-      // try {
-      // id = URLDecoder.decode(id, "UTF-8");
-      // System.out.println(id);
-      // } catch (Exception e) {
-      // System.out.println("ERROR: Problem with decoding group ID.");
-      // }
 
-      Map<String, Object> info = GROUP_CONTROL.getGroupView(curr_user_email);
-      System.out.println(curr_user_email);
+      Map<String, Object> info = groupController.getGroupView(currUserEmail);
       info.put("title", "Grouper - Group status");
 
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
           "grouptitle", info.get("grouptitle"), "groupclass", info.get("groupclass"), "groupdesc",
-          info.get("groupdesc"), "groupemails", info.get("groupemails"));
+          info.get("groupdesc"), "groupusers", info.get("groupusers"));
 
       // Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Group status",
       // "grouptitle", "Group Title", "groupclass", "CLAS1234", "groupdesc",
@@ -355,7 +319,7 @@ public abstract class Main {
 
       // Hard coded examples in order to test front end
       for (String c : classes) {
-        for (Group g : online_groups.values()) {
+        for (Group g : groupCache.getCache().asMap().values()) {
           if (g.getCourseCode().equals(c)) {
             String id = Integer.toString(g.getGroupID());
             String title = g.getDescription();
@@ -459,45 +423,15 @@ public abstract class Main {
       String email = qm.value("email");
       String img = qm.value("img");
 
-      curr_user_email = email;
+      currUserEmail = email;
 
       if (email.endsWith("@brown.edu")) {
-
         String hash = generateHash(32);
-
-        Connection conn = GROUPER_DB.getConnection();
-
-        String query1 = "UPDATE users SET hash=? WHERE U_ID=?;";
-        String query2 = "INSERT INTO users(U_ID, name, G_ID, hash) SELECT ?, ?, ?, ? WHERE "
-            + "(Select Changes() = 0);";
-        try (PreparedStatement prep = conn.prepareStatement(query1)) {
-          prep.setString(1, hash);
-          prep.setString(2, email);
-
-          prep.executeUpdate();
-          prep.close();
-        } catch (SQLException e) {
-          System.err.println(e.getMessage());
-        }
-
-        try (PreparedStatement prep = conn.prepareStatement(query2)) {
-          prep.setString(1, email);
-          prep.setString(2, name);
-          prep.setInt(3, -1);
-          prep.setString(4, hash);
-
-          prep.executeUpdate();
-          prep.close();
-        } catch (SQLException e) {
-          System.err.println(e.getMessage());
-        }
-
+        grouperDBManager.addNewUser(hash, name, email);
         Map<String, Object> variables = ImmutableMap.of("msg", "success", "error", "", "hash",
             hash);
         return GSON.toJson(variables);
-
       } else {
-
         Map<String, Object> variables = ImmutableMap.of("msg", "error", "error",
             "Only valid brown.edu Google accounts allowed", "hash", "");
         return GSON.toJson(variables);
@@ -521,6 +455,33 @@ public abstract class Main {
     }
     String outStr = hash.toString();
     return outStr;
+  }
+
+  /**
+   * Handles deleting group itself form db and deleting its info from each user.
+   * 
+   * @author Kento
+   *
+   */
+  private static class DeleteGroupHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String mod_email = qm.value("mod");
+      // Handles removing group and updatin info in db and cache
+      grouperDBManager.removeGroup(mod_email);
+
+      String url = null;
+      // return the URL to the new page (group view)
+      try {
+        url = "/grouper/dashboard";// + URLEncoder.encode(gIdString, "UTF-8");
+      } catch (Exception e) {
+        System.out.println("ERROR: Could not encode url");
+      }
+
+      Map<String, Object> info = ImmutableMap.of("groupurl", url);
+      return GSON.toJson(info);
+    }
   }
 
 }

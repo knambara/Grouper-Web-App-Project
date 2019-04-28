@@ -44,11 +44,13 @@ const setup_live_groups = () => {
   };
 }
 
-// Should be called when a user makes a new group.
-const new_group = () => {
+// Should be called when a user makes or deletes a new group.
+const update_dash = () => {
   // Send a GROUPS message to the server using `conn
   const p = {"id" : myId};
   const JSONObj = {"type" : MESSAGE_TYPE.GROUPS, "payload" : p};     
   conn.send(JSON.stringify(JSONObj));
 }
+
+
 

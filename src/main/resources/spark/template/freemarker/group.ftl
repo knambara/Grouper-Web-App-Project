@@ -21,8 +21,8 @@
       <span style="bold">Description: </span>${groupdesc}
     </div>
     <div id="group-members">
-      <#list groupemails as email>
-		${email}
+      <#list groupusers as user>
+		${user.getEmail()}
 	  </#list>
     </div>
     <div id="group-options">
@@ -41,3 +41,9 @@
 </#assign>
 <#include "main.ftl">
 
+<script>
+$(document).ready(function() {
+  console.log("group_modPage");
+  setup_live_groups();
+});
+</script>

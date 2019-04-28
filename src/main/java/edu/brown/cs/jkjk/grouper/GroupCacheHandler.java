@@ -1,10 +1,13 @@
 package edu.brown.cs.jkjk.grouper;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
@@ -14,8 +17,7 @@ import com.google.common.cache.LoadingCache;
 import edu.brown.cs.jkjk.database.DBConnector;
 
 /**
- * Handler for fetching Group object with given in; query the db if the group
- * does not exits
+ * Handler for fetching Group object with given in; query the db if the group does not exits
  *
  * @author kvlynch
  */
@@ -25,175 +27,108 @@ public class GroupCacheHandler {
   private static final int MAX_SIZE = 1000;
 
   private DBConnector database;
+  private UserCacheHandler userCache;
 
-  //Cache that stores the groups by group id
+  // Cache that stores the groups by group id
   private LoadingCache<Integer, Group> groupCache = CacheBuilder.newBuilder()
-          .expireAfterWrite(TIME_LIMIT, TimeUnit.HOURS).maximumSize(MAX_SIZE)
-          .build(new CacheLoader<Integer, Group>() {
-            @Override
-            public Group load(Integer groupID) throws Exception {
+      .expireAfterWrite(TIME_LIMIT, TimeUnit.HOURS).maximumSize(MAX_SIZE)
+      .build(new CacheLoader<Integer, Group>() {
+        @Override
+        public Group load(Integer groupID) throws Exception {
 
-              Connection conn = database.getConnection();
-              Group g = null;
+          Connection conn = database.getConnection();
+          Group g = null;
+          // Create and return Group with given id
+          String query = "SELECT * FROM groups WHERE G_ID = ?";
+          try (PreparedStatement prep = conn.prepareStatement(query)) {
+            prep.setInt(1, groupID);
+            try (ResultSet rs = prep.executeQuery()) {
+              while (rs.next()) {
+                Integer groupId = rs.getInt("G_ID");
+                String code = rs.getString("code");
+                String department = rs.getString("department");
+                String description = rs.getString("description");
+                Double duration = rs.getDouble("duration");
+                String start = rs.getString("start");
+                String moderator = rs.getString("Mod");
+                String location = rs.getString("location");
+                String room = rs.getString("room");
+                String details = rs.getString("details");
 
-              //Create and return Group with given id
-              String query = "SELECT * FROM groups WHERE G_ID = ?";
-              try {
-                PreparedStatement prep = conn.prepareStatement(query);
-                prep.setInt(1, groupID);
-                ResultSet rs = prep.executeQuery();
-                if (rs.next()) {
-                  Set<Group> groups = new HashSet<>();
-                  try {
-                    while (rs.next()) {
-                      System.out.println("Group Helper Start");
-                      Integer groupId = rs.getInt("G_ID");
-                      String code = rs.getString("code");
-                      String department = rs.getString("department");
-                      String description = rs.getString("description");
-                      Double duration = rs.getDouble("duration");
-                      Timestamp start = rs.getTimestamp("start");
-                      String moderator = rs.getString("Mod");
-                      String location = rs.getString("location");
-                      String room = rs.getString("room");
-                      String details = rs.getString("details");
-
-                      g = new Group(groupId, department, location, code, description, duration, room, details);
-                      g.setModerator(moderator);
-                      g.setStartTime(start);
-
-                      //add the users to the group
-                      Set<User> users = getUsers(groupId);
-                      Iterator<User> usersIt = users.iterator();
-                      while (usersIt.hasNext()) {
-                        g.addUser(usersIt.next());
-                      }
-
-                      groups.add(g);
-
-                      System.out.println("Group Helper End");
-                    }
-
-                  } catch (Exception e) {
-                    System.out.println("ERROR: " + e.getMessage());
-                  }
+                g = new Group(groupId, department, location, code, description, duration, room,
+                    details);
+                g.setModerator(moderator);
+                Timestamp ts = Timestamp.valueOf(start);
+                g.setStartTime(ts);
+                // add the users to the group
+                Set<User> users = getUsers(groupId);
+                Iterator<User> usersIt = users.iterator();
+                while (usersIt.hasNext()) {
+                  g.addUser(usersIt.next());
                 }
-                prep.close();
-                rs.close();
-              } catch (SQLException e) {
-                System.out.println("ERROR: " + e.getMessage());
               }
-              return g;
+            } catch (SQLException e) {
+              System.out.println(e.getMessage());
             }
-          });
-
-  //Cache that stores the groups by department id
-  private LoadingCache<String, Set<Group>> departmentCache = CacheBuilder.newBuilder()
-          .expireAfterWrite(TIME_LIMIT, TimeUnit.HOURS).maximumSize(MAX_SIZE)
-          .build(new CacheLoader<String, Set<Group>>() {
-            @Override
-            public Set<Group> load(String department) throws Exception {
-              Connection conn = database.getConnection();
-              Set<Group> groups = null;
-
-              //Find all groups in the given department
-              String query = "SELECT * FROM groups WHERE department = ?";
-              try {
-                PreparedStatement prep = conn.prepareStatement(query);
-                prep.setString(1, department);
-                ResultSet rs = prep.executeQuery();
-                if (rs.next()) {
-                  groups = groupHelper(rs);
-                }
-                prep.close();
-                rs.close();
-              } catch (SQLException e) {
-                System.out.println("ERROR: " + e.getMessage());
-              }
-              return groups;
-            }
-          });
-
-
-
-  private Set<Group> groupHelper(ResultSet rs) {
-
-
-    Set<Group> groups = new HashSet<>();
-    try {
-      while (rs.next()) {
-        System.out.println("Group Helper Start");
-        Integer groupId = rs.getInt("G_ID");
-        String code = rs.getString("code");
-        String department = rs.getString("department");
-        String description = rs.getString("description");
-        Double duration = rs.getDouble("duration");
-        Timestamp start = rs.getTimestamp("start");
-        String moderator = rs.getString("Mod");
-        String location = rs.getString("location");
-        String room = rs.getString("room");
-        String details = rs.getString("details");
-
-        Group g = new Group(groupId, department, location, code, description, duration, room, details);
-        g.setModerator(moderator);
-        g.setStartTime(start);
-
-        //add the users to the group
-        Set<User> users = getUsers(groupId);
-        Iterator<User> usersIt = users.iterator();
-        while (usersIt.hasNext()) {
-          g.addUser(usersIt.next());
+          } catch (SQLException e) {
+            System.out.println(e.getMessage());
+          }
+          return g;
         }
-
-        groups.add(g);
-
-        System.out.println("Group Helper End");
-      }
-
-    } catch (Exception e) {
-      System.out.println("ERROR: " + e.getMessage());
-    }
-    return groups;
-  }
+      });
 
   /**
    * Constructor for the GroupCacheHandler
    *
    * @param database DBConnector database
+   * @param userCache UserCacheHandler instance
    */
-  public GroupCacheHandler(DBConnector database) { this.database = database; }
+  public GroupCacheHandler(DBConnector database, UserCacheHandler userCache) {
+    this.database = database;
+    this.userCache = userCache;
+  }
+
+  /**
+   * Returns the group guava cache object.
+   * 
+   * @return LoadingCache of Group
+   */
+  public LoadingCache<Integer, Group> getCache() {
+    return groupCache;
+  }
 
   /**
    * Returns specified Group object from cache.
+   * 
    * @param id int group id
    * @return Group group
-   * @throws ExecutionException Upon connection error to the database
    */
-  public Group getGroup(int id) throws ExecutionException {
-    return groupCache.get(id);
+  public Group getGroup(int id) {
+    return groupCache.getUnchecked(id);
   }
 
-  public Set<Group> getDepartmentGroups(String department) throws ExecutionException {
-    return departmentCache.get(department);
-  }
-
-  private Set<User> getUsers(Integer groupId) {
-    UserCacheHandler userCache = new UserCacheHandler(database);
+  /**
+   * Returns set of User with specified group ID
+   * 
+   * @param groupId String groupID
+   * @return Set of Users
+   */
+  public Set<User> getUsers(Integer groupID) {
 
     Connection conn = database.getConnection();
     Set<User> users = new HashSet<>();
 
     String query = "SELECT U_ID FROM users WHERE G_ID = ?";
-    try {
-      PreparedStatement prep = conn.prepareStatement(query);
-      prep.setInt(1, groupId);
-      ResultSet rs = prep.executeQuery();
-      while (rs.next()) {
-        //User u = userCache.getUser(rs.getString(1));
-        //users.add(u);
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setInt(1, groupID);
+      try (ResultSet rs = prep.executeQuery()) {
+        while (rs.next()) {
+          User u = userCache.getUser(rs.getString(1));
+          users.add(u);
+        }
+      } catch (SQLException e) {
+
       }
-      rs.close();
-      prep.close();
     } catch (Exception e) {
       System.out.println("ERROR: Could not get users from G_ID");
     }
@@ -201,5 +136,19 @@ public class GroupCacheHandler {
     return users;
   }
 
-
+  /**
+   * Return groups studying subject in specified department
+   * 
+   * @param dept String department name
+   * @return Set of Groups
+   */
+  public Set<Group> getDepartmentGroups(String dept) {
+    Set<Group> deptGroups = new HashSet<>();
+    for (Group g : groupCache.asMap().values()) {
+      if (g.getDepartment().equals(dept)) {
+        deptGroups.add(g);
+      }
+    }
+    return deptGroups;
+  }
 }

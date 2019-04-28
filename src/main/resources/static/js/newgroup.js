@@ -43,7 +43,7 @@ $(document).ready(() => {
         });
 
         // Call fuction in websockets.js
-        new_group();
+        update_dash();
     });
 
     function repopulateCourses() {

@@ -20,7 +20,7 @@
         </select><br><br>
 
         Duration:<br>
-        <input type="number" min="0" max="24" value="1" class="duration-box" name="duration-hours" id="field-duration-hours"> :
+        <input type="number" min="0" max="23" value="1" class="duration-box" name="duration-hours" id="field-duration-hours"> :
         <input type="number" min="0" max="59" value="30" class="duration-box" name="duration-mins" id="field-duration-mins"><br><br>
         <!-- <button id="button-photo-upload">Upload Photo</button><br><br> -->
       </div>
