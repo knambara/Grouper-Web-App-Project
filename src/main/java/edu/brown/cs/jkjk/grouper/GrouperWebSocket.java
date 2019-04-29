@@ -20,7 +20,7 @@ public class GrouperWebSocket {
   private static int nextId = 0;
 
   private static enum MESSAGE_TYPE {
-    CONNECT, GROUPS, MEMBERS, UPDATE_DASHBOARD, UPDATE_GROUP
+    CONNECT, GROUPS, MEMBERS, UPDATE_DASHBOARD, UPDATE_GROUP, REDIRECT, REDIRECT_USERS
   }
 
   @OnWebSocketConnect
@@ -91,5 +91,26 @@ public class GrouperWebSocket {
       }
     }
 
+    // TODO: Handles redirecting users to dashboard page upon end of group
+    if (received.get("type").getAsInt() == MESSAGE_TYPE.REDIRECT.ordinal()) {
+      // Get session id from payload
+      JsonObject payload = received.get("payload").getAsJsonObject();
+      int id = payload.get("id").getAsInt();
+      String gid = payload.get("gid").getAsString();
+
+      JsonObject updateMsg = new JsonObject();
+      JsonObject updatePayload = new JsonObject();
+      updatePayload.addProperty("id", id);
+      updatePayload.addProperty("gid", gid);
+
+      updateMsg.addProperty("type", MESSAGE_TYPE.REDIRECT_USERS.ordinal());
+      updateMsg.add("payload", updatePayload);
+
+      for (Session s : sessions) {
+        if (s != session) {
+          s.getRemote().sendString(GSON.toJson(updateMsg));
+        }
+      }
+    }
   }
 }

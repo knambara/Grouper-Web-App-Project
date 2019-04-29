@@ -254,6 +254,14 @@ public class GrouperDBManager {
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }
+    // Change all users' G_ID value back to -1
+    String query2 = "UPDATE users SET G_ID = -1";
+    try (PreparedStatement prep = conn.prepareStatement(query2)) {
+      prep.executeUpdate();
+      prep.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: Could not update Users' G_ID.");
+    }
   }
 
   /**
@@ -297,7 +305,7 @@ public class GrouperDBManager {
       prep.executeUpdate();
       prep.close();
     } catch (Exception e) {
-      System.out.println("ERROR: Could not update Users' group to null.");
+      System.out.println("ERROR: Could not update Users' G_ID.");
     }
   }
 

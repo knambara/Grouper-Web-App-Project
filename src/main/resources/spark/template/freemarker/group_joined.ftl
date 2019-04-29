@@ -35,9 +35,3 @@
 </#assign>
 <#include "main.ftl">
 
-<script>
-$(document).ready(function() {
-  console.log("group_userPage");
-  setup_live_groups();
-});
-</script>

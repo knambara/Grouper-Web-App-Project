@@ -40,10 +40,3 @@
 </div>
 </#assign>
 <#include "main.ftl">
-
-<script>
-$(document).ready(function() {
-  console.log("group_modPage");
-  setup_live_groups();
-});
-</script>

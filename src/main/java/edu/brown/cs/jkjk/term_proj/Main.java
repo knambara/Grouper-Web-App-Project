@@ -262,11 +262,15 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      String g_id = req.queryParams("id");
+      String g_id = req.queryParams("gid");
+      String u_id = req.queryParams("uid");
+
+      System.out.println(g_id);
+      System.out.println(u_id);
 
       // Handle get request for moderator group page is called
-      if (g_id.contains("modPage")) {
-        int groupID = Integer.parseInt(String.valueOf(g_id.charAt(0)));
+      if (u_id.equals("modPage")) {
+        int groupID = Integer.parseInt(g_id);
         // TODO: getGroupView method is redundant
         Group g = groupCache.getGroup(groupID);
         String groupSize = Integer.toString(g.getUsers().size());
@@ -283,8 +287,8 @@ public abstract class Main {
         return new ModelAndView(variables, "group.ftl");
       }
       // Handle get request for joined group page
-      int groupID = Integer.parseInt(String.valueOf(g_id.charAt(0)));
-      String userHash = g_id.substring(2);
+      int groupID = Integer.parseInt(g_id);
+      String userHash = u_id;
       String userID = grouperDBManager.getUserIDFromHash(userHash);
 
       grouperDBManager.addUserToGroup(userID, groupID);

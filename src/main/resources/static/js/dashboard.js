@@ -18,7 +18,7 @@ class GroupTile {
         "<h4>" + this.dept + " " + this.code + "</h4>" +
         "<p>" + this.loc + "</p>" +
         "<div id='group-tile-bottom'>" +
-        "<button id='join'><a href=/grouper/group?id=" + this.id + "_"+ localStorage.getItem("grouper_hash") +">Join</a></button>" +
+        "<button id='join'><a href=/grouper/group?gid=" + this.id + "&uid="+ localStorage.getItem("grouper_hash") +">Join</a></button>" +
         "<p>" + this.size + " member(s)</p>" +
         "<div id='time-"+ this.id + "'>" + this.time_left + " left</div>" +
         "</div></div>"

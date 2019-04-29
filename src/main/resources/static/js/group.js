@@ -22,17 +22,28 @@ $(document).ready(() => {
         const responseObject = JSON.parse(responseJSON);
         const msg = responseObject.msg;
         console.log(msg);
-    });
 
-    // Call function in websockets.js
-    update_dash();
-    // Redirect current user's page to dashboard
-    redirectToDashboard();
+        // Call function in websockets.js
+        update_dash();    
+        // Redirect all other users' page to dashboard
+        redirect_all(localStorage.getItem("gid"));
+
+        // Redirect current user's page to dashboard and reset gid
+        localStorage.setItem("gid", "-1");
+        redirectToDashboard(); 
+    });
   });
 
   if(window.location.href.split('?')[0] === "http://localhost:4567/grouper/group"){
-    console.log("commencing update group");
-    update_group(localStorage.getItem("grouper_email"));
+    setup_live_groups();
+    conn.onopen = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const gid = urlParams.get('gid');
+      // Save groupID in local storage
+      localStorage.setItem("gid", gid);
+      console.log("Commencing update group.");
+      update_group(localStorage.getItem("grouper_email"));
+    }
   }
 
 });

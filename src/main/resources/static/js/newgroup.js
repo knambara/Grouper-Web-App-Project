@@ -40,7 +40,7 @@ $(document).ready(() => {
             const url = responseObject.groupurl;
             const id = responseObject.groupid;
             console.log(url);
-            window.location.href = url + "?id="+id+"_modPage";
+            window.location.href = url + "?gid="+id+"&uid=modPage";
         });
 
         // Call fuction in websockets.js

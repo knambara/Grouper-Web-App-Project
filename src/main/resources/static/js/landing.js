@@ -8,8 +8,6 @@ $(document).ready(() => {
     redirectToDashboard();
   }
 
-  console.log("newpage!");
-
 });
 
 /*
