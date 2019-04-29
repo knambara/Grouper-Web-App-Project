@@ -1,31 +1,36 @@
 <#assign content>
 <div id="group-body">
-  <div id="group-centered">
-    <div id="group-header">
-      <h2>${grouptitle}</h2>
-      <h3>${groupclass}</h4>
+<div id="group-centered">
+  <div id="group-header">
+    <h2>${grouptitle}</h2>
+    <h3>${groupclass}</h4>
+  </div>
+  <div id="group-details">
+    <div id="group-detail-size" class="group-detail">
+      <img width="20" src="/img/person-icon.png"/>
+      ${groupSize} Members
     </div>
-    <div id="group-details">
-      <div id="group-detail-size" class="group-detail">
-        ${groupSize} Members
-      </div>
-      <div id="group-detail-location" class="group-detail">
-        Sciences Library Basement, Room 101
-      </div>
-      <div id="group-detail-time" class="group-detail">
-        2 hr 12 min remaining
-      </div>
+    <div id="group-detail-location" class="group-detail">
+      <div><img width="25" src="/img/location-icon.png"/></div>
+      <div><p id="building">Science Library</p>
+      <p id="spec-loc">Basement, Room A23</p></div>
     </div>
-    <hr>
-    <div id="group-description">
-      <span style="bold">Description: </span>${groupdesc}
+    <div id="group-detail-time" class="group-detail">
+      <img width="25" src="/img/clock-icon.png"/>
+      2 hr 12 min remaining
     </div>
-    <div id="group-members">
-      <#list groupusers as user>
-		<p>${user.getEmail()}</p>
-	  </#list>
-    </div>
-    <div id="group-options">      
+  </div>
+  <hr>
+  <div id="group-description">
+    <div id="description-tag">Description:</div>
+    <div id="description-details">${groupdesc}</div>
+  </div>
+  <div id="group-members">
+    <#list groupusers as user>
+      <p>${user.getEmail()}</p>
+    </#list>
+  </div>
+    <div id="group-options">
       <div id="group-option-leave" class="group-option">
         <button id="leave-button">LEAVE</button>
       </div>
@@ -34,4 +39,3 @@
 </div>
 </#assign>
 <#include "main.ftl">
-

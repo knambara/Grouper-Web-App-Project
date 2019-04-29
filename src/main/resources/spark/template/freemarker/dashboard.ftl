@@ -7,8 +7,9 @@
     <button id="log-out">log out</button>
     </div>
     <div id="side-menu-content">
-        <div id="logo">
+        <div id="dashboard-logo">
         <h1>Grouper</h1>
+        <img width="120" src="/img/grouper-icon.svg"/>
         </div>
         <div id="department-dropdown">
         <select id="department-selector">

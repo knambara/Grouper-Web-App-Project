@@ -24,27 +24,45 @@ $(document).ready(() => {
         const loc = $('#field-location').val();
 
         console.log(dept, course, hours, mins, description, building, loc);
+        //if (grouptitle === "" || description === "" || loc === "" || hours === "" || mins === "") {
+        //    displayFormError();
+        const fields = [$('#field-title'), $('#field-duration-hours'), $('#field-duration-mins'), $('#field-description'), $('#field-location')];
+        let incomplete = 0;
+        for (i in fields) {
+            if (fields[i].val() === "") {
+                fields[i].css('border', '2px red solid');
+                incomplete = incomplete + 1;
+            } else {
+                fields[i].css('border', '1px gray solid');
+            }
+        }
+        if (incomplete != 0) {
+            $('#incomplete-form-error').empty();
+            $('#incomplete-form-error').append("You must complete all fields before creating a new group!");
+        } else {
+            $('#incomplete-form-error').empty();
 
-        // Also need to send User data? In order to designate moderator, add email/member?
+            // Also need to send User data? In order to designate moderator, add email/member?
 
-        // Send all new group data to back end
-        const postParameter = {department: dept, grouptitle: grouptitle,
-            course_number: course, duration_hours: hours, duration_mins: mins,
-            description: description, building: building, location: loc, email: localStorage.getItem("grouper_email")};
+            // Send all new group data to back end
+            const postParameter = {department: dept, grouptitle: grouptitle,
+                course_number: course, duration_hours: hours, duration_mins: mins,
+                description: description, building: building, location: loc, email: localStorage.getItem("grouper_email")};
 
-        // Creates new groups with data and returns the URL corresponding to
-        // that group, which the user is sent to
-        $.post("/createGroupInfo", postParameter, responseJSON => {
+            // Creates new groups with data and returns the URL corresponding to
+            // that group, which the user is sent to
+            $.post("/createGroupInfo", postParameter, responseJSON => {
 
-            const responseObject = JSON.parse(responseJSON);
-            const url = responseObject.groupurl;
-            const id = responseObject.groupid;
-            console.log(url);
-            window.location.href = url + "?gid="+id+"&uid=modPage";
-        });
+                const responseObject = JSON.parse(responseJSON);
+                const url = responseObject.groupurl;
+                const id = responseObject.groupid;
+                console.log(url);
+                window.location.href = url + "?gid="+id+"&uid=modPage";
+            });
 
-        // Call fuction in websockets.js
-        update_dash();
+            // Call fuction in websockets.js
+            update_dash();
+            }
     });
 
     function repopulateCourses() {
@@ -67,6 +85,12 @@ $(document).ready(() => {
     }
 
 });
+
+function displayFormError() {
+    $('#incomplete-form-error').empty();
+    $('#incomplete-form-error').append("You must complete all fields before creating a new group!");
+}
+
 
 
 // let populateDropdowns = function() {

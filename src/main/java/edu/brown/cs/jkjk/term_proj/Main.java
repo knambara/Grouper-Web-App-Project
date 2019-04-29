@@ -375,7 +375,10 @@ public abstract class Main {
             String course = c;
             String size = Integer.toString(g.getUsers().size());
             String loc = g.getLocation();
-            String time_rem = Double.toString(g.getDuration());
+            long secs_elapsed = (System.currentTimeMillis() - g.getStartTime().getTime()) / 1000
+                + 4 * 3600;
+            String time_rem = Double.toString((int) ((g.getDuration() * 60 - secs_elapsed / 60)));
+            //String time_rem = Double.toString(g.getDuration());
             groups.add(Arrays.asList(id, title, course, size, loc, time_rem));
           }
         }

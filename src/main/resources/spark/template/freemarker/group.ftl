@@ -7,18 +7,23 @@
     </div>
     <div id="group-details">
       <div id="group-detail-size" class="group-detail">
+        <img width="20" src="/img/person-icon.png"/>
         ${groupSize} Members
       </div>
       <div id="group-detail-location" class="group-detail">
-        Sciences Library Basement, Room 101
+        <div><img width="25" src="/img/location-icon.png"/></div>
+        <div><p id="building">Science Library</p>
+        <p id="spec-loc">Basement, Room A23</p></div>
       </div>
       <div id="group-detail-time" class="group-detail">
+        <img width="25" src="/img/clock-icon.png"/>
         2 hr 12 min remaining
       </div>
     </div>
     <hr>
     <div id="group-description">
-      <span style="bold">Description: </span>${groupdesc}
+      <div id="description-tag">Description:</div>
+      <div id="description-details">${groupdesc}</div>
     </div>
     <div id="group-members">
       <#list groupusers as user>
@@ -27,7 +32,11 @@
     </div>
     <div id="group-options">
       <div id="group-option-invisible" class="group-option">
-        invisible
+        <p id="invisible"> INVISIBLE </p>
+        <label class="switch">
+            <input type="checkbox">
+            <span class="slider round"></span>
+        </label>
       </div>
       <div id="group-option-extend" class="group-option">
         <button id="extend-button">EXTEND TIME</button>
