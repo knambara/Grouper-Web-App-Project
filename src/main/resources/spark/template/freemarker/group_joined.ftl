@@ -8,7 +8,7 @@
   <div id="group-details">
     <div id="group-detail-size" class="group-detail">
       <img width="20" src="/img/person-icon.png"/>
-      ${groupSize} Members
+      <div id="groupSize">${groupSize}</div> Members
     </div>
     <div id="group-detail-location" class="group-detail">
       <div><img width="25" src="/img/location-icon.png"/></div>
@@ -27,7 +27,7 @@
   </div>
   <div id="group-members">
     <#list groupusers as user>
-      <p>${user.getEmail()}</p>
+      <p id=${user.getEmail()}>${user.getEmail()}</p>
     </#list>
   </div>
     <div id="group-options">

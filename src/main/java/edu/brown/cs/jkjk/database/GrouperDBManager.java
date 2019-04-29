@@ -5,8 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
@@ -189,7 +189,7 @@ public class GrouperDBManager {
     mod.setMod(false);
 
     // Update users table for each user that was in mod's group
-    Set<User> users = groupCache.getUsers(groupID);
+    List<User> users = groupCache.getUsers(groupID);
     Iterator<User> usersIt = users.iterator();
     while (usersIt.hasNext()) {
       updateUserGroupID(usersIt.next(), -1);

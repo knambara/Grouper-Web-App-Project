@@ -41,6 +41,7 @@ const setup_live_groups = () => {
       case MESSAGE_TYPE.UPDATE_GROUP:
         // TODO: Update the members within a group
         console.log("update group invoked");
+        // function in group.js
         updateGroupContent(data.payload.email);
         break;
       case MESSAGE_TYPE.REDIRECT_USERS:

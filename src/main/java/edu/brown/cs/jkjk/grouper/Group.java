@@ -1,14 +1,14 @@
 package edu.brown.cs.jkjk.grouper;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 //kvlynch -- added start time as a field stored within the group
 // added the ability to set/get a moderator
 public class Group {
 
-  private Set<User> users = new HashSet<>();
+  private List<User> users = new ArrayList<>();
   private int groupID;
   private String department;
   private String courseCode;
@@ -35,7 +35,7 @@ public class Group {
     this.groupID = groupID;
   }
 
-  public Set<User> getUsers() {
+  public List<User> getUsers() {
     return users;
   }
 

@@ -24,6 +24,7 @@ import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
 import edu.brown.cs.jkjk.grouper.GroupControl;
 import edu.brown.cs.jkjk.grouper.GrouperWebSocket;
+import edu.brown.cs.jkjk.grouper.User;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
@@ -272,7 +273,6 @@ public abstract class Main {
       // Handle get request for moderator group page is called
       if (u_id.equals("modPage")) {
         int groupID = Integer.parseInt(g_id);
-        // TODO: getGroupView method is redundant
         Group g = groupCache.getGroup(groupID);
         String groupSize = Integer.toString(g.getUsers().size());
         // @formatter:off
@@ -289,12 +289,14 @@ public abstract class Main {
       }
       // Handle get request for joined group page
       int groupID = Integer.parseInt(g_id);
+      Group g = groupCache.getGroup(groupID);
       String userHash = u_id;
       String userID = grouperDBManager.getUserIDFromHash(userHash);
-
-      grouperDBManager.addUserToGroup(userID, groupID);
-     // TODO: getGroupView method is redundant
-      Group g = groupCache.getGroup(groupID);
+      User u = userCache.getUser(userID);
+      // Only add if group doesn't contain this user; handles refreshing group page
+      if (!g.getUsers().contains(u)) {
+        grouperDBManager.addUserToGroup(userID, groupID);
+      }
       String groupSize = Integer.toString(g.getUsers().size());
       // @formatter:off
       Map<String, Object> variables = ImmutableMap.<String, Object>builder()
