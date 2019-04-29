@@ -2,14 +2,21 @@ function updateGroupContent(email) {
   const $groupSize = $('#group-detail-size');
   const $groupMembers = $('#group-members');
 
-  let num = Number($groupSize.html()) + 1; 
-  $groupSize.html(num.toString());
-  $groupMembers.html( $groupMembers.html() + "<br />" + email);
+  if (document.getElementById(email)) {
+    let num = Number($groupSize.html()) - 1;
+    $groupSize.html(num.toString());
+    $('#' + email, this).remove();
+  } else {
+    let num = Number($groupSize.html()) + 1; 
+    $groupSize.html(num.toString());
+    $groupMembers.html( $groupMembers.html() + "<p id='" + email + "'>" + email + "</p>");
+  }
 }
 
 $(document).ready(() => {
 
   const $end_button = $('#end-button');
+  const $leave_button = $('#leave-button');
 
   $end_button.on('click', event => {
     // Send mod email to backend
@@ -31,6 +38,22 @@ $(document).ready(() => {
         // Redirect current user's page to dashboard and reset gid
         localStorage.setItem("gid", "-1");
         redirectToDashboard(); 
+    });
+  });
+
+  $leave_button.on('click', event => {
+    // Send user email to backend
+    const postParameter = {user : localStorage.getItem("grouper_email"), group : localStorage.getItem("gid")};
+    $.post("/leaveGroup", postParameter, responseJSON => {
+      const responseObject = JSON.parse(responseJSON);
+      const msg = responseObject.msg;
+      console.log(msg);
+      console.log("Commencing update group.");
+      update_group(localStorage.getItem("grouper_email"));
+
+      // Redirect current user's page to dashboard and reset gid
+      localStorage.setItem("gid", "-1");
+      redirectToDashboard(); 
     });
   });
 

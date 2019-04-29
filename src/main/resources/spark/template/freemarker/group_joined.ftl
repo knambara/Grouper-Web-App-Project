@@ -22,7 +22,7 @@
     </div>
     <div id="group-members">
       <#list groupusers as user>
-		${user.getEmail()}<br/>
+		<p>${user.getEmail()}</p>
 	  </#list>
     </div>
     <div id="group-options">      

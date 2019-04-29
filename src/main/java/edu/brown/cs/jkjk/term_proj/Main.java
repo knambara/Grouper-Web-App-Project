@@ -122,6 +122,7 @@ public abstract class Main {
     Spark.post("/createGroupInfo", new CreateGroupHandler());
     Spark.post("/grouper/group", new GroupHandler(), freeMarker);
     Spark.post("/deleteGroup", new DeleteGroupHandler());
+    Spark.post("/leaveGroup", new LeaveGroupHandler());
 
   }
 
@@ -483,6 +484,19 @@ public abstract class Main {
         return GSON.toJson(variables);
 
       }
+    }
+  }
+  
+  public static class LeaveGroupHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String userID = qm.value("user");
+      int groupID = Integer.parseInt(qm.value("group"));
+      
+      grouperDBManager.removeUserFromGroup(userID, groupID);
+      Map<String, Object> variables = ImmutableMap.of("msg", "success");
+      return GSON.toJson(variables);      
     }
   }
 

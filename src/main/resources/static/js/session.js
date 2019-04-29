@@ -11,6 +11,7 @@ function doesSessionExist() {
 function removeSession() {
   localStorage.removeItem("grouper_email");
   localStorage.removeItem("grouper_hash");
+  localStorage.removeItem("gid");
 }
 
 function getUserSession() {
