@@ -226,7 +226,7 @@ public class GrouperDBManager {
     Connection conn = grouperDB.getConnection();
     List<String> deptGroups = new ArrayList<>();
 
-    String query = "SELECT code FROM groups WHERE department = ?";
+    String query = "SELECT * FROM groups WHERE department = ?";
     try {
       PreparedStatement prep = conn.prepareStatement(query);
       prep.setString(1, department);

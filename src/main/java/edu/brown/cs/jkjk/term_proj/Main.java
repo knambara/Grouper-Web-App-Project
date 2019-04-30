@@ -326,6 +326,7 @@ public abstract class Main {
       String dept = qm.value("department");
 
       List<String> classes = grouperDBManager.getDepartmentCourses(dept);
+      System.out.println(classes);
 
       Boolean expired = grouperDBManager.checkExpiredGroup();
 

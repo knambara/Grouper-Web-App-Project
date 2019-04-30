@@ -93,12 +93,11 @@ public class DataReader {
 
     try {
       reader = new BufferedReader(new FileReader(buildingsFilepath));
-      String line = null;
+      String line;
 
       while ((line = reader.readLine()) != null) {
         String[] data = line.split(COMMA_DELIMITER);
         buildings.add(data[0]);
-
       }
 
     } catch (IOException e) {
