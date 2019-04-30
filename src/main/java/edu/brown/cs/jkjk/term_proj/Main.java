@@ -368,7 +368,6 @@ public abstract class Main {
 
       List<List<String>> groups = new ArrayList<List<String>>();
 
-      // Hard coded examples in order to test front end
       for (String c : classes) {
         for (Group g : groupCache.getCache().asMap().values()) {
           if (g.getCourseCode().equals(c)) {
@@ -385,6 +384,7 @@ public abstract class Main {
           }
         }
         // @formatter: off
+        // Hard coded examples in order to test front end
         // if (c.equals("CSCI0150")) {
         // groups.add(Arrays.asList("4", "Sketchy Meeting", "CSCI0150", "7", "Ratty", "335"));
         //

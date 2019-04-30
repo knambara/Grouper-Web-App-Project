@@ -174,8 +174,11 @@ $(document).ready(() => {
 
         // Re-add all classes that were listed and checked
         for (let i in curr_classes) {
-            $class_list.append("<li>" + curr_classes[i] +
-            "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
+            //$class_list.append("<li>" + curr_classes[i] +
+            //"<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
+            // "</li>");
+            $class_list.append("<li><label class='checkmark-container'>" + curr_classes[i] +
+            "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'><span class='checkmark'></span></label" +
              "</li>");
             if (checked_classes.includes(curr_classes[i])) {
                 $('#'+curr_classes[i]).prop('checked', true);
@@ -185,7 +188,7 @@ $(document).ready(() => {
                 if (to_check.includes(curr_classes[i])) {
                     $('#'+curr_classes[i]).prop('checked', true);
                 }
-            }*/            
+            }*/
             $('#'+curr_classes[i]).on('click', event => {
                 // If checkbox is changed to unchecked, remove all groups
                 //associated with the class, then update the grid
@@ -194,7 +197,7 @@ $(document).ready(() => {
                 }
                 updateGrid();
 
-            });            
+            });
         }
         updateGrid();
     });
@@ -249,8 +252,8 @@ $(document).ready(() => {
 
             // Add each class to the list
             for (let i in curr_classes) {
-                $class_list.append("<li>" + curr_classes[i] +
-                "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
+                $class_list.append("<li><label class='checkmark-container'>" + curr_classes[i] +
+                "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'><span class='checkmark'></span></label" +
                  "</li>");
 
                  // Check if class should already be checked
@@ -290,7 +293,7 @@ $(document).ready(() => {
         // Update displayedGroups variable to have only groups that should still
         // be shown after the given class code has been removed
         displayedGroups = tempDisplayedGroups;
-    }    
+    }
 
     function updateTimeRemainingForDisplayed() {
         const groups = displayedGroups.values();
@@ -314,59 +317,6 @@ $(document).ready(() => {
         sessionStorage.setItem("sort", $sort_select.val());
         sort();
     });
-    
-
-    function sortByCourseCode(groups) {
-        const tempList = [];
-        const groupIter = groups.values();
-        for (let i = 0; i < groups.size; i++) {
-            const g = groupIter.next().value;
-            const tempGroup = {code: g.code, tile: g};
-            tempList.push(tempGroup);
-        }
-        tempList.sort(function(a,b){return b.code - a.code;});
-        const sortedTiles = [];
-        for (i in tempList) {
-            sortedTiles.push(tempList[i].tile);
-        }
-        return sortedTiles;
-    }
-
-    function sortByTimeLeft(groups) {
-        const tempList = [];
-        const groupIter = groups.values();
-        for (let i = 0; i < groups.size; i++) {
-            const g = groupIter.next().value;
-            const tempGroup = {time: g.time_left, tile: g};
-            tempList.push(tempGroup);
-        }
-        tempList.sort(function(a,b){return b.time - a.time;});
-        const sortedTiles = [];
-        for (i in tempList) {
-            sortedTiles.push(tempList[i].tile);
-        }
-        return sortedTiles;
-    }
-
-    function sortByGroupSize(groups) {
-        const tempList = [];
-        const groupIter = groups.values();
-        for (let i = 0; i < groups.size; i++) {
-            const g = groupIter.next().value;
-            const tempGroup = {size: g.size, tile: g};
-            tempList.push(tempGroup);
-        }
-        tempList.sort(function(a,b){return b.size - a.size;});
-        const sortedTiles = [];
-        for (i in tempList) {
-            sortedTiles.push(tempList[i].tile);
-        }
-        return sortedTiles;
-    }
-
-    function sortByDistance(groups) {
-
-    }
 
     // Log out functionality
     $logout_button.on('click', (e) => {
@@ -375,3 +325,55 @@ $(document).ready(() => {
     });
 
 });
+
+function sortByCourseCode(groups) {
+    const tempList = [];
+    const groupIter = groups.values();
+    for (let i = 0; i < groups.size; i++) {
+        const g = groupIter.next().value;
+        const tempGroup = {code: g.code, tile: g};
+        tempList.push(tempGroup);
+    }
+    tempList.sort(function(a,b){return b.code - a.code;});
+    const sortedTiles = [];
+    for (i in tempList) {
+        sortedTiles.push(tempList[i].tile);
+    }
+    return sortedTiles;
+}
+
+function sortByTimeLeft(groups) {
+    const tempList = [];
+    const groupIter = groups.values();
+    for (let i = 0; i < groups.size; i++) {
+        const g = groupIter.next().value;
+        const tempGroup = {time: g.time_left, tile: g};
+        tempList.push(tempGroup);
+    }
+    tempList.sort(function(a,b){return b.time - a.time;});
+    const sortedTiles = [];
+    for (i in tempList) {
+        sortedTiles.push(tempList[i].tile);
+    }
+    return sortedTiles;
+}
+
+function sortByGroupSize(groups) {
+    const tempList = [];
+    const groupIter = groups.values();
+    for (let i = 0; i < groups.size; i++) {
+        const g = groupIter.next().value;
+        const tempGroup = {size: g.size, tile: g};
+        tempList.push(tempGroup);
+    }
+    tempList.sort(function(a,b){return b.size - a.size;});
+    const sortedTiles = [];
+    for (i in tempList) {
+        sortedTiles.push(tempList[i].tile);
+    }
+    return sortedTiles;
+}
+
+function sortByDistance(groups) {
+
+}
