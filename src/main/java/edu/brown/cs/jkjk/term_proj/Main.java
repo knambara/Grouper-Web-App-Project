@@ -182,10 +182,7 @@ public abstract class Main {
     public ModelAndView handle(Request req, Response res) {
       DataReader dr = new DataReader();
       List<String> depts = dr.departments("data/departments_sample.csv");
-      List<String> buildings = new ArrayList<>();
-      buildings.add("Sci Li");
-      buildings.add("The Rock");
-      buildings.add("Walter J Wilson");
+      List<String> buildings = dr.buildings("data/buildings_sample.csv");
 
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group",
           "departments", depts, "buildings", buildings);
@@ -267,8 +264,8 @@ public abstract class Main {
       String g_id = req.queryParams("gid");
       String u_id = req.queryParams("uid");
 
-      System.out.println(g_id);
-      System.out.println(u_id);
+      //System.out.println(g_id);
+      //System.out.println(u_id);
 
       // Handle get request for moderator group page is called
       if (u_id.equals("modPage")) {
@@ -328,19 +325,24 @@ public abstract class Main {
       QueryParamsMap qm = req.queryMap();
       String dept = qm.value("department");
 
-      // Hard coded info in order to test front end connection
-      List<String> classes = new ArrayList<String>();
-      if (dept.equals("Computer Science")) {
-        classes.add("CSCI0150");
-        classes.add("CSCI0220");
-        classes.add("CSCI0320");
-      } else if (dept.equals("Biology")) {
-        classes.add("BIOL0100");
-        classes.add("BIOL1998");
-      } else if (dept.equals("Applied Math")) {
-        classes.add("APMA1650");
-        classes.add("APMA0330");
+      List<String> classes = grouperDBManager.getDepartmentCourses(dept);
+
+      Boolean expired = grouperDBManager.checkExpiredGroup();
+
+      if (expired) {
+        grouperDBManager.deleteExpiredGroups();
       }
+//      if (dept.equals("Computer Science")) {
+//        classes.add("CSCI0150");
+//        classes.add("CSCI0220");
+//        classes.add("CSCI0320");
+//      } else if (dept.equals("Biology")) {
+//        classes.add("BIOL0100");
+//        classes.add("BIOL1998");
+//      } else if (dept.equals("Applied Math")) {
+//        classes.add("APMA1650");
+//        classes.add("APMA0330");
+//      }
       Map<String, Object> variables = ImmutableMap.of("classes", classes);
       return GSON.toJson(variables);
     }
@@ -378,10 +380,13 @@ public abstract class Main {
             String course = c;
             String size = Integer.toString(g.getUsers().size());
             String loc = g.getLocation();
-            long secs_elapsed = (System.currentTimeMillis() - g.getStartTime().getTime()) / 1000
-                + 4 * 3600;
-            String time_rem = Double.toString((int) ((g.getDuration() * 60 - secs_elapsed / 60)));
+//            long secs_elapsed = (System.currentTimeMillis() - g.getStartTime().getTime()) / 1000
+//                + 4 * 3600;
+//            String time_rem = Double.toString((int) ((g.getDuration() * 60 - secs_elapsed / 60)));
             //String time_rem = Double.toString(g.getDuration());
+            Integer trInt = grouperDBManager.timeRemaining(g.getEndTime());
+            String time_rem = Integer.toString(trInt);
+
             groups.add(Arrays.asList(id, title, course, size, loc, time_rem));
           }
         }

@@ -51,22 +51,19 @@ public class GroupCacheHandler {
                 String department = rs.getString("department");
                 String description = rs.getString("description");
                 Double duration = rs.getDouble("duration");
-                String start = rs.getString("start");
+                Timestamp end_time = rs.getTimestamp("end_time");
                 String moderator = rs.getString("Mod");
                 String location = rs.getString("location");
                 String room = rs.getString("room");
                 String details = rs.getString("details");
 
                 g = new Group(groupId, department, location, code, description, duration, room,
-                    details);
+                    details, end_time);
                 g.setModerator(moderator);
-                Timestamp ts = Timestamp.valueOf(start);
-                g.setStartTime(ts);
                 // add the users to the group
                 List<User> users = getUsers(groupId);
-                Iterator<User> usersIt = users.iterator();
-                while (usersIt.hasNext()) {
-                  g.addUser(usersIt.next());
+                for (User u : users) {
+                  g.addUser(u);
                 }
               }
             } catch (SQLException e) {

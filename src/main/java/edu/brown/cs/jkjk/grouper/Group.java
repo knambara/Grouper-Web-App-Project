@@ -15,20 +15,20 @@ public class Group {
   private String location;
   private String description;
   private double duration;
-  private Timestamp start;
+  private Timestamp end;
   private String moderator;
   private String room;
   private Boolean visible;
   private String details;
 
   public Group(Integer groupID, String department, String location, String courseCode,
-      String description, double duration, String room, String details) {
+      String description, double duration, String room, String details, Timestamp end) {
     this.department = department;
     this.location = location;
     this.courseCode = courseCode;
     this.description = description;
     this.duration = duration;
-    this.start = null;
+    this.end = end;
     this.room = room;
     visible = true;
     this.details = details;
@@ -63,12 +63,12 @@ public class Group {
     return duration;
   }
 
-  public Timestamp getStartTime() {
-    return start;
+  public Timestamp getEndTime() {
+    return end;
   }
 
-  public void setStartTime(Timestamp start) {
-    this.start = start;
+  public void setEndTime(Timestamp end) {
+    this.end = end;
   }
 
   public void setModerator(String moderator) {
