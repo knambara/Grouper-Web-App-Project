@@ -183,6 +183,7 @@ public abstract class Main {
       DataReader dr = new DataReader();
       List<String> depts = dr.departments("data/departments_sample.csv");
       List<String> buildings = dr.buildings("data/buildings_sample.csv");
+      System.out.println(buildings);
 
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group",
           "departments", depts, "buildings", buildings);
@@ -326,13 +327,12 @@ public abstract class Main {
       String dept = qm.value("department");
 
       List<String> classes = grouperDBManager.getDepartmentCourses(dept);
-      System.out.println(classes);
 
-      Boolean expired = grouperDBManager.checkExpiredGroup();
-
-      if (expired) {
-        grouperDBManager.deleteExpiredGroups();
-      }
+//      Boolean expired = grouperDBManager.checkExpiredGroup();
+//
+//      if (expired) {
+//        grouperDBManager.deleteExpiredGroups();
+//      }
 //      if (dept.equals("Computer Science")) {
 //        classes.add("CSCI0150");
 //        classes.add("CSCI0220");

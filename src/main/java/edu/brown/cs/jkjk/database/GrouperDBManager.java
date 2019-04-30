@@ -172,7 +172,7 @@ public class GrouperDBManager {
 
     Connection conn = grouperDB.getConnection();
     String insert = "INSERT INTO groups (code, department, description, "
-            + "duration, end_time, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+            + "duration, end_time, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     try (PreparedStatement prep = conn.prepareStatement(insert)) {
       prep.setString(1, code);
@@ -180,10 +180,10 @@ public class GrouperDBManager {
       prep.setString(3, description);
       prep.setDouble(4, duration);
       prep.setTimestamp(5, end_time);
-      prep.setString(5, modID);
-      prep.setString(6, location);
-      prep.setString(7, room);
-      prep.setString(8, details);
+      prep.setString(6, modID);
+      prep.setString(7, location);
+      prep.setString(8, room);
+      prep.setString(9, details);
       prep.executeUpdate();
     } catch (Exception e) {
       System.out.println("ERROR: Could not add group to db.");
