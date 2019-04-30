@@ -8,7 +8,7 @@
   <div id="group-details">
     <div id="group-detail-size" class="group-detail">
       <img width="20" src="/img/person-icon.png"/>
-      <div id="groupSize">${groupSize}</div> Members
+      <div id="groupSize">${groupSize}</div> <div> Member(s)</div>
     </div>
     <div id="group-detail-location" class="group-detail">
       <div><img width="25" src="/img/location-icon.png"/></div>

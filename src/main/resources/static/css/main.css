@@ -419,12 +419,18 @@ input[type=checkbox] {
   margin: 0;
 }
 
-#group-detail-location {
+#group-detail-location, #group-detail-size {
   display: flex;
 }
 
 #group-details img {
   margin-right: 10px;
+  max-height: 25px;
+  max-width: 25px;
+}
+
+#groupSize {
+  margin-right: 5px;
 }
 
 .group-detail {
