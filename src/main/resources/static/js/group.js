@@ -8,13 +8,18 @@ function updateGroupContent(email) {
     $('#' + email, this).remove();
   } else {
     console.log($groupSize.html());
-    let num = Number($groupSize.html()) + 1; 
+    let num = Number($groupSize.html()) + 1;
     $groupSize.html(num.toString());
     $groupMembers.html( $groupMembers.html() + "<p id='" + email + "'>" + email + "</p>");
   }
 }
 
 $(document).ready(() => {
+
+  let totalMins = $('#group-duration').html() * 60;
+  console.log(totalMins);
+  updateDuration();
+
 
   const $end_button = $('#end-button');
   const $leave_button = $('#leave-button');
@@ -33,13 +38,13 @@ $(document).ready(() => {
         console.log(msg);
 
         // Call function in websockets.js
-        update_dash();    
+        update_dash();
         // Redirect all other users' page to dashboard
         redirect_all(localStorage.getItem("gid"));
 
         // Redirect current user's page to dashboard and reset gid
         localStorage.setItem("gid", "-1");
-        redirectToDashboard(); 
+        redirectToDashboard();
     });
   });
 
@@ -55,7 +60,7 @@ $(document).ready(() => {
 
       // Redirect current user's page to dashboard and reset gid
       localStorage.setItem("gid", "-1");
-      redirectToDashboard(); 
+      redirectToDashboard();
     });
   });
 
@@ -80,4 +85,18 @@ $(document).ready(() => {
     }
   }
 
+  // Timer for duration countdown
+  function updateDuration() {
+      displayTime(totalMins);
+      totalMins = totalMins - 1;
+      t = setTimeout(updateDuration,60000);
+  }
+
 });
+
+// Converts total numbers of minutes remaining to proper format and adds to HTML
+function displayTime(totalMins) {
+    const hours = Math.floor(totalMins / 60);
+    const mins = totalMins - hours * 60;
+    $('#group-duration').html(hours + " hr " + mins + " min remaining");
+}

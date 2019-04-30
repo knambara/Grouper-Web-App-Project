@@ -16,8 +16,8 @@
         <p id="spec-loc">Basement, Room A23</p></div>
       </div>
       <div id="group-detail-time" class="group-detail">
-        <img width="25" src="/img/clock-icon.png"/>
-        2 hr 12 min remaining
+        <div><img width="25" src="/img/clock-icon.png"/></div>
+        <div id="group-duration">${groupduration}</div>
       </div>
     </div>
     <hr>
