@@ -8,16 +8,21 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 
+/**
+ * Reads in the data regarding current courses, buldings and departments.
+ */
 public class DataReader {
 
   private List<String> departments;
   private Map<String, Set<String>> courses;
+  private List<String> buildings;
 
   private static final String COMMA_DELIMITER = ",";
 
   public DataReader() {
     departments = new ArrayList<>();
     courses = new HashMap<>();
+    buildings = new ArrayList<>();
   }
 
   public List<String> departments(String deptFilepath) {
@@ -80,6 +85,35 @@ public class DataReader {
     }
 
     return courses;
+
+  }
+
+  public List<String> buildings(String buildingsFilepath) {
+    BufferedReader reader = null;
+
+    try {
+      reader = new BufferedReader(new FileReader(buildingsFilepath));
+      String line = null;
+
+      while ((line = reader.readLine()) != null) {
+        String[] data = line.split(COMMA_DELIMITER);
+        buildings.add(data[0]);
+
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: the building filepath could not be opened.");
+    } finally {
+      try {
+        if (reader != null) {
+          reader.close();
+        }
+      } catch (IOException ie) {
+        System.out.println("ERROR: Couldn't close buffer reader.");
+      }
+    }
+
+    return buildings;
 
   }
 
