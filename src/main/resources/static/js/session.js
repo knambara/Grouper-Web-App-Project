@@ -1,6 +1,7 @@
 function addUserSession(email, hash) {
   localStorage.setItem("grouper_email", email);
   localStorage.setItem("grouper_hash", hash);
+  localStorage.setItem("gid", "-1");
 }
 
 function doesSessionExist() {

@@ -5,8 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -61,7 +63,7 @@ public class GroupCacheHandler {
                 Timestamp ts = Timestamp.valueOf(start);
                 g.setStartTime(ts);
                 // add the users to the group
-                Set<User> users = getUsers(groupId);
+                List<User> users = getUsers(groupId);
                 Iterator<User> usersIt = users.iterator();
                 while (usersIt.hasNext()) {
                   g.addUser(usersIt.next());
@@ -111,12 +113,12 @@ public class GroupCacheHandler {
    * Returns set of User with specified group ID
    * 
    * @param groupId String groupID
-   * @return Set of Users
+   * @return List of Users
    */
-  public Set<User> getUsers(Integer groupID) {
+  public List<User> getUsers(Integer groupID) {
 
     Connection conn = database.getConnection();
-    Set<User> users = new HashSet<>();
+    List<User> users = new ArrayList<>();
 
     String query = "SELECT U_ID FROM users WHERE G_ID = ?";
     try (PreparedStatement prep = conn.prepareStatement(query)) {

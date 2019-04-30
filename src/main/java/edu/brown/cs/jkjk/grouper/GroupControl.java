@@ -3,6 +3,7 @@ package edu.brown.cs.jkjk.grouper;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -111,7 +112,7 @@ public class GroupControl {
     // check if the user is the moderator, if so they also get visibility status
     // String modId = getModeratorID(groupId);
     Group g = groupCache.getGroup(groupId);
-    Set<User> users = g.getUsers();
+    List<User> users = g.getUsers();
 
     String course = g.getCourseCode();
     String description = g.getDescription();

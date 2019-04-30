@@ -8,7 +8,7 @@
     <div id="group-details">
       <div id="group-detail-size" class="group-detail">
         <img width="20" src="/img/person-icon.png"/>
-        ${groupSize} Members
+        <div id="groupSize">${groupSize}</div> <div> Member(s)</div>
       </div>
       <div id="group-detail-location" class="group-detail">
         <div><img width="25" src="/img/location-icon.png"/></div>
@@ -16,8 +16,8 @@
         <p id="spec-loc">Basement, Room A23</p></div>
       </div>
       <div id="group-detail-time" class="group-detail">
-        <img width="25" src="/img/clock-icon.png"/>
-        2 hr 12 min remaining
+        <div><img width="25" src="/img/clock-icon.png"/></div>
+        <div id="group-duration">${groupduration}</div>
       </div>
     </div>
     <hr>
@@ -27,7 +27,7 @@
     </div>
     <div id="group-members">
       <#list groupusers as user>
-		<p>${user.getEmail()}</p>
+		<p id=${user.getEmail()}>${user.getEmail()}</p>
 	  </#list>
     </div>
     <div id="group-options">
