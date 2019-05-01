@@ -11,6 +11,8 @@
 8. figure out how to make time consistent and update/stay accurate on refresh
 9. TESTING
 10. README
+11. invisibility functionality
+12. extend time functionality
 
 # BELLS AND WHISTLES
 
