@@ -282,6 +282,8 @@ public abstract class Main {
             .put("groupdesc", g.getDetails())
             .put("groupusers", g.getUsers())
             .put("groupduration", g.getDuration())
+            .put("grouproom", g.getRoom())
+            .put("groupbuilding", g.getLocation())
             .build();
         // @formatter: on
         return new ModelAndView(variables, "group.ftl");
@@ -306,6 +308,8 @@ public abstract class Main {
           .put("groupdesc", g.getDetails())
           .put("groupusers", g.getUsers())
           .put("groupduration", g.getDuration())
+          .put("grouproom", g.getRoom())
+          .put("groupbuilding", g.getLocation())
           .build();
       // @formatter: on
       return new ModelAndView(variables, "group_joined.ftl");
