@@ -265,8 +265,8 @@ public abstract class Main {
       String g_id = req.queryParams("gid");
       String u_id = req.queryParams("uid");
 
-      //System.out.println(g_id);
-      //System.out.println(u_id);
+      // System.out.println(g_id);
+      // System.out.println(u_id);
 
       // Handle get request for moderator group page is called
       if (u_id.equals("modPage")) {
@@ -284,6 +284,7 @@ public abstract class Main {
             .put("groupduration", g.getDuration())
             .put("grouproom", g.getRoom())
             .put("groupbuilding", g.getLocation())
+            .put("groupendtime", g.getEndTime())
             .build();
         // @formatter: on
         return new ModelAndView(variables, "group.ftl");
@@ -310,6 +311,7 @@ public abstract class Main {
           .put("groupduration", g.getDuration())
           .put("grouproom", g.getRoom())
           .put("groupbuilding", g.getLocation())
+          .put("groupendtime", g.getEndTime())
           .build();
       // @formatter: on
       return new ModelAndView(variables, "group_joined.ftl");
@@ -391,8 +393,9 @@ public abstract class Main {
             //String time_rem = Double.toString(g.getDuration());
             Integer trInt = grouperDBManager.timeRemaining(g.getEndTime());
             String time_rem = Integer.toString(trInt);
+            String end_time = g.getEndTime().toString();
 
-            groups.add(Arrays.asList(id, title, course, size, loc, time_rem));
+            groups.add(Arrays.asList(id, title, course, size, loc, time_rem, end_time));
           }
         }
         // @formatter: off

@@ -608,4 +608,8 @@ input:checked + .slider:before {
   height: 100%;
 }
 
+#end-time {
+  display: none;
+}
+
 /*# sourceMappingURL=main.css.map */

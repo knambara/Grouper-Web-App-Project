@@ -18,6 +18,7 @@
     <div id="group-detail-time" class="group-detail">
       <div><img width="25" src="/img/clock-icon.png"/></div>
       <div id="group-duration">${groupduration}</div>
+      <p id="end-time">${groupendtime}</p>
     </div>
   </div>
   <hr>

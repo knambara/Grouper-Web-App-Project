@@ -7,11 +7,11 @@
 4. make email list dynamic when someone leaves
 5. make deleting groups dynamic
 6. after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
-7. figure out how to make time consistent and update/stay accurate on refresh
-8. TESTING
-9. README
-10. invisibility functionality
-11. extend time functionality
+	-> also, for me as a moderator, I can't view group page once going back to the dashboard
+7. TESTING
+8. README
+9. invisibility functionality
+10. extend time functionality
 
 # BELLS AND WHISTLES
 

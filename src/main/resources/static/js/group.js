@@ -16,10 +16,7 @@ function updateGroupContent(email) {
 
 $(document).ready(() => {
 
-  let totalMins = $('#group-duration').html() * 60;
-  console.log(totalMins);
   updateDuration();
-
 
   const $end_button = $('#end-button');
   const $leave_button = $('#leave-button');
@@ -87,9 +84,12 @@ $(document).ready(() => {
 
   // Timer for duration countdown
   function updateDuration() {
+      const endTime = new Date($('#end-time').html());
+      const currTime = new Date();
+      const timeDiff = endTime.getTime() - currTime.getTime();
+      const totalMins = timeDiff/ 60000;
       displayTime(totalMins);
-      totalMins = totalMins - 1;
-      t = setTimeout(updateDuration,60000);
+      t = setTimeout(updateDuration,1000);
   }
 
 });
@@ -97,6 +97,6 @@ $(document).ready(() => {
 // Converts total numbers of minutes remaining to proper format and adds to HTML
 function displayTime(totalMins) {
     const hours = Math.floor(totalMins / 60);
-    const mins = totalMins - hours * 60;
+    const mins = Math.floor(totalMins - hours * 60);
     $('#group-duration').html(hours + " hr " + mins + " min remaining");
 }

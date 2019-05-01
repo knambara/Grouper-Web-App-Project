@@ -1,5 +1,5 @@
 class GroupTile {
-    constructor(id, title, course, size, loc, time_left) {
+    constructor(id, title, course, size, loc, time_left, end_time) {
         this.id = id;
         this.title = title;
         this.dept = course.substring(0,4);
@@ -7,6 +7,7 @@ class GroupTile {
         this.size = size;
         this.loc = loc;
         this.time_left = time_left; // in minutes
+        this.endTime = end_time;
     }
 
     // Builds the HTML of the Group Tile
@@ -36,10 +37,14 @@ class GroupTile {
         this.time_left = time;
     }
 
-    // Converts time left to hours and minutes adn updates the HTML
+    // Finds time remaining based on current time and end time
     updateTime() {
-        const hours = Math.floor(this.time_left / 60);
-        const mins = this.time_left - hours*60;
+        const endTime = new Date(this.endTime);
+        const currTime = new Date();
+        const timeDiff = endTime.getTime() - currTime.getTime();
+        const totalMins = timeDiff/ 60000;
+        const hours = Math.floor(totalMins / 60);
+        const mins = Math.floor(totalMins - hours*60);
         if (mins >= 10) {
             $('#time-'+ this.id).html(hours + ":" + mins + " left");
         } else {
@@ -85,7 +90,7 @@ function updateGrid() {
             for (i in groups) {
                 const group = groups[i];
                 if (!displayedGroups.has(group[0])) {
-                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5]);
+                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
                     displayedGroups.set(tile.id, tile);
                     tile.build();
                     tile.updateTime();
@@ -295,19 +300,18 @@ $(document).ready(() => {
         displayedGroups = tempDisplayedGroups;
     }
 
+    // Updates time remaining on each tile every second
     function updateTimeRemainingForDisplayed() {
         const groups = displayedGroups.values();
         for (let i = 0; i < displayedGroups.size; i++) {
             const g = groups.next().value;
-            g.setTime(g.time_left-1);
             g.updateTime();
         }
-        t = setTimeout(updateTimeRemainingForDisplayed,60000);
+        t = setTimeout(updateTimeRemainingForDisplayed,1000);
     }
 
 
     // SORTING FUNCTIONALITY
-
     $order_select.on('change', event => {
         sessionStorage.setItem("order", $order_select.val());
         sort();
