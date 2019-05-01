@@ -1,20 +1,23 @@
 # BUGS TO FIX / NECESSARY THINGS TO HAVE
 **Please add and remove to this list as problems are resolved/arise**
-change JOIN to VIEW for group tile you're already in and clicking tile brings you to group page
-add alert for non-moderator joining another group that says "Hey, leave your group first"
-resolve name differences in database/variable names
-add correct location to group page
-make email list dynamic when someone leaves
-make deleting groups dynamic
-after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
-figure out how to make time consistent and update/stay accurate on refresh
-TESTING
-README
+
+1. change JOIN to VIEW for group tile you're already in and clicking tile brings you to group page
+2. add alert for non-moderator joining another group that says "Hey, leave your group first"
+3. resolve name differences in database/variable names
+4. add correct location to group page
+5. make email list dynamic when someone leaves
+6. make deleting groups dynamic
+7. after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
+8. figure out how to make time consistent and update/stay accurate on refresh
+9. TESTING
+10. README
 
 # BELLS AND WHISTLES
-location services and location sorting
-text search
-profile images?
+
+1. location services and location sorting
+2. text search
+3. profile images?
+
 
 
 # Strengths/Weaknesses
