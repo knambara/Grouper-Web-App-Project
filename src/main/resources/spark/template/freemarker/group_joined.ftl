@@ -12,8 +12,8 @@
     </div>
     <div id="group-detail-location" class="group-detail">
       <div><img width="25" src="/img/location-icon.png"/></div>
-      <div><p id="building">Science Library</p>
-      <p id="spec-loc">Basement, Room A23</p></div>
+      <div><p id="building">${groupbuilding}</p>
+      <p id="spec-loc">${grouproom}</p></div>
     </div>
     <div id="group-detail-time" class="group-detail">
       <div><img width="25" src="/img/clock-icon.png"/></div>

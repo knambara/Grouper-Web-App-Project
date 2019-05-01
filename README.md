@@ -4,15 +4,14 @@
 1. change JOIN to VIEW for group tile you're already in and clicking tile brings you to group page
 2. add alert for non-moderator joining another group that says "Hey, leave your group first"
 3. resolve name differences in database/variable names
-4. add correct location to group page
-5. make email list dynamic when someone leaves
-6. make deleting groups dynamic
-7. after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
-8. figure out how to make time consistent and update/stay accurate on refresh
-9. TESTING
-10. README
-11. invisibility functionality
-12. extend time functionality
+4. make email list dynamic when someone leaves
+5. make deleting groups dynamic
+6. after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
+7. figure out how to make time consistent and update/stay accurate on refresh
+8. TESTING
+9. README
+10. invisibility functionality
+11. extend time functionality
 
 # BELLS AND WHISTLES
 
