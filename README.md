@@ -1,3 +1,22 @@
+# BUGS TO FIX / NECESSARY THINGS TO HAVE
+**Please add and remove to this list as problems are resolved/arise**
+change JOIN to VIEW for group tile you're already in and clicking tile brings you to group page
+add alert for non-moderator joining another group that says "Hey, leave your group first"
+resolve name differences in database/variable names
+add correct location to group page
+make email list dynamic when someone leaves
+make deleting groups dynamic
+after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
+figure out how to make time consistent and update/stay accurate on refresh
+TESTING
+README
+
+# BELLS AND WHISTLES
+location services and location sorting
+text search
+profile images?
+
+
 # Strengths/Weaknesses
 Katie Lynch<br />
 Classes taken: 15/16, 22, 1450, 53, 1410, 1430, 1800<br />
