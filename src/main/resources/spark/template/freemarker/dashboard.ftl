@@ -56,8 +56,9 @@
     <div id="group-grid">
         <div id="add-group-button" class="group-button">
             <div id="add-group-text">
-                <a href=/grouper/newgroup id="plus-sign">+</a>
-                <a href=/grouper/newgroup id="add-group">Add Group</a>
+                <p id='plus-sign'>+</p><p id='add-group'>Add Group</p></div>
+                <!--<a href=/grouper/newgroup id="plus-sign">+</a>
+                <a href=/grouper/newgroup id="add-group">Add Group</a> -->
             </div>
         </div>
     </div>

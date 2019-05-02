@@ -1,17 +1,15 @@
 # BUGS TO FIX / NECESSARY THINGS TO HAVE
 **Please add and remove to this list as problems are resolved/arise**
 
-1. change JOIN to VIEW for group tile you're already in and clicking tile brings you to group page
-2. add alert for non-moderator joining another group that says "Hey, leave your group first"
-3. resolve name differences in database/variable names
-4. make email list dynamic when someone leaves
-5. make deleting groups dynamic
-6. fix bug where returning to dashboard and rejoining group you made (as the moderator) brings you to normal group joined page (instead of mod view)
-7. TESTING
-8. README
-9. invisibility functionality
-10. extend time functionality
-11. classes need to disappear from list dynamically
+1. resolve name differences in database/variable names
+2. make email list dynamic when someone leaves
+3. make deleting groups dynamic
+4. fix bug where viewing group you made (as the moderator) brings you to normal group joined page (instead of mod view)
+5. TESTING
+6. README
+7. invisibility functionality
+8. extend time functionality
+9. classes need to disappear from list dynamically
 
 # BELLS AND WHISTLES
 

@@ -15,15 +15,21 @@ class GroupTile {
         const tile = document.createElement('div');
         tile.setAttribute('id', this.id);
         tile.setAttribute('class', 'group-tile');
-        tile.innerHTML ="<div class='group-tile-content'><h2>"+this.title + "</h2>" +
+        const html1 ="<div class='group-tile-content'><h2>"+this.title + "</h2>" +
         "<h4>" + this.dept + " " + this.code + "</h4>" +
         "<p>" + this.loc + "</p>" +
-        "<div id='group-tile-bottom'>" +
-        "<button id='join'><a href=/grouper/group?gid=" + this.id + "&uid="+ localStorage.getItem("grouper_hash") +">Join</a></button>" +
-        "<p>" + this.size + " member(s)</p>" +
+        "<div id='group-tile-bottom'>";
+        let html2 = "";
+        if (this.id != localStorage.getItem("gid")) {
+            html2 = "<button onclick='manageJoin("+this.id+")' class='join' id='join"+this.id + "'>Join</button>";//<a href=/grouper/group?gid=" + this.id + "&uid="+ localStorage.getItem("grouper_hash") +">Join</a></button>" +
+        } else {
+            html2 = "<button onclick='manageJoin("+this.id+")' class='join' id='view"+this.id + "'>View</button>";
+        }
+        const html3 = "<p>" + this.size + " member(s)</p>" +
         "<div id='time-"+ this.id + "'>" + this.time_left + " left</div>" +
-        "</div></div>"
+        "</div></div>";
         ;
+        tile.innerHTML = html1 + html2 + html3;
         $group_grid.prepend(tile);
     }
 
@@ -53,6 +59,28 @@ class GroupTile {
     }
 }
 
+// Function to determine if a user can join a new group or not
+function manageJoin(id) {
+    const curr_gid = localStorage.getItem('gid');
+    // If you are already in  a group
+    if (curr_gid != "-1") {
+        // Clicking the group you are already in brings you back to that group page
+        if (id == curr_gid) {
+            window.location.href= "/grouper/group?gid=" + id + "&uid="+ localStorage.getItem("grouper_hash");
+
+        }
+        // Trying to join a group you are NOT already in sends an alert
+        else {
+            console.log("you are NOT in this group");
+            alert("Whoa there. Looks like you're already in a group! You must leave that group before joining a new one!");
+        }
+    }
+    // If you're not in any group you can join any group
+    else {
+        window.location.href= "/grouper/group?gid=" + id + "&uid="+ localStorage.getItem("grouper_hash");
+    }
+}
+
 // Rebuilds the group-grid in the correctly sorted order
 function rebuildGrid(sortedTiles) {
     $group_grid.empty();
@@ -63,7 +91,8 @@ function rebuildGrid(sortedTiles) {
     const addGroup = document.createElement('div');
     addGroup.setAttribute('id', 'add-group-button');
     addGroup.innerHTML = "<div id='add-group-text'>" +
-        "<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
+        "<p id='plus-sign'>+</p><p id='add-group'>Add Group</span></p>";
+        //"<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
     $group_grid.append(addGroup);
 }
 
@@ -326,6 +355,15 @@ $(document).ready(() => {
     $logout_button.on('click', (e) => {
       removeSession();
       window.location.href = "/grouper";
+    });
+
+    // Prevent users who are already in a group from creating a new one.
+    $('#add-group-button').on('click', event => {
+        if (localStorage.getItem("gid") !== '-1') {
+            alert("You are already in a group! You must leave or end your current group before adding a new one.");
+        } else {
+            window.location.href = "/grouper/newgroup";
+        }
     });
 
 });

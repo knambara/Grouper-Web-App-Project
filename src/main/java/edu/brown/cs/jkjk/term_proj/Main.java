@@ -124,7 +124,6 @@ public abstract class Main {
     Spark.post("/grouper/group", new GroupHandler(), freeMarker);
     Spark.post("/deleteGroup", new DeleteGroupHandler());
     Spark.post("/leaveGroup", new LeaveGroupHandler());
-
   }
 
   /**

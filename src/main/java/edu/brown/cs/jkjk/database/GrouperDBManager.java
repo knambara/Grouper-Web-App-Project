@@ -450,4 +450,13 @@ public class GrouperDBManager {
     }
   }
 
+  /*
+   * public String getGroupdIDFromHash(String hash) { Connection conn = grouperDB.getConnection();
+   * String query = "SELECT G_ID FROM users WHERE hash = ?;"; String groupID = null; try
+   * (PreparedStatement prep = conn.prepareStatement(query)) { prep.setString(1, hash); try
+   * (ResultSet res = prep.executeQuery()) { groupID = res.getString(1); } catch (SQLException e) {
+   * System.out.println(e.getMessage()); } } catch (SQLException e) {
+   * System.out.println(e.getMessage()); } return groupID; }
+   */
+
 }

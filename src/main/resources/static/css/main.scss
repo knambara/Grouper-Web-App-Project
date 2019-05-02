@@ -347,7 +347,7 @@ select {
     background-color: $tile_background_color;
 }
 
-#add-group-button a {
+#add-group-button a, #add-group-button p {
     font-size: 18pt;
     text-align: center;
     text-decoration: none;
@@ -431,11 +431,11 @@ select {
     padding: 0;
 }
 
-#join {
+.join {
     width: 80px;
 }
 
-#join a {
+.join a {
     text-decoration: none;
     color: white;
 }
