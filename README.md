@@ -6,12 +6,12 @@
 3. resolve name differences in database/variable names
 4. make email list dynamic when someone leaves
 5. make deleting groups dynamic
-6. after making a group, redirect to dashboard when clicking back button on group page (as opposed to the new group page)
-	-> also, for me as a moderator, I can't view group page once going back to the dashboard
+6. fix bug where returning to dashboard and rejoining group you made (as the moderator) brings you to normal group joined page (instead of mod view)
 7. TESTING
 8. README
 9. invisibility functionality
 10. extend time functionality
+11. classes need to disappear from list dynamically
 
 # BELLS AND WHISTLES
 

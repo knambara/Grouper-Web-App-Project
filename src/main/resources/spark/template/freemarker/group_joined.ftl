@@ -1,6 +1,9 @@
 <#assign content>
 <div id="group-body">
 <div id="group-centered">
+<div id="back-button">
+<button id="back-to-dashboard">Back to Dashboard</button>
+</div>
   <div id="group-header">
     <h2>${grouptitle}</h2>
     <h3>${groupclass}</h4>

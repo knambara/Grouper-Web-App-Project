@@ -2,6 +2,9 @@
 <div id="newgroup-body">
 
   <div id="newgroup-content">
+  <div id="back-button">
+  <button id="back-to-dashboard">Back to Dashboard</button>
+  </div>
     <h1>New Group</h1>
     <p id="incomplete-form-error"></p>
     <!-- form id="new-group-form" method="POST" -->

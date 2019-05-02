@@ -643,3 +643,43 @@ input:checked + .slider:before {
 #end-time {
     display: none;
 }
+
+#back-to-dashboard {
+    background-color: $primary_gray;
+    width: 180px;
+    font-size: 14pt;
+    height: 34px;
+    position: relative;
+    box-shadow: none;
+    margin-left: 20px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    -webkit-transition: background-color 0s;
+    transition: background-color 0s;
+}
+
+#back-to-dashboard:hover {
+    background-color: $tile_border_color;
+}
+
+#back-to-dashboard:hover::after {
+    border-color: $tile_border_color;
+    border-top-color:transparent;
+    border-bottom-color:transparent;
+    border-left-color:transparent;
+}
+
+#back-to-dashboard:after {
+    content:"";
+    position: absolute;
+    top:0;
+    right:100%;
+    height:0;
+    width:0;
+    border-width: 17px;
+    border-style:solid;
+    border-color:$primary_gray;
+    border-top-color:transparent;
+    border-bottom-color:transparent;
+    border-left-color:transparent;
+}

@@ -92,6 +92,11 @@ $(document).ready(() => {
       t = setTimeout(updateDuration,1000);
   }
 
+  $('#back-to-dashboard').on('click', event => {
+      console.log("go back");
+      redirectToDashboard();
+  });
+
 });
 
 // Converts total numbers of minutes remaining to proper format and adds to HTML

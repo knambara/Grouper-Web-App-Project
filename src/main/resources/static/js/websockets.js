@@ -11,7 +11,7 @@ const MESSAGE_TYPE = {
 let conn;
 let myId = -1;
 
-// Setup the WebSocket connection for live updating of scores.
+// Setup the WebSocket connection for live updating of groups
 const setup_live_groups = () => {
   // TODO Create the WebSocket connection and assign it to `conn`
   conn = new WebSocket("ws://localhost:4567/websocket");
@@ -60,7 +60,7 @@ const setup_live_groups = () => {
 const update_dash = () => {
   // Send a GROUPS message to the server using 'conn'
   const p = {"id" : myId};
-  const JSONObj = {"type" : MESSAGE_TYPE.GROUPS, "payload" : p};    
+  const JSONObj = {"type" : MESSAGE_TYPE.GROUPS, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }
 
@@ -69,7 +69,7 @@ const update_group = (email) => {
   // Send a MEMBERS message to the server using 'conn'
   console.log("In update group");
   const p = {"id" : myId, "email" : email};
-  const JSONObj = {"type" : MESSAGE_TYPE.MEMBERS, "payload" : p};     
+  const JSONObj = {"type" : MESSAGE_TYPE.MEMBERS, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }
 
@@ -77,8 +77,6 @@ const redirect_all = (gid) => {
   // Send a REDIRECT message to the server using 'conn'
   console.log("redirect called");
   const p = {"id" : myId, "gid" : gid};
-  const JSONObj = {"type" : MESSAGE_TYPE.REDIRECT, "payload" : p};     
+  const JSONObj = {"type" : MESSAGE_TYPE.REDIRECT, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }
-
-

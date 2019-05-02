@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutionException;
-
 
 import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
@@ -35,7 +37,7 @@ public class GrouperDBManager {
    * @param grouperDB Shared instance of DBConnector
    */
   public GrouperDBManager(UserCacheHandler userCache, GroupCacheHandler groupCache,
-                          DBConnector grouperDB) {
+      DBConnector grouperDB) {
     this.userCache = userCache;
     this.groupCache = groupCache;
     this.grouperDB = grouperDB;
@@ -95,7 +97,7 @@ public class GrouperDBManager {
 
     String query1 = "UPDATE users SET hash=? WHERE U_ID=?;";
     String query2 = "INSERT INTO users(U_ID, name, G_ID, hash) SELECT ?, ?, ?, ? WHERE "
-            + "(Select Changes() = 0);";
+        + "(Select Changes() = 0);";
 
     try (PreparedStatement prep = conn.prepareStatement(query1)) {
       prep.setString(1, hash);
@@ -123,15 +125,15 @@ public class GrouperDBManager {
   }
 
   private Timestamp getEndTime(Double duration) {
-    Long durMins = Math.round(duration*60);
-    Date endDate = new Date(System.currentTimeMillis() + durMins*60*1000);
+    Long durMins = Math.round(duration * 60);
+    Date endDate = new Date(System.currentTimeMillis() + durMins * 60 * 1000);
     Long endTime = endDate.getTime();
     Timestamp endTS = new Timestamp(endTime);
 
     return endTS;
   }
 
-  public Integer timeRemaining(Timestamp endTime){
+  public Integer timeRemaining(Timestamp endTime) {
     Date nowDate = new Date();
     Long time = nowDate.getTime();
     Timestamp nowTime = new Timestamp(time);
@@ -145,7 +147,7 @@ public class GrouperDBManager {
     timeLeft[0] = hours;
     timeLeft[1] = minutes;
 
-    Long trLong = timeLeft[0]*60 + timeLeft[1];
+    Long trLong = timeLeft[0] * 60 + timeLeft[1];
     Integer tr = trLong.intValue();
 
     return tr;
@@ -172,7 +174,7 @@ public class GrouperDBManager {
 
     Connection conn = grouperDB.getConnection();
     String insert = "INSERT INTO groups (code, department, description, "
-            + "duration, end_time, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        + "duration, end_time, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     try (PreparedStatement prep = conn.prepareStatement(insert)) {
       prep.setString(1, code);
@@ -213,7 +215,6 @@ public class GrouperDBManager {
     assert g.getGroupID() == thisGroupID;
   }
 
-
   /**
    * Get the data and create the groups that exist in the database.
    *
@@ -232,7 +233,9 @@ public class GrouperDBManager {
       prep.setString(1, department);
       ResultSet rs = prep.executeQuery();
       while (rs.next()) {
-        deptGroups.add(rs.getString("code"));
+        if (!deptGroups.contains(rs.getString("code"))) {
+          deptGroups.add(rs.getString("code"));
+        }
       }
     } catch (Exception e) {
       System.out.println("ERROR: Could not get group ids for given dpt.");
@@ -374,8 +377,8 @@ public class GrouperDBManager {
   }
 
   /**
-   * Uses a moderator id to find the group id. To be used when a moderator is
-   * changing attributes of the group.
+   * Uses a moderator id to find the group id. To be used when a moderator is changing attributes of
+   * the group.
    *
    * @param groupId moderator id
    * @return the group id of which they are the moderator
@@ -401,7 +404,6 @@ public class GrouperDBManager {
     }
     return mId;
   }
-
 
   /**
    * Returns the userID that matches given hash.

@@ -612,4 +612,44 @@ input:checked + .slider:before {
   display: none;
 }
 
+#back-to-dashboard {
+  background-color: #C4C4C4;
+  width: 180px;
+  font-size: 14pt;
+  height: 34px;
+  position: relative;
+  box-shadow: none;
+  margin-left: 20px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  -webkit-transition: background-color 0s;
+  transition: background-color 0s;
+}
+
+#back-to-dashboard:hover {
+  background-color: #E3E3E3;
+}
+
+#back-to-dashboard:hover::after {
+  border-color: #E3E3E3;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+#back-to-dashboard:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 100%;
+  height: 0;
+  width: 0;
+  border-width: 17px;
+  border-style: solid;
+  border-color: #C4C4C4;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
 /*# sourceMappingURL=main.css.map */
