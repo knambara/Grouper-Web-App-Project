@@ -20,7 +20,8 @@ public class GroupControl {
   /**
    * Constructor for GroupControl.
    *
-   * @param database DBConnector database
+   * @param userCache the cache of users
+   * @param groupCache the cache of groups
    */
   public GroupControl(UserCacheHandler userCache, GroupCacheHandler groupCache) {
     this.groupCache = groupCache;
@@ -51,6 +52,7 @@ public class GroupControl {
    * To be used on the filter page, once the user has selected the courses to search within.
    * 
    * @param courses Set of strings which are course codes
+   * @param department the department of the courses
    * @return the set of visible groups for the given courses
    */
   public Set<Group> getCourseGroups(String department, Set<String> courses) {
@@ -78,9 +80,9 @@ public class GroupControl {
     while (groupIt.hasNext()) {
       Group g = groupIt.next();
       Integer gId = g.getGroupID();
-      String desc = g.getDescription();
+      String title = g.getTitle();
       String course = g.getCourseCode();
-      String location = g.getLocation();
+      String building = g.getBuilding();
 
       Integer users = g.getUsers().size();
 
@@ -88,9 +90,9 @@ public class GroupControl {
       String timeRemainingPlaceHolder = "HH:MM left";
 
       Map<String, Object> gInfo = new HashMap<>();
-      gInfo.put("description", desc);
+      gInfo.put("title", title);
       gInfo.put("code", course);
-      gInfo.put("location", location);
+      gInfo.put("building", building);
       gInfo.put("users", users);
       gInfo.put("timeLeft", timeRemainingPlaceHolder);
 
@@ -102,7 +104,7 @@ public class GroupControl {
   /**
    * Returns parameters necessary for group pages.
    * 
-   * @param Current userID
+   * @param userId the current user id
    * @return HashMap of group page information.
    */
   public Map<String, Object> getGroupView(String userId) {
@@ -115,13 +117,13 @@ public class GroupControl {
     List<User> users = g.getUsers();
 
     String course = g.getCourseCode();
-    String description = g.getDescription();
+    String title = g.getTitle();
     // Integer userCount = users.size();
     // String location = g.getLocation();
     // String room = g.getRoom();
     String details = g.getDetails();
 
-    info.put("grouptitle", description);
+    info.put("grouptitle", title);
     info.put("groupclass", course);
     info.put("groupusers", users);
     info.put("groupdesc", details);

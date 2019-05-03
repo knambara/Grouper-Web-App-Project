@@ -87,7 +87,7 @@ public class User {
    * 
    * @param groupCache LoadingCache containing Group objects
    * @return Group object
-   * @throws ExecutionException
+   * @throws ExecutionException if there is an issue
    */
   public Group getGroup(LoadingCache<Integer, Group> groupCache) throws ExecutionException {
     return groupCache.getUnchecked(this.groupID);

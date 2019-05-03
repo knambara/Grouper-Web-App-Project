@@ -21,7 +21,6 @@ import edu.brown.cs.jkjk.grouper.UserCacheHandler;
  * Class manages all modifications in regards to grouper Database.
  *
  * @author Kento, kvlynch
- *
  */
 public class GrouperDBManager {
 
@@ -67,11 +66,11 @@ public class GrouperDBManager {
             + "groups(G_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "code TEXT, "
             + "department TEXT, "
-            + "description TEXT, "
+            + "title TEXT, "
             + "duration REAL, "
             + "end_time TIMESTAMP, "
             + "Mod TEXT, "
-            + "location TEXT, "
+            + "building TEXT, "
             + "visible INTEGER DEFAULT 1, "
             + "room TEXT, "
             + "details TEXT, "
@@ -86,7 +85,7 @@ public class GrouperDBManager {
   }
 
   /**
-   * Adds new user's information into database
+   * Adds new user's information into database.
    *
    * @param hash Newly generated hash unique for each user.
    * @param username String username
@@ -133,6 +132,12 @@ public class GrouperDBManager {
     return endTS;
   }
 
+  /**
+   * Finds time remaining for a group given an end time.
+   * 
+   * @param endTime the Timestamp for the group's end
+   * @return time remaining in minutes
+   */
   public Integer timeRemaining(Timestamp endTime) {
     Date nowDate = new Date();
     Long time = nowDate.getTime();
@@ -156,34 +161,34 @@ public class GrouperDBManager {
   /**
    * Adds new group into database.
    *
-   * @param variables
-   * @param modID
+   * @param variables a map of the required fields to their information
+   * @param modID the ID of the user to be the group moderator
    *
    * @author kvlynch
    */
   public void addNewGroup(Map<String, String> variables, String modID) {
 
     String department = variables.get("department");
-    String location = variables.get("location");
+    String building = variables.get("building");
     String code = variables.get("code");
-    String description = variables.get("description");
+    String title = variables.get("title");
     Double duration = Double.parseDouble(variables.get("duration"));
     String room = variables.get("room");
     String details = variables.get("details");
-    Timestamp end_time = getEndTime(duration);
+    Timestamp endtime = getEndTime(duration);
 
     Connection conn = grouperDB.getConnection();
-    String insert = "INSERT INTO groups (code, department, description, "
-        + "duration, end_time, Mod, location, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    String insert = "INSERT INTO groups (code, department, title, "
+        + "duration, end_time, Mod, building, room, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     try (PreparedStatement prep = conn.prepareStatement(insert)) {
       prep.setString(1, code);
       prep.setString(2, department);
-      prep.setString(3, description);
+      prep.setString(3, title);
       prep.setDouble(4, duration);
-      prep.setTimestamp(5, end_time);
+      prep.setTimestamp(5, endtime);
       prep.setString(6, modID);
-      prep.setString(7, location);
+      prep.setString(7, building);
       prep.setString(8, room);
       prep.setString(9, details);
       prep.executeUpdate();
@@ -247,7 +252,7 @@ public class GrouperDBManager {
   /**
    * Removes group from the database and updates related user's g_id.
    *
-   * @param modID
+   * @param modID the ID of the moderator for the group to remove
    */
   public void removeGroup(String modID) {
     User mod = userCache.getUser(modID);
@@ -357,6 +362,11 @@ public class GrouperDBManager {
     }
   }
 
+  /**
+   * Checks whether there are any groups that are expired.
+   *
+   * @return whether groups are expired
+   */
   public Boolean checkExpiredGroup() {
     Connection conn = grouperDB.getConnection();
     Boolean expired = false;
@@ -372,7 +382,6 @@ public class GrouperDBManager {
     } catch (Exception e) {
       System.out.println("ERROR: Problem checking for expired groups.");
     }
-
     return expired;
   }
 
@@ -408,8 +417,8 @@ public class GrouperDBManager {
   /**
    * Returns the userID that matches given hash.
    *
-   * @param hash
-   * @return String userID
+   * @param hash the user's hash
+   * @return userID the ID of the user associated with the input hash
    */
   public String getUserIDFromHash(String hash) {
     Connection conn = grouperDB.getConnection();
@@ -449,14 +458,4 @@ public class GrouperDBManager {
       System.out.println("ERROR: Could not update Users' G_ID.");
     }
   }
-
-  /*
-   * public String getGroupdIDFromHash(String hash) { Connection conn = grouperDB.getConnection();
-   * String query = "SELECT G_ID FROM users WHERE hash = ?;"; String groupID = null; try
-   * (PreparedStatement prep = conn.prepareStatement(query)) { prep.setString(1, hash); try
-   * (ResultSet res = prep.executeQuery()) { groupID = res.getString(1); } catch (SQLException e) {
-   * System.out.println(e.getMessage()); } } catch (SQLException e) {
-   * System.out.println(e.getMessage()); } return groupID; }
-   */
-
 }

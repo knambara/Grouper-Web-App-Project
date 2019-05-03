@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -49,16 +48,16 @@ public class GroupCacheHandler {
                 Integer groupId = rs.getInt("G_ID");
                 String code = rs.getString("code");
                 String department = rs.getString("department");
-                String description = rs.getString("description");
+                String title = rs.getString("title");
                 Double duration = rs.getDouble("duration");
                 Timestamp end_time = rs.getTimestamp("end_time");
                 String moderator = rs.getString("Mod");
-                String location = rs.getString("location");
+                String building = rs.getString("building");
                 String room = rs.getString("room");
                 String details = rs.getString("details");
 
-                g = new Group(groupId, department, location, code, description, duration, room,
-                    details, end_time);
+                g = new Group(groupId, department, building, code, title, duration, room, details,
+                    end_time);
                 g.setModerator(moderator);
                 // add the users to the group
                 List<User> users = getUsers(groupId);
@@ -109,8 +108,8 @@ public class GroupCacheHandler {
   /**
    * Returns set of User with specified group ID
    * 
-   * @param groupId String groupID
-   * @return List of Users
+   * @param groupID String id of the group
+   * @return list of Users
    */
   public List<User> getUsers(Integer groupID) {
 

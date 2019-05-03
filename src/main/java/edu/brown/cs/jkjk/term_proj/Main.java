@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,7 +60,6 @@ public abstract class Main {
    * Method entrypoint for CLI invocation.
    *
    * @param args Arguments passed on the command line.
-   * @throws SQLException
    */
   public static void main(String[] args) {
 
@@ -115,7 +113,6 @@ public abstract class Main {
     Spark.post("/grouper/dashboard", new DashboardHandler(), freeMarker);
     Spark.get("/grouper/newgroup", new NewGroupHandler(), freeMarker);
     Spark.get("/grouper/group", new GroupHandler(), freeMarker);
-
     Spark.post("/newuser", new NewUserHandler());
     Spark.post("/department", new DepartmentSelectHandler());
     Spark.post("/checkedClasses", new GroupDashboardHandler());
@@ -143,7 +140,7 @@ public abstract class Main {
   /**
    * Handler for the dashboard page which displays groups.
    *
-   * @author jsoenkse
+   * @author jsoenkse, jdemanch
    */
   private static class DashboardHandler implements TemplateViewRoute {
 
@@ -155,8 +152,8 @@ public abstract class Main {
       String hash = qm.value("login_hash");
 
       if (grouperDB.verifyUserHash(email, hash)) {
-        // Hard coded for testing purposes.
         DataReader dr = new DataReader();
+        // Get list of departments
         List<String> departmentList = dr.departments("data/departments_sample.csv");
 
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
@@ -173,13 +170,14 @@ public abstract class Main {
   /**
    * Handler for the page that allows you to create a new group.
    *
-   * @author jsoenkse
+   * @author jsoenkse, kvlynch
    */
   private static class NewGroupHandler implements TemplateViewRoute {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
       DataReader dr = new DataReader();
+      // Get list of departments and buildings
       List<String> depts = dr.departments("data/departments_sample.csv");
       List<String> buildings = dr.buildings("data/buildings_sample.csv");
       System.out.println(buildings);
@@ -190,15 +188,21 @@ public abstract class Main {
     }
   }
 
+  /**
+   * Handler for creating a group form the "New Group" page on the front end. Takes all input data
+   * and creates a new group.
+   * 
+   * @author jsoenkse, kvlynch
+   */
   private static class CreateGroupHandler implements Route {
 
     @Override
     public String handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
       String dept = qm.value("department");
-      String location = qm.value("building");
+      String building = qm.value("building");
       String code = qm.value("course_number");
-      String description = qm.value("grouptitle");
+      String title = qm.value("grouptitle");
       Integer durationHours = Integer.parseInt(qm.value("duration_hours"));
       Integer durationMins = Integer.parseInt(qm.value("duration_mins"));
       Double duration = durationHours + durationMins / 60.0;
@@ -210,9 +214,9 @@ public abstract class Main {
 
       Map<String, String> variables = new HashMap<>();
       variables.put("department", dept);
-      variables.put("location", location);
+      variables.put("building", building);
       variables.put("code", code);
-      variables.put("description", description);
+      variables.put("title", title);
       variables.put("duration", durString);
       variables.put("room", room);
       variables.put("details", details);
@@ -238,7 +242,7 @@ public abstract class Main {
     public String handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
       String mod_email = qm.value("mod");
-      // Handles removing group and updatin info in db and cache
+      // Handles removing group and updating info in db and cache
       grouperDBManager.removeGroup(mod_email);
 
       Map<String, Object> info = ImmutableMap.of("msg", "success");
@@ -256,9 +260,6 @@ public abstract class Main {
       String g_id = req.queryParams("gid");
       String u_id = req.queryParams("uid");
 
-      // System.out.println(g_id);
-      // System.out.println(u_id);
-
       // Handle get request for moderator group page is called
       if (u_id.equals("modPage")) {
         int groupID = Integer.parseInt(g_id);
@@ -267,14 +268,14 @@ public abstract class Main {
         // @formatter:off
         Map<String, Object> variables = ImmutableMap.<String, Object>builder()
             .put("title", "Grouper - Group status")
-            .put("grouptitle", g.getDescription())
+            .put("grouptitle", g.getTitle())
             .put("groupclass", g.getCourseCode())
             .put("groupSize", groupSize)
             .put("groupdesc", g.getDetails())
             .put("groupusers", g.getUsers())
             .put("groupduration", g.getDuration())
             .put("grouproom", g.getRoom())
-            .put("groupbuilding", g.getLocation())
+            .put("groupbuilding", g.getBuilding())
             .put("groupendtime", g.getEndTime())
             .build();
         // @formatter: on
@@ -294,14 +295,14 @@ public abstract class Main {
       // @formatter:off
       Map<String, Object> variables = ImmutableMap.<String, Object>builder()
           .put("title", "Grouper - Group status")
-          .put("grouptitle", g.getDescription())
+          .put("grouptitle", g.getTitle())
           .put("groupclass", g.getCourseCode())
           .put("groupSize", groupSize)
           .put("groupdesc", g.getDetails())
           .put("groupusers", g.getUsers())
           .put("groupduration", g.getDuration())
           .put("grouproom", g.getRoom())
-          .put("groupbuilding", g.getLocation())
+          .put("groupbuilding", g.getBuilding())
           .put("groupendtime", g.getEndTime())
           .build();
       // @formatter: on
@@ -311,10 +312,8 @@ public abstract class Main {
 
   /**
    * Handler for passing all of the classes to the front end, given the selected department
-   * 
-   * FEEL FREE TO CHANGE THIS TO SUIT YOUR BACK END NEEDS!
-   * 
-   * @author jsoenkse
+   *
+   * @author jsoenkse, kvlynch
    */
   private static class DepartmentSelectHandler implements Route {
 
@@ -349,9 +348,7 @@ public abstract class Main {
   /**
    * Handler for obtaining group information from a list of courses.
    * 
-   * FEEL FREE TO CHANGE THIS TO SUIT YOUR BACK END NEEDS!
-   * 
-   * @author jsoenkse
+   * @author jsoenkse, kvlynch, knambara
    */
   private static class GroupDashboardHandler implements Route {
     @Override
@@ -369,44 +366,23 @@ public abstract class Main {
       }
 
       List<List<String>> groups = new ArrayList<List<String>>();
-
+      
+      // Get all active groups for the list of classes
       for (String c : classes) {
         for (Group g : groupCache.getCache().asMap().values()) {
           if (g.getCourseCode().equals(c)) {
             String id = Integer.toString(g.getGroupID());
-            String title = g.getDescription();
+            String title = g.getTitle();
             String course = c;
             String size = Integer.toString(g.getUsers().size());
-            String loc = g.getLocation();
-//            long secs_elapsed = (System.currentTimeMillis() - g.getStartTime().getTime()) / 1000
-//                + 4 * 3600;
-//            String time_rem = Double.toString((int) ((g.getDuration() * 60 - secs_elapsed / 60)));
-            //String time_rem = Double.toString(g.getDuration());
+            String build = g.getBuilding();
             Integer trInt = grouperDBManager.timeRemaining(g.getEndTime());
             String time_rem = Integer.toString(trInt);
             String end_time = g.getEndTime().toString();
 
-            groups.add(Arrays.asList(id, title, course, size, loc, time_rem, end_time));
+            groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
           }
         }
-        // @formatter: off
-        // Hard coded examples in order to test front end
-        // if (c.equals("CSCI0150")) {
-        // groups.add(Arrays.asList("4", "Sketchy Meeting", "CSCI0150", "7", "Ratty", "335"));
-        //
-        // } else if (c.equals("CSCI0220")) {
-        // groups.add(Arrays.asList("1", "Studying for Midterm", "CSCI0220", "5", "CIT", "142"));
-        // groups.add(Arrays.asList("2", "Drawing Logic Circuits", "CSCI0220", "4",
-        // "Science Library", "43"));
-        // } else if (c.equals("CSCI0320")) {
-        // groups
-        // .add(Arrays.asList("3", "Talking about Appliances", "CSCI0320", "37", "CIT", "252"));
-        // } else if (c.equals("BIOL0100")) {
-        // groups.add(Arrays.asList("5", "Problem Set 1", "BIOL0100", "6", "Barus & Holley", "62"));
-        // }
-        // @formatter: on
-
-        // loop thorough saved list of classes
       }
 
       Map<String, Object> variables = ImmutableMap.of("groups", groups);
@@ -414,6 +390,11 @@ public abstract class Main {
     }
   }
 
+  /**
+   * Handler that returns all courses in a given department.
+   * 
+   * @author kvlynch
+   */
   private static class CourseHandler implements Route {
 
     @Override
@@ -433,7 +414,6 @@ public abstract class Main {
       }
 
       Map<String, Object> variables = ImmutableMap.of("dept", deptCourses);
-
       return GSON.toJson(variables);
     }
   }
@@ -473,7 +453,6 @@ public abstract class Main {
    * Handles receival of newly logged-in user's information.
    * 
    * @author Kento
-   *
    */
   private static class NewUserHandler implements Route {
     @Override
@@ -498,6 +477,11 @@ public abstract class Main {
     }
   }
   
+  /**
+   * Handler for a user leaving a group.
+   * 
+   * @author ???
+   */
   public static class LeaveGroupHandler implements Route {
     @Override
     public String handle(Request req, Response res) {

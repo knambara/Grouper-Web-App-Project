@@ -4,16 +4,19 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-//kvlynch -- added start time as a field stored within the group
-// added the ability to set/get a moderator
+/**
+ * Class that models a Group.
+ *
+ * @author kvlynch, knambara
+ */
 public class Group {
 
   private List<User> users = new ArrayList<>();
   private int groupID;
   private String department;
   private String courseCode;
-  private String location;
-  private String description;
+  private String building;
+  private String title;
   private double duration;
   private Timestamp end;
   private String moderator;
@@ -21,12 +24,12 @@ public class Group {
   private Boolean visible;
   private String details;
 
-  public Group(Integer groupID, String department, String location, String courseCode,
-      String description, double duration, String room, String details, Timestamp end) {
+  public Group(Integer groupID, String department, String building, String courseCode, String title,
+      double duration, String room, String details, Timestamp end) {
     this.department = department;
-    this.location = location;
+    this.building = building;
     this.courseCode = courseCode;
-    this.description = description;
+    this.title = title;
     this.duration = duration;
     this.end = end;
     this.room = room;
@@ -47,16 +50,16 @@ public class Group {
     return department;
   }
 
-  public String getLocation() {
-    return location;
+  public String getBuilding() {
+    return building;
   }
 
   public String getCourseCode() {
     return courseCode;
   }
 
-  public String getDescription() {
-    return description;
+  public String getTitle() {
+    return title;
   }
 
   public double getDuration() {

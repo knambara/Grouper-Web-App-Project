@@ -1,14 +1,13 @@
 # BUGS TO FIX / NECESSARY THINGS TO HAVE
 **Please add and remove to this list as problems are resolved/arise**
 
-1. resolve name differences in database/variable names
-2. make email list dynamic when someone leaves
-3. make deleting groups dynamic
-4. TESTING
-5. README
-6. invisibility functionality
-7. extend time functionality
-8. classes need to disappear from list dynamically
+1. make email list dynamic when someone leaves
+2. make deleting groups dynamic
+3. TESTING
+4. README
+5. invisibility functionality
+6. extend time functionality
+7. classes need to disappear from list dynamically
 
 # BELLS AND WHISTLES
 

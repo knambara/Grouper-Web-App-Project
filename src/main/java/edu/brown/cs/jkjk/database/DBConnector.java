@@ -33,7 +33,8 @@ public class DBConnector {
   public void connect(String dbFile) throws Exception {
     if (database != null) {
       if (database.equals(dbFile)) {
-        System.out.println("ERROR: Same database as previous one; No change in " + "connection");
+        System.out.println("ERROR: Same database as previous one; "//
+            + "No change in connection");
         return;
       }
     }
@@ -64,7 +65,7 @@ public class DBConnector {
 
   /**
    * Verifies whether a hash exists in the database for a given user.
-   * 
+   *
    * @param email The user's email (which is used as the primary_key in the table).
    * @param hash The hash to compare against.
    * @return True if verified.
