@@ -221,15 +221,7 @@ public abstract class Main {
       grouperDBManager.addNewGroup(variables, thisUserEmail);
       int groupID = userCache.getUser(thisUserEmail).getGroupID();
 
-      // return the URL to the new page (group view)
-      String url = null;
-      try {
-        url = "/grouper/group";// + URLEncoder.encode(gIdString, "UTF-8");
-      } catch (Exception e) {
-        System.out.println("ERROR: Could not encode url");
-      }
-      Map<String, Object> info = ImmutableMap.of("groupurl", url, "groupid",
-          Integer.toString(groupID));
+      Map<String, Object> info = ImmutableMap.of("groupid", Integer.toString(groupID));
 
       return GSON.toJson(info);
     }

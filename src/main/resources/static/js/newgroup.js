@@ -1,3 +1,4 @@
+
 $(document).ready(() => {
 
     const $select_course = $('#select-course-number');
@@ -11,7 +12,8 @@ $(document).ready(() => {
         repopulateCourses();
     });
 
-
+    // When create group button is clicked, first check all fields complete then
+    // send post request with information to back end
     $create_group.on('click', event => {
 
         const dept = $select_department.val();
@@ -23,11 +25,19 @@ $(document).ready(() => {
         const building = $('#select-building').val();
         const loc = $('#field-location').val();
 
-        console.log(dept, course, hours, mins, description, building, loc);
-        //if (grouptitle === "" || description === "" || loc === "" || hours === "" || mins === "") {
-        //    displayFormError();
-        const fields = [$('#field-title'), $('#field-duration-hours'), $('#field-duration-mins'), $('#field-description'), $('#field-location')];
+        // Define the fields that need to be completed to continue
+        const fields = [
+                        $('#field-title'),
+                        $('#field-duration-hours'),
+                        $('#field-duration-mins'),
+                        $('#field-description'),
+                        $('#field-location')
+                        ];
+        // Keep counter for number of fields that are incomplete
         let incomplete = 0;
+
+        // Change the border color to red for any fields that is incomplete, or
+        // return to gray is completed
         for (i in fields) {
             if (fields[i].val() === "") {
                 fields[i].css('border', '2px red solid');
@@ -36,35 +46,44 @@ $(document).ready(() => {
                 fields[i].css('border', '1px gray solid');
             }
         }
+        // If any field is incomplete, display the error
         if (incomplete != 0) {
             $('#incomplete-form-error').empty();
             $('#incomplete-form-error').append("You must complete all fields before creating a new group!");
-        } else {
+        }
+        // If all fields are complete, remove the error and proceed to the POST request
+        else {
             $('#incomplete-form-error').empty();
 
-            // Also need to send User data? In order to designate moderator, add email/member?
 
             // Send all new group data to back end
-            const postParameter = {department: dept, grouptitle: grouptitle,
-                course_number: course, duration_hours: hours, duration_mins: mins,
-                description: description, building: building, location: loc, email: localStorage.getItem("grouper_email")};
+            const postParameter = { department: dept,
+                                    grouptitle: grouptitle,
+                                    course_number: course,
+                                    duration_hours: hours,
+                                    duration_mins: mins,
+                                    description: description,
+                                    building: building,
+                                    location: loc,
+                                    email: localStorage.getItem("grouper_email")
+                                  };
 
-            // Creates new groups with data and returns the URL corresponding to
-            // that group, which the user is sent to
+            // Creates new groups with data and returns the group id for the newly
+            // created group
             $.post("/createGroupInfo", postParameter, responseJSON => {
 
                 const responseObject = JSON.parse(responseJSON);
-                const url = responseObject.groupurl;
                 const id = responseObject.groupid;
-                console.log(url);
-                window.location.href = url + "?gid="+id+"&uid=modPage";
+                window.location.href = "/grouper/group?gid="+id+"&uid=modPage";
+                localStorage.setItem("isModerator", true);
             });
 
             // Call fuction in websockets.js
             update_dash();
-            }
+        }
     });
 
+    // Repopulates course dropdown based on department selected
     function repopulateCourses() {
         const department = $select_department.val();
         const postParameter = {department: department};
@@ -76,6 +95,7 @@ $(document).ready(() => {
             // Empty old results
             $select_course.empty();
 
+            // Display new results
             for (i in courses) {
                 $select_course.append(
                     "<option value='" + courses[i] + "'>" + courses[i] + "</option>"
@@ -85,42 +105,3 @@ $(document).ready(() => {
     }
 
 });
-
-function displayFormError() {
-    $('#incomplete-form-error').empty();
-    $('#incomplete-form-error').append("You must complete all fields before creating a new group!");
-}
-
-
-
-// let populateDropdowns = function() {
-//   getDepartments().forEach(dep => {
-//     $("#select-department").append(
-//       "<option value='" + dep + "'>" + dep + "</option>"
-//     );
-//   });
-//
-//   getCourses().forEach(course => {
-//     $("#select-course-number").append(
-//       "<option value='" + course + "'>" + course + "</option>"
-//     );
-//   });
-//
-//   getBuildings().forEach(building => {
-//     $("#select-building").append(
-//       "<option value='" + building + "'>" + building + "</option>"
-//     );
-//   });
-// }
-//
-// let getDepartments = function() {
-//   return ["Applied Mathematics", "Computer Science", "Philosophy"];
-// }
-//
-// let getCourses = function(department) {
-//   return ["APMA1650", "CSCI0320", "CSCI0220", "PHIL0010"];
-// }
-//
-// let getBuildings = function() {
-//   return ["Barus and Holley", "Faunce House", "Sayles Hall", "Sciences Library"];
-// }

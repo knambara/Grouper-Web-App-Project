@@ -1,3 +1,5 @@
+
+// Class defining a Group Tile for the Dashboard page
 class GroupTile {
     constructor(id, title, course, size, loc, time_left, end_time) {
         this.id = id;
@@ -6,8 +8,8 @@ class GroupTile {
         this.code = course.substring(4,8);
         this.size = size;
         this.loc = loc;
-        this.time_left = time_left; // in minutes
-        this.endTime = end_time;
+        this.time_left = time_left;
+        this.endTime = end_time; // Timestamp
     }
 
     // Builds the HTML of the Group Tile
@@ -20,8 +22,9 @@ class GroupTile {
         "<p>" + this.loc + "</p>" +
         "<div id='group-tile-bottom'>";
         let html2 = "";
+        // If user is not in the group, button says "Join", otherwise it says "View"
         if (this.id != localStorage.getItem("gid")) {
-            html2 = "<button onclick='manageJoin("+this.id+")' class='join' id='join"+this.id + "'>Join</button>";//<a href=/grouper/group?gid=" + this.id + "&uid="+ localStorage.getItem("grouper_hash") +">Join</a></button>" +
+            html2 = "<button onclick='manageJoin("+this.id+")' class='join' id='join"+this.id + "'>Join</button>";
         } else {
             html2 = "<button onclick='manageJoin("+this.id+")' class='join' id='view"+this.id + "'>View</button>";
         }
@@ -62,17 +65,23 @@ class GroupTile {
 // Function to determine if a user can join a new group or not
 function manageJoin(id) {
     const curr_gid = localStorage.getItem('gid');
+    const isMod = localStorage.getItem('isModerator');
+
     // If you are already in  a group
     if (curr_gid != "-1") {
         // Clicking the group you are already in brings you back to that group page
         if (id == curr_gid) {
-            window.location.href= "/grouper/group?gid=" + id + "&uid="+ localStorage.getItem("grouper_hash");
+            if (isMod) {
+                window.location.href= "/grouper/group?gid="+id+"&uid=modPage";
+            }
+            else {
+                window.location.href= "/grouper/group?gid=" + id + "&uid="+ localStorage.getItem("grouper_hash");
+            }
 
         }
         // Trying to join a group you are NOT already in sends an alert
         else {
-            console.log("you are NOT in this group");
-            alert("Whoa there. Looks like you're already in a group! You must leave that group before joining a new one!");
+            alert("Whoa there... Looks like you're already in a group! You must leave your current group before joining a new one!");
         }
     }
     // If you're not in any group you can join any group
@@ -81,7 +90,7 @@ function manageJoin(id) {
     }
 }
 
-// Rebuilds the group-grid in the correctly sorted order
+// Rebuilds the group-grid in the correctly sorted order based on input parameter
 function rebuildGrid(sortedTiles) {
     $group_grid.empty();
     for (i in sortedTiles) {
@@ -92,7 +101,6 @@ function rebuildGrid(sortedTiles) {
     addGroup.setAttribute('id', 'add-group-button');
     addGroup.innerHTML = "<div id='add-group-text'>" +
         "<p id='plus-sign'>+</p><p id='add-group'>Add Group</span></p>";
-        //"<a href=/grouper/newgroup id='plus-sign'>+</a><a href=/grouper/newgroup id='add-group'>Add Group</a></div>";
     $group_grid.append(addGroup);
 }
 
@@ -110,12 +118,13 @@ function updateGrid() {
         const postParameters = {checked: JSON.stringify(checked_classes)};
 
         // POST request for all groups associated with checked classes; recieve list of
-        // active groups w/ information in formate of [id, title, course, size, location, time-remaining]
+        // active groups w/ information in formate of [id, title, course, size, location, time-remaining, end-time]
         $.post("/checkedClasses", postParameters, responseJSON => {
 
             const responseObject = JSON.parse(responseJSON);
             const groups = responseObject.groups;
 
+            // Build a GroupTile object for every group returned (if not already displayed)
             for (i in groups) {
                 const group = groups[i];
                 if (!displayedGroups.has(group[0])) {
@@ -197,32 +206,15 @@ $(document).ready(() => {
         $sort_select.val(sessionStorage.getItem("sort"));
         const curr_classes = JSON.parse(sessionStorage.getItem("classList"));
         const checked_classes = JSON.parse(sessionStorage.getItem("checkedClasses"));
-        //const dept_to_checked = new Map(JSON.parse(sessionStorage.getItem("dept_to_checked")));
-        //const dept_to_checked = objToStrMap(JSON.parse(sessionStorage.getItem("dept_to_checked")));
-        //console.log(dept_to_checked);
-        /*
-        let to_check;
-        if (dept_to_checked.has(sessionStorage.getItem("department"))) {
-            to_check = dept_to_checked.get(sessionStorage.getItem("department"));
-        }*/
 
         // Re-add all classes that were listed and checked
         for (let i in curr_classes) {
-            //$class_list.append("<li>" + curr_classes[i] +
-            //"<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'>" +
-            // "</li>");
             $class_list.append("<li><label class='checkmark-container'>" + curr_classes[i] +
             "<input type='checkbox' name='classes' class='class-item' value='"+ curr_classes[i] + "' id='"+curr_classes[i]+"'><span class='checkmark'></span></label" +
              "</li>");
             if (checked_classes.includes(curr_classes[i])) {
                 $('#'+curr_classes[i]).prop('checked', true);
             }
-            /*
-            if (to_check) {
-                if (to_check.includes(curr_classes[i])) {
-                    $('#'+curr_classes[i]).prop('checked', true);
-                }
-            }*/
             $('#'+curr_classes[i]).on('click', event => {
                 // If checkbox is changed to unchecked, remove all groups
                 //associated with the class, then update the grid
@@ -245,6 +237,7 @@ $(document).ready(() => {
     // Update courses w/ active groups when the department selector is changed
     $dept_select.on('change', event => {
 
+        //#### THIS IS ALL RELATED TO ATTEMPTING TO MAINTAIN EVERYTHING WHEN REFRESHING ####//
         // Before updating the classes, get all currently checked classes
         const shown_classes = $('.class-item');
         const old_checked_classes = [];
@@ -254,14 +247,11 @@ $(document).ready(() => {
                 old_checked_classes.push(shown_classes[i].value);
             }
         }
-        console.log(old_checked_classes);
-
         // Map old department to old checked classes
         if (old_dept !== '') {
-            console.log(old_dept);
             dept_to_checked.set(old_dept, old_checked_classes);
         }
-        //sessionStorage.setItem("dept_to_checked", Array.from(dept_to_checked.entries()));
+        //####################################################################//
 
         // Remove old results
         $class_list.empty();
@@ -368,6 +358,7 @@ $(document).ready(() => {
 
 });
 
+// Sorting helper functions
 function sortByCourseCode(groups) {
     const tempList = [];
     const groupIter = groups.values();

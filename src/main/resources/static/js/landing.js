@@ -73,6 +73,4 @@ function onSuccess(googleUser) {
     }
   });
 
-  // TODO?: page is redirects to user's last visited page
-
 }

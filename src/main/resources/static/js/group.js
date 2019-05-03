@@ -1,3 +1,5 @@
+
+// Updates the HTML for number of members and members' emails
 function updateGroupContent(email) {
   const $groupSize = $('#groupSize');
   const $groupMembers = $('#group-members');
@@ -16,13 +18,15 @@ function updateGroupContent(email) {
 
 $(document).ready(() => {
 
+  // Start timer to check for time updates
   updateDuration();
 
   const $end_button = $('#end-button');
   const $leave_button = $('#leave-button');
-  console.log(localStorage.getItem("gid"));
 
+  // When the moderator ends a group
   $end_button.on('click', event => {
+
     // Send mod email to backend
     const postParameter = {mod: localStorage.getItem("grouper_email")};
 
@@ -41,6 +45,7 @@ $(document).ready(() => {
 
         // Redirect current user's page to dashboard and reset gid
         localStorage.setItem("gid", "-1");
+        localStorage.setItem("isModerator", false);
         redirectToDashboard();
     });
   });
@@ -82,7 +87,7 @@ $(document).ready(() => {
     }
   }
 
-  // Timer for duration countdown
+  // Timer that calculates time remaining every second based on current time and end time
   function updateDuration() {
       const endTime = new Date($('#end-time').html());
       const currTime = new Date();
@@ -92,8 +97,8 @@ $(document).ready(() => {
       t = setTimeout(updateDuration,1000);
   }
 
+  // Redirect to dashboard when button is clicked
   $('#back-to-dashboard').on('click', event => {
-      console.log("go back");
       redirectToDashboard();
   });
 

@@ -4,12 +4,11 @@
 1. resolve name differences in database/variable names
 2. make email list dynamic when someone leaves
 3. make deleting groups dynamic
-4. fix bug where viewing group you made (as the moderator) brings you to normal group joined page (instead of mod view)
-5. TESTING
-6. README
-7. invisibility functionality
-8. extend time functionality
-9. classes need to disappear from list dynamically
+4. TESTING
+5. README
+6. invisibility functionality
+7. extend time functionality
+8. classes need to disappear from list dynamically
 
 # BELLS AND WHISTLES
 
