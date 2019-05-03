@@ -74,7 +74,7 @@ $(document).ready(() => {
 
                 const responseObject = JSON.parse(responseJSON);
                 const id = responseObject.groupid;
-                window.location.href = "/grouper/group?gid="+id+"&uid=modPage";
+                window.location.href = "/grouper/group?gid="+id+"&uid="+getUserSession().hash;
                 localStorage.setItem("isModerator", true);
             });
 

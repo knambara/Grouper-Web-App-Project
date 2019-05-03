@@ -458,4 +458,57 @@ public class GrouperDBManager {
       System.out.println("ERROR: Could not update Users' G_ID.");
     }
   }
+
+  /**
+   * Verifies whether a user with given hash is a moderator of the given group.
+   *
+   * @param userHash The user's hash to verify.
+   * @param gID the group to verify.
+   * @return True if the user is a mod of the group.
+   */
+  public boolean isUserMod(String userHash, String gID) {
+
+    String query = "SELECT * FROM groups AS g, users AS u "
+        + "WHERE u.hash=? AND u.U_ID=g.mod AND g.G_ID=?;";
+    Connection conn = grouperDB.getConnection();
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, userHash);
+      prep.setString(2, gID);
+      ResultSet results = prep.executeQuery();
+
+      while (results.next()) {
+        results.close();
+        return true;
+      }
+      results.close();
+    } catch (SQLException e) {
+      System.err.println(e.getMessage());
+    }
+    return false;
+  }
+
+  /**
+   * Verifies whether a user with given hash exists in the table.
+   *
+   * @param userHash The user's hash to verify.
+   * @return True if the user is in the table.
+   */
+  public boolean doesUserExist(String userHash) {
+
+    String query = "SELECT * FROM users WHERE hash=?;";
+    Connection conn = grouperDB.getConnection();
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, userHash);
+      ResultSet results = prep.executeQuery();
+
+      while (results.next()) {
+        results.close();
+        return true;
+      }
+      results.close();
+    } catch (SQLException e) {
+      System.err.println(e.getMessage());
+    }
+    return false;
+  }
 }

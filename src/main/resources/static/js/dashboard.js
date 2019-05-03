@@ -71,12 +71,12 @@ function manageJoin(id) {
     if (curr_gid != "-1") {
         // Clicking the group you are already in brings you back to that group page
         if (id == curr_gid) {
-            if (isMod) {
+            /*if (isMod) {
                 window.location.href= "/grouper/group?gid="+id+"&uid=modPage";
             }
-            else {
+            else {*/
                 window.location.href= "/grouper/group?gid=" + id + "&uid="+ localStorage.getItem("grouper_hash");
-            }
+            //}
 
         }
         // Trying to join a group you are NOT already in sends an alert

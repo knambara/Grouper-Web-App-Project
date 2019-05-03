@@ -260,8 +260,16 @@ public abstract class Main {
       String g_id = req.queryParams("gid");
       String u_id = req.queryParams("uid");
 
+      if (!grouperDBManager.doesUserExist(u_id)) {
+        Map<String, Object> variables = ImmutableMap.of("title", "Not Authorized");
+        return new ModelAndView(variables, "notauthorized.ftl");
+      }
+
+      boolean isUserMod = grouperDBManager.isUserMod(u_id, g_id);
+
       // Handle get request for moderator group page is called
-      if (u_id.equals("modPage")) {
+      // if (u_id.equals("modPage")) {
+      if (isUserMod) {
         int groupID = Integer.parseInt(g_id);
         Group g = groupCache.getGroup(groupID);
         String groupSize = Integer.toString(g.getUsers().size());
