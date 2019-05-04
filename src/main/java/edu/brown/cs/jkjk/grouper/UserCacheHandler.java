@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheLoader.InvalidCacheLoadException;
 import com.google.common.cache.LoadingCache;
 
 import edu.brown.cs.jkjk.database.DBConnector;
@@ -71,6 +72,12 @@ public class UserCacheHandler {
    * @return User user
    */
   public User getUser(String id) {
-    return userCache.getUnchecked(id);
+    User user = null;
+    try {
+      user = userCache.getUnchecked(id);
+    } catch (InvalidCacheLoadException e) {
+      user = null;
+    }
+    return user;
   }
 }

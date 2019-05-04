@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheLoader.InvalidCacheLoadException;
 import com.google.common.cache.LoadingCache;
 
 import edu.brown.cs.jkjk.database.DBConnector;
@@ -103,7 +104,13 @@ public class GroupCacheHandler {
    * @return Group group
    */
   public Group getGroup(int id) {
-    return groupCache.getUnchecked(id);
+    Group group = null;
+    try {
+      group = groupCache.getUnchecked(id);
+    } catch (InvalidCacheLoadException e) {
+      group = null;
+    }
+    return group;
   }
 
   /**
