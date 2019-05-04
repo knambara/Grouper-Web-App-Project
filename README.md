@@ -1,17 +1,18 @@
 # BUGS TO FIX / NECESSARY THINGS TO HAVE
 **Please add and remove to this list as problems are resolved/arise**
 
-1. TESTING
-2. README
-3. invisibility functionality
-4. extend time functionality
-5. classes need to disappear from list dynamically
+1. README
+2. dynamically extend time
+3. dynamically add/remove profile images
+4. classes need to disappear from list dynamically
+5. making sure expired groups disappear
+6. create and connect to full data files
+7. fix checkstyle errors -> write your javadoc comments please!
 
 # BELLS AND WHISTLES
 
 1. location services and location sorting
 2. text search
-3. profile images?
 
 
 
