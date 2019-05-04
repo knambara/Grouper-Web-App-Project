@@ -42,8 +42,9 @@ public class UserCacheHandler {
               if (res.next()) {
                 String user_email = res.getString(1);
                 String user_name = res.getString(2);
+                String user_img = res.getString(5);
                 int groupID = res.getInt(3);
-                u = new User(user_name, user_email);
+                u = new User(user_name, user_email, user_img);
                 u.setGroupID(groupID);
               }
             } catch (SQLException e) {

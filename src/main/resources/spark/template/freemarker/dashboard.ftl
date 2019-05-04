@@ -3,7 +3,10 @@
 
 <div id="side-menu">
     <div id="user-info">
+    <div id="email-and-img">
+    <div class="circle-image" id="user-img"></div>
     <p>${email}</p>
+    </div>
     <button id="log-out">log out</button>
     </div>
     <div id="side-menu-content">

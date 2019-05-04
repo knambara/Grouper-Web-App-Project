@@ -16,6 +16,7 @@ public class User {
   private String email;
   private int groupID = -1;
   private boolean mod;
+  private String img;
 
   /**
    * Constructor for User. ID of each user is autoincremented.
@@ -23,9 +24,10 @@ public class User {
    * @param name Name of user.
    * @param email User's email.
    */
-  public User(String name, String email) {
+  public User(String name, String email, String img) {
     this.name = name;
     this.email = email;
+    this.img = img;
   }
 
   /**
@@ -53,6 +55,15 @@ public class User {
    */
   public int getGroupID() {
     return groupID;
+  }
+
+  /**
+   * Return the URL of the user's profile image.
+   *
+   * @return img the URL
+   */
+  public String getImg() {
+    return img;
   }
 
   /**

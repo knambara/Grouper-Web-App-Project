@@ -53,6 +53,7 @@ public class GrouperDBManager {
             + "name TEXT, "
             + "G_ID INTEGER, "
             + "hash TEXT, "
+            + "img TEXT, "
             + "PRIMARY KEY (U_ID));";
     try (PreparedStatement prep = conn.prepareStatement(query)) {
       prep.executeUpdate();
@@ -90,11 +91,11 @@ public class GrouperDBManager {
    * @param username String username
    * @param email String email
    */
-  public void addNewUser(String hash, String username, String email) {
+  public void addNewUser(String hash, String username, String email, String img) {
     Connection conn = grouperDB.getConnection();
 
     String query1 = "UPDATE users SET hash=? WHERE U_ID=?;";
-    String query2 = "INSERT INTO users(U_ID, name, G_ID, hash) SELECT ?, ?, ?, ? WHERE "
+    String query2 = "INSERT INTO users(U_ID, name, G_ID, hash, img) SELECT ?, ?, ?, ?, ? WHERE "
         + "(Select Changes() = 0);";
 
     try (PreparedStatement prep = conn.prepareStatement(query1)) {
@@ -111,6 +112,7 @@ public class GrouperDBManager {
       prep.setString(2, username);
       prep.setInt(3, -1);
       prep.setString(4, hash);
+      prep.setString(5, img);
 
       prep.executeUpdate();
     } catch (SQLException e) {
