@@ -53,7 +53,7 @@
       <div id="group-option-invisible" class="group-option">
         <p id="invisible"> INVISIBLE </p>
         <label class="switch">
-            <input type="checkbox" id="myToggle">
+            <input type="checkbox" id="myToggle" ${invisiblechecked}>
             <span class="slider round"></span>
         </label>
       </div>

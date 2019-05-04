@@ -338,6 +338,7 @@ select {
 }
 
 #add-group-button, .group-tile {
+    cursor: pointer;
     border: $tile_border_color 1px solid;
     border-radius: 22px;
     height: 280px;

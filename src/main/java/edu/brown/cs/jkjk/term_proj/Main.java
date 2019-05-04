@@ -245,11 +245,19 @@ public abstract class Main {
     public String handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
       String mod_email = qm.value("mod");
-      // Handles removing group and updating info in db and cache
-      grouperDBManager.removeGroup(mod_email);
+      String hash = qm.value("hash");
 
-      Map<String, Object> info = ImmutableMap.of("msg", "success");
-      return GSON.toJson(info);
+      if (grouperDB.verifyUserHash(mod_email, hash)) {
+        // Handles removing group and updating info in db and cache
+        grouperDBManager.removeGroup(mod_email);
+
+        Map<String, Object> info = ImmutableMap.of("msg", "success");
+        return GSON.toJson(info);
+      } else {
+        Map<String, Object> info = ImmutableMap.of("msg", "failure");
+        return GSON.toJson(info);
+      }
+
     }
   }
 
@@ -287,6 +295,7 @@ public abstract class Main {
             .put("grouproom", g.getRoom())
             .put("groupbuilding", g.getBuilding())
             .put("groupendtime", g.getEndTime())
+            .put("invisiblechecked", g.getVisibility() ? "" : "checked")
             .build();
         // @formatter: on
         return new ModelAndView(variables, "group.ftl");
@@ -313,6 +322,7 @@ public abstract class Main {
           .put("grouproom", g.getRoom())
           .put("groupbuilding", g.getBuilding())
           .put("groupendtime", g.getEndTime())
+          .put("invisiblechecked", "")
           .build();
       // @formatter: on
       return new ModelAndView(variables, "group_joined.ftl");
@@ -364,6 +374,8 @@ public abstract class Main {
     public String handle(Request req, Response res) throws Exception {
       QueryParamsMap qm = req.queryMap();
       String classesUnparsed = qm.value("checked");
+      String userEmail = qm.value("user");
+      String userHash = qm.value("hash");
 
       // Stripping and parsing input from front end into list of just class codes
       classesUnparsed = classesUnparsed.replace("]", "");
@@ -391,6 +403,24 @@ public abstract class Main {
 
             groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
           }
+        }
+      }
+      
+      // First, if the user is verified to be the moderator of some group, make that group appear first.
+      for (Group g : groupCache.getCache().asMap().values()) {
+        if (userCache.getUser(userEmail).getGroupID() == g.getGroupID() && grouperDB.verifyUserHash(userEmail, userHash)) {
+          String id = Integer.toString(g.getGroupID());
+          String title = g.getTitle();
+          String course = g.getCourseCode();
+          String size = Integer.toString(g.getUsers().size());
+          String build = g.getBuilding();
+          Integer trInt = (int) grouperDBManager.timeRemaining(g.getEndTime());
+          String time_rem = Integer.toString(trInt);
+          String end_time = g.getEndTime().toString();
+
+          groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
+          
+          break;
         }
       }
 
@@ -527,7 +557,7 @@ public abstract class Main {
             + "\"group\": " + userCache.getUser(userID).getGroupID() + "}";
       }
       
-      return "{status: \"failure\", group: undefined}";
+      return "{\"status\": \"failure\", \"group\": \"undefined\"}";
     }
   }
   

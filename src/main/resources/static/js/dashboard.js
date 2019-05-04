@@ -115,7 +115,11 @@ function updateGrid() {
         }
         console.log(checked_classes);
         // Send list of course codes as strings
-        const postParameters = {checked: JSON.stringify(checked_classes)};
+        const postParameters = {
+          checked: JSON.stringify(checked_classes),
+          user: getUserSession().email,
+          hash: getUserSession().hash
+        };
 
         // POST request for all groups associated with checked classes; recieve list of
         // active groups w/ information in formate of [id, title, course, size, location, time-remaining, end-time]

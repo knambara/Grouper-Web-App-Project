@@ -31,7 +31,7 @@ $(document).ready(() => {
   const $toggle_switch = $('#myToggle');
 
   // When invisible switch is changed
-  $toggle_switch.change(function() {        
+  $toggle_switch.change(function() {
         if(this.checked) {
             // Invisible mode on
             const postParameter = {invisibility: "on", gid : localStorage.getItem("gid")};
@@ -58,7 +58,10 @@ $(document).ready(() => {
   $end_button.on('click', event => {
 
     // Send mod email to backend
-    const postParameter = {mod: localStorage.getItem("grouper_email")};
+    const postParameter = {
+      mod: localStorage.getItem("grouper_email"),
+      hash: getUserSession().hash
+    };
 
     // Deletes group mod is in and returns the URL corresponding to
     // that group, which the user is sent to
@@ -66,17 +69,21 @@ $(document).ready(() => {
 
         const responseObject = JSON.parse(responseJSON);
         const msg = responseObject.msg;
-        console.log(msg);
 
-        // Call function in websockets.js
-        remove_group(localStorage.getItem("gid"));
-        // Redirect all other users' page to dashboard
-        redirect_all(localStorage.getItem("gid"));
+        if (msg == "success") {
+          // Call function in websockets.js
+          remove_group(localStorage.getItem("gid"));
+          // Redirect all other users' page to dashboard
+          redirect_all(localStorage.getItem("gid"));
 
-        // Redirect current user's page to dashboard and reset gid
-        localStorage.setItem("gid", "-1");
-        localStorage.setItem("isModerator", false);
-        redirectToDashboard();
+          // Redirect current user's page to dashboard and reset gid
+          localStorage.setItem("gid", "-1");
+          localStorage.setItem("isModerator", false);
+          redirectToDashboard();
+        } else {
+          alert("Error deleting group.");
+        }
+
     });
   });
 

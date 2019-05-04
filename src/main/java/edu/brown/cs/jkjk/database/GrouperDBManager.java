@@ -513,6 +513,32 @@ public class GrouperDBManager {
   }
 
   /**
+   * Confirms that some user with the given hash exists in a given group.
+   * 
+   * @param hash The user hash.
+   * @param groupID The group.
+   * @return Boolean verification.
+   */
+  public boolean userInGroupByHash(String hash, int groupID) {
+    String query = "SELECT * FROM users WHERE hash=? AND G_ID=?;";
+    Connection conn = grouperDB.getConnection();
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setString(1, hash);
+      prep.setInt(2, groupID);
+      ResultSet results = prep.executeQuery();
+
+      while (results.next()) {
+        results.close();
+        return true;
+      }
+      results.close();
+    } catch (SQLException e) {
+      System.err.println(e.getMessage());
+    }
+    return false;
+  }
+
+  /**
    * Extends a group's remaining time.
    * 
    * @param groupID The id of the group to extend.
