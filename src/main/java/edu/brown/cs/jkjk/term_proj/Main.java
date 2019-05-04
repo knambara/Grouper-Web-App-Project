@@ -510,7 +510,7 @@ public abstract class Main {
   /**
    * Handler for a user leaving a group.
    * 
-   * @author ???
+   * @author Kento
    */
   public static class LeaveGroupHandler implements Route {
     @Override

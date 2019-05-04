@@ -13,6 +13,12 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+/**
+ * Handles receiving and sending messages to websockets for dynamic page upadtes.
+ * 
+ * @author Kento
+ *
+ */
 @WebSocket
 public class GrouperWebSocket {
   private static final Gson GSON = new Gson();
@@ -20,7 +26,7 @@ public class GrouperWebSocket {
   private static int nextId = 0;
 
   private static enum MESSAGE_TYPE {
-    CONNECT, GROUPS, MEMBERS, UPDATE_DASHBOARD, UPDATE_GROUP, REDIRECT, REDIRECT_USERS
+    CONNECT, GROUPS, MEMBERS, UPDATE_DASHBOARD, UPDATE_GROUP, REDIRECT, REDIRECT_USERS, REMOVE, REMOVE_GROUP
   }
 
   @OnWebSocketConnect
@@ -110,6 +116,26 @@ public class GrouperWebSocket {
         if (s != session) {
           s.getRemote().sendString(GSON.toJson(updateMsg));
         }
+      }
+    }
+
+    // TODO: Handles removing group from dashboard
+    if (received.get("type").getAsInt() == MESSAGE_TYPE.REMOVE.ordinal()) {
+      // Get session id from payload
+      JsonObject payload = received.get("payload").getAsJsonObject();
+      int id = payload.get("id").getAsInt();
+      String gid = payload.get("gid").getAsString();
+
+      JsonObject updateMsg = new JsonObject();
+      JsonObject updatePayload = new JsonObject();
+      updatePayload.addProperty("id", id);
+      updatePayload.addProperty("gid", gid);
+
+      updateMsg.addProperty("type", MESSAGE_TYPE.REMOVE_GROUP.ordinal());
+      updateMsg.add("payload", updatePayload);
+
+      for (Session s : sessions) {
+        s.getRemote().sendString(GSON.toJson(updateMsg));
       }
     }
   }

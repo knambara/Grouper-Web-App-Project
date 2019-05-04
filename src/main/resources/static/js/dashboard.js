@@ -113,7 +113,7 @@ function updateGrid() {
                 checked_classes.push(shown_classes[i].value);
             }
         }
-
+        console.log(checked_classes);
         // Send list of course codes as strings
         const postParameters = {checked: JSON.stringify(checked_classes)};
 
@@ -134,6 +134,7 @@ function updateGrid() {
                     tile.updateTime();
                 }
             }
+            
             sort();
             sessionStorage.setItem("checkedClasses", JSON.stringify(checked_classes));
         });

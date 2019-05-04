@@ -5,7 +5,9 @@ const MESSAGE_TYPE = {
   UPDATE_DASHBOARD: 3,
   UPDATE_GROUP: 4,
   REDIRECT: 5,
-  REDIRECT_USERS: 6
+  REDIRECT_USERS: 6,
+  REMOVE: 7,
+  REMOVE_GROUP: 8
 };
 
 let conn;
@@ -52,6 +54,11 @@ const setup_live_groups = () => {
           localStorage.setItem("gid", -1);
         }
         break;
+      case MESSAGE_TYPE.REMOVE_GROUP:
+        console.log("Remove group invoked.");
+        displayedGroups.delete(data.payload.gid);
+        $('#' + data.payload.gid).remove();
+        break;      
     }
   };
 }
@@ -61,6 +68,14 @@ const update_dash = () => {
   // Send a GROUPS message to the server using 'conn'
   const p = {"id" : myId};
   const JSONObj = {"type" : MESSAGE_TYPE.GROUPS, "payload" : p};
+  conn.send(JSON.stringify(JSONObj));
+}
+
+// Should be called when a user deletes a group.
+const remove_group = (gid) => {
+  // Send a GROUPS message to the server using 'conn'
+  const p = {"id" : myId, "gid" : gid};
+  const JSONObj = {"type" : MESSAGE_TYPE.REMOVE, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }
 

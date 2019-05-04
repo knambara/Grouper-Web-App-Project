@@ -43,7 +43,7 @@ $(document).ready(() => {
         console.log(msg);
 
         // Call function in websockets.js
-        update_dash();
+        remove_group(localStorage.getItem("gid"));
         // Redirect all other users' page to dashboard
         redirect_all(localStorage.getItem("gid"));
 
