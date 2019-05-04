@@ -504,7 +504,7 @@ public abstract class Main {
 
       if (/* email.endsWith("@brown.edu") */true) { // for testing purposes
         String hash = generateHash(32);
-        grouperDBManager.addNewUser(hash, name, email);
+        grouperDBManager.addNewUser(hash, name, email, img);
         Map<String, Object> variables = ImmutableMap.of("msg", "success", "error", "", "hash",
             hash);
         return GSON.toJson(variables);

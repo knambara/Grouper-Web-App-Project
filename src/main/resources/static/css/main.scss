@@ -261,19 +261,20 @@ select {
 }
 
 #log-out {
-    width: 70px;
-    height: 35px;
-    font-size: 11pt;
-    background-color: $background_color;
-    color: $primary_color !important;
-    border: 3px $background_color solid;
+    width: 64px;
+    height: 22px;
+    font-size: 10pt;
+    background-color: $primary_color_highlighted;
+    color: $background_color !important;
+    border: 1px $background_color solid;
     border-radius: 20px;
     box-shadow: none;
+    margin: auto;
 }
 
 #log-out:hover {
-    background-color: $primary_color_highlighted;
-    color: $background_color !important;
+    background-color: $background_color;
+    color: $primary_color !important;
 }
 
 #user-info {
@@ -714,4 +715,40 @@ input:checked + .slider:before {
   height: 170px;
   padding-top: 40px;
   box-shadow: 2px 2px 3px $dark_color;
+}
+
+.circle-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+    width: 50px;
+    margin-right: 15px;
+}
+
+.circle-image.small {
+    width: 35px;
+}
+
+#email-and-img {
+    width: 360px;
+    display: flex;
+    align-items: baseline;
+}
+
+#group-user-info {
+    display: flex;
+    align-items: center;
+}
+
+#group-user-info img {
+    margin-right: 15px;
+}
+
+#group-members {
+    margin-left: 30px;
+}
+
+#members-tag {
+    font-weight: 600;
+    margin-top: 20px;
 }

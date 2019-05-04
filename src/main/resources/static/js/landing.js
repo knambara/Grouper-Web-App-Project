@@ -59,14 +59,14 @@ function onSuccess(googleUser) {
   console.log("Sign in successful");
   var profile = googleUser.getBasicProfile();
 
-  const postParameter = {name: profile.getName(), email: profile.getEmail(), img: profile.getImageUrl()};
+  const postParameter = {name: profile.getName(), email: profile.getEmail(), img: JSON.stringify(profile.getImageUrl())};
   $.post("/newuser", postParameter, responseJSON => {
     const responseObject = JSON.parse(responseJSON);
     if (responseObject.msg == "success" && responseObject.hash != "") {
       console.log(responseObject.hash);
       // This adds the login email and hash returned by the server into
       // localStorage, which can be accessed later (see session.js).
-      addUserSession(profile.getEmail(), responseObject.hash);
+      addUserSession(profile.getEmail(), responseObject.hash, profile.getImageUrl());
       redirectToDashboard();
     } else {
       alert(responseObject.error);

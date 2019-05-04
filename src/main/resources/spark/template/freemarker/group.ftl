@@ -44,9 +44,13 @@
       <div id="description-tag">Description:</div>
       <div id="description-details">${groupdesc}</div>
     </div>
+    <div id="members-tag">Members:</div>
     <div id="group-members">
       <#list groupusers as user>
-		<p id=${user.getEmail()}>${user.getEmail()}</p>
+        <div id="group-user-info">
+		<img class = "circle-image small" src =${user.getImg()} />
+        <p id=${user.getEmail()}>${user.getEmail()}</p>
+        </div>
 	  </#list>
     </div>
     <div id="group-options">

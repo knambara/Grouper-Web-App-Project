@@ -207,6 +207,9 @@ function updateCourseList() {
 
 $(document).ready(() => {
 
+    const profile_img = getUserSession().img;
+    $('#user-img').html("<img class='circle-image' src='"+ profile_img + "'/>");
+
     // When page is refreshed, reload all the appropriate data that has been saved
     $(window).on('load', function(){
 
