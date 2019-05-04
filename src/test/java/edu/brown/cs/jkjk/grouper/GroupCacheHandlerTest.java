@@ -79,6 +79,10 @@ public class GroupCacheHandlerTest {
     UserCacheHandler userCache = new UserCacheHandler(db);
     GroupCacheHandler groupCache = new GroupCacheHandler(db, userCache);
 
+    groupCache.getGroup(1);
+    groupCache.getGroup(2);
+    groupCache.getGroup(3);
+
     Set<Group> res1 = groupCache.getDepartmentGroups("Computer Science");
     assertEquals(res1.size(), 2);
 
