@@ -65,7 +65,7 @@ public class DataReader {
    * Reads and stores list of courses from the given file path.
    *
    * @param courseFilepath the path to the file containing course info
-   * @return a list of courses
+   * @return a map of departments to courses
    */
   public Map<String, Set<String>> courses(String courseFilepath) {
     BufferedReader reader = null;
@@ -73,7 +73,6 @@ public class DataReader {
     try {
       reader = new BufferedReader(new FileReader(courseFilepath));
       String line = null;
-
       while ((line = reader.readLine()) != null) {
         String[] data = line.split(COMMA_DELIMITER);
         if (courses.containsKey(data[0])) {

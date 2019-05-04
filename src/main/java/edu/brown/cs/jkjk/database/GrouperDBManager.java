@@ -346,8 +346,7 @@ public class GrouperDBManager {
     Connection conn = grouperDB.getConnection();
 
     String query = "SELECT G_ID FROM groups WHERE end_time < CURRENT_TIMESTAMP ";
-    try {
-      PreparedStatement prep = conn.prepareStatement(query);
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
       ResultSet rs = prep.executeQuery();
 
       while (rs.next()) {
@@ -372,13 +371,14 @@ public class GrouperDBManager {
     Boolean expired = false;
 
     String query = "SELECT G_ID FROM groups WHERE end_time < CURRENT_TIMESTAMP";
-    try {
-      PreparedStatement prep = conn.prepareStatement(query);
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
       ResultSet rs = prep.executeQuery();
 
       if (rs.next()) {
         expired = true;
       }
+      rs.close();
+      prep.close();
     } catch (Exception e) {
       System.out.println("ERROR: Problem checking for expired groups.");
     }
@@ -536,7 +536,7 @@ public class GrouperDBManager {
       prep.executeUpdate();
       prep.close();
 
-      groupCache.setEndTime(groupID, newEnd);
+      // groupCache.setEndTime(groupID, newEnd);
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }
