@@ -28,6 +28,31 @@ $(document).ready(() => {
 
   const $extend_apply_button = $('#extend-time-apply');
   const $extend_exit_area = $('#extend-cancel');
+  const $toggle_switch = $('#myToggle');
+
+  // When invisible switch is changed
+  $toggle_switch.change(function() {        
+        if(this.checked) {
+            // Invisible mode on
+            const postParameter = {invisibility: "on", gid : localStorage.getItem("gid")};
+            $.post("/invisibility", postParameter, responseJSON => {
+                const responseObject = JSON.parse(responseJSON);
+                const msg = responseObject.msg;
+                console.log("invisible on " + msg);
+            });
+            // Call function in websocket.js
+            remove_group(localStorage.getItem("gid"));
+        } else {
+            // Invisible mode off
+            const postParameter = {invisibility: "off", gid : localStorage.getItem("gid")};
+            $.post("/invisibility", postParameter, responseJSON => {
+                const responseObject = JSON.parse(responseJSON);
+                const msg = responseObject.msg;
+                console.log("invisible off " + msg);
+            });
+            update_dash();
+        }
+    });
 
   // When the moderator ends a group
   $end_button.on('click', event => {

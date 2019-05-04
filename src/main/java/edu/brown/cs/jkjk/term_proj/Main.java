@@ -122,6 +122,7 @@ public abstract class Main {
     Spark.post("/deleteGroup", new DeleteGroupHandler());
     Spark.post("/leaveGroup", new LeaveGroupHandler());
     Spark.post("/extendGroup", new ExtendGroupHandler());
+    Spark.post("/invisibility", new InvisibilityHandler());
   }
 
   /**
@@ -377,7 +378,7 @@ public abstract class Main {
       // Get all active groups for the list of classes
       for (String c : classes) {
         for (Group g : groupCache.getCache().asMap().values()) {
-          if (g.getCourseCode().equals(c)) {
+          if (g.getCourseCode().equals(c) && g.getVisibility()) {
             String id = Integer.toString(g.getGroupID());
             String title = g.getTitle();
             String course = c;
@@ -524,7 +525,29 @@ public abstract class Main {
       return GSON.toJson(variables);      
     }
   }
-
+  
+  /**
+   * Handles visibility of each group.
+   * 
+   * @author Kento  
+   */
+  public static class InvisibilityHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String bool = qm.value("invisibility");
+      int groupID = Integer.parseInt(qm.value("gid"));
+      
+      if (bool.equals("on")) {
+        groupCache.getGroup(groupID).setInvisible();
+      } else {
+        groupCache.getGroup(groupID).setVisible();
+      }
+      Map<String, Object> variables = ImmutableMap.of("msg", "success");
+      return GSON.toJson(variables);       
+    }
+  }
+  
   /**
    * Generates a random string of a given length using alpha-numeric characters.
    * 
@@ -541,5 +564,6 @@ public abstract class Main {
     String outStr = hash.toString();
     return outStr;
   }
+  
 
 }
