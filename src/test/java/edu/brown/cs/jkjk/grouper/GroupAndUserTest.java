@@ -14,9 +14,9 @@ public class GroupAndUserTest {
   public void testAddAndRemoveUsers() {
     Group test = new Group(1, "Computer Science", "CIT", "CSCI0320", "Talking About Appliances",
         4.0, "201", "Come talk with us!", new Timestamp(System.currentTimeMillis()));
-    User user1 = new User("Blueno", "blueno@brown.edu");
-    User user2 = new User("Rock Tree", "rock_tree@brown.edu");
-    User user3 = new User("Rhodey", "rhodey@brown.edu");
+    User user1 = new User("Blueno", "blueno@brown.edu", "");
+    User user2 = new User("Rock Tree", "rock_tree@brown.edu", "");
+    User user3 = new User("Rhodey", "rhodey@brown.edu", "");
     test.addUser(user1);
     test.addUser(user2);
     test.addUser(user3);
@@ -37,7 +37,7 @@ public class GroupAndUserTest {
   public void testDuplicateRemove() {
     Group test = new Group(1, "Computer Science", "CIT", "CSCI0320", "Talking About Appliances",
         4.0, "201", "Come talk with us!", new Timestamp(System.currentTimeMillis()));
-    User user1 = new User("Blueno", "blueno@brown.edu");
+    User user1 = new User("Blueno", "blueno@brown.edu", "");
     test.addUser(user1);
     List<User> res = test.getUsers();
     assertEquals(res.size(), 1);

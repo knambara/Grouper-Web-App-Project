@@ -29,7 +29,7 @@ public class GrouperDBManagerTest {
     GrouperDBManager manager = new GrouperDBManager(userCache, groupCache, db);
     manager.setUpUsersAndGroupsTable();
     String testHash = "ABCD";
-    manager.addNewUser(testHash, "John Doe", "john_doe@domain.com");
+    manager.addNewUser(testHash, "John Doe", "john_doe@domain.com", "");
     Connection conn = db.getConnection();
     String query = "SELECT * FROM users WHERE U_ID = 'john_doe@domain.com'";
     PreparedStatement prep = conn.prepareStatement(query);
