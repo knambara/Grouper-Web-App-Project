@@ -232,7 +232,7 @@ public class GrouperDBManager {
     Connection conn = grouperDB.getConnection();
     List<String> deptGroups = new ArrayList<>();
 
-    String query = "SELECT * FROM groups WHERE department = ?";
+    String query = "SELECT * FROM groups WHERE department = ?;";
     try {
       PreparedStatement prep = conn.prepareStatement(query);
       prep.setString(1, department);
@@ -247,6 +247,33 @@ public class GrouperDBManager {
     }
 
     return deptGroups;
+  }
+
+  /**
+   * Get the data and create the groups that exist in the database.
+   *
+   * @param department A string that represents the selected dept
+   * @return a list of groups that exist in that department
+   *
+   * @author kvlynch
+   */
+  public List<Integer> getAllGroupIDs() {
+    Connection conn = grouperDB.getConnection();
+    List<Integer> groups = new ArrayList<>();
+
+    String query = "SELECT G_ID FROM groups;";
+    try {
+      PreparedStatement prep = conn.prepareStatement(query);
+
+      ResultSet rs = prep.executeQuery();
+      while (rs.next()) {
+        groups.add(rs.getInt(1));
+      }
+    } catch (Exception e) {
+      System.out.println("ERROR: Could not get group ids for given dpt.");
+    }
+
+    return groups;
   }
 
   /**

@@ -388,24 +388,6 @@ public abstract class Main {
 
       List<List<String>> groups = new ArrayList<List<String>>();
       
-      // Get all active groups for the list of classes
-      for (String c : classes) {
-        for (Group g : groupCache.getCache().asMap().values()) {
-          if (g.getCourseCode().equals(c) && g.getVisibility()) {
-            String id = Integer.toString(g.getGroupID());
-            String title = g.getTitle();
-            String course = c;
-            String size = Integer.toString(g.getUsers().size());
-            String build = g.getBuilding();
-            Integer trInt = (int) grouperDBManager.timeRemaining(g.getEndTime());
-            String time_rem = Integer.toString(trInt);
-            String end_time = g.getEndTime().toString();
-
-            groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
-          }
-        }
-      }
-      
       // First, if the user is verified to be the moderator of some group, make that group appear first.
       for (Group g : groupCache.getCache().asMap().values()) {
         if (userCache.getUser(userEmail).getGroupID() == g.getGroupID() && grouperDB.verifyUserHash(userEmail, userHash)) {
@@ -421,6 +403,25 @@ public abstract class Main {
           groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
           
           break;
+        }
+      }
+      
+      // Get all active groups for the list of classes
+      for (String c : classes) {
+        for (int gid : grouperDBManager.getAllGroupIDs()) {
+          Group g = groupCache.getGroup(gid);
+          if (g.getCourseCode().equals(c) && g.getVisibility()) {
+            String id = Integer.toString(g.getGroupID());
+            String title = g.getTitle();
+            String course = c;
+            String size = Integer.toString(g.getUsers().size());
+            String build = g.getBuilding();
+            Integer trInt = (int) grouperDBManager.timeRemaining(g.getEndTime());
+            String time_rem = Integer.toString(trInt);
+            String end_time = g.getEndTime().toString();
+
+            groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
+          }
         }
       }
 
