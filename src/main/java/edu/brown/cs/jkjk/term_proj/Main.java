@@ -21,7 +21,6 @@ import edu.brown.cs.jkjk.database.DataReader;
 import edu.brown.cs.jkjk.database.GrouperDBManager;
 import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
-import edu.brown.cs.jkjk.grouper.GroupControl;
 import edu.brown.cs.jkjk.grouper.GrouperWebSocket;
 import edu.brown.cs.jkjk.grouper.User;
 import edu.brown.cs.jkjk.grouper.UserCacheHandler;
@@ -52,7 +51,7 @@ public abstract class Main {
   private static DBConnector grouperDB = new DBConnector();
   private static UserCacheHandler userCache = new UserCacheHandler(grouperDB);
   private static GroupCacheHandler groupCache = new GroupCacheHandler(grouperDB, userCache);
-  private static GroupControl groupController = new GroupControl(userCache, groupCache);
+  // private static GroupControl groupController = new GroupControl(userCache, groupCache);
   private static GrouperDBManager grouperDBManager = new GrouperDBManager(userCache, groupCache,
       grouperDB);
 
