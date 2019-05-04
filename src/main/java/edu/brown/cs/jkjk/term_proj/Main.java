@@ -158,7 +158,7 @@ public abstract class Main {
       if (grouperDB.verifyUserHash(email, hash)) {
         DataReader dr = new DataReader();
         // Get list of departments
-        List<String> departmentList = dr.departments("data/departments_sample.csv");
+        List<String> departmentList = dr.departments("data/departments.csv");
 
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
             "departments", departmentList, "email", email);
@@ -182,7 +182,7 @@ public abstract class Main {
     public ModelAndView handle(Request req, Response res) {
       DataReader dr = new DataReader();
       // Get list of departments and buildings
-      List<String> depts = dr.departments("data/departments_sample.csv");
+      List<String> depts = dr.departments("data/departments.csv");
       List<String> buildings = dr.buildings("data/buildings.csv");
       //System.out.println(buildings);
 
@@ -461,7 +461,7 @@ public abstract class Main {
     @Override
     public String handle(Request req, Response res) {
       DataReader dr = new DataReader();
-      Map<String, Set<String>> courses = dr.courses("data/sample_courses.csv");
+      Map<String, Set<String>> courses = dr.courses("data/courses.csv");
 
       QueryParamsMap qm = req.queryMap();
       String dept = qm.value("department");
