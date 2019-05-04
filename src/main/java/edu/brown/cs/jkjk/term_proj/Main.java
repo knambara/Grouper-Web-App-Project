@@ -385,7 +385,7 @@ public abstract class Main {
             String course = c;
             String size = Integer.toString(g.getUsers().size());
             String build = g.getBuilding();
-            Integer trInt = grouperDBManager.timeRemaining(g.getEndTime());
+            Integer trInt = (int) grouperDBManager.timeRemaining(g.getEndTime());
             String time_rem = Integer.toString(trInt);
             String end_time = g.getEndTime().toString();
 
@@ -503,9 +503,9 @@ public abstract class Main {
       
       if (grouperDBManager.isUserMod(userHash, groupID)) {
         grouperDBManager.extendGroupTime(groupID, durationHours, durationMins);
-        return "{status: \"success\"}";
+        return "{\"status\": \"success\"}";
       }
-      return "{status: \"failure\"}";
+      return "{\"status\": \"failure\"}";
     }
   }
   

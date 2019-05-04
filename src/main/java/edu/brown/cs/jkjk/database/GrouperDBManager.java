@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import edu.brown.cs.jkjk.grouper.Group;
 import edu.brown.cs.jkjk.grouper.GroupCacheHandler;
@@ -138,24 +137,25 @@ public class GrouperDBManager {
    * @param endTime the Timestamp for the group's end
    * @return time remaining in minutes
    */
-  public Integer timeRemaining(Timestamp endTime) {
+  public double timeRemaining(Timestamp endTime) {
     Date nowDate = new Date();
     Long time = nowDate.getTime();
     Timestamp nowTime = new Timestamp(time);
 
     long diff = endTime.getTime() - nowTime.getTime();
 
-    long hours = TimeUnit.MILLISECONDS.toHours(diff);
-    long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+    return (double) diff / 1000.0 / 60.0;
 
-    long[] timeLeft = new long[2];
-    timeLeft[0] = hours;
-    timeLeft[1] = minutes;
-
-    Long trLong = timeLeft[0] * 60 + timeLeft[1];
-    Integer tr = trLong.intValue();
-
-    return tr;
+    /*
+     * long hours = TimeUnit.MILLISECONDS.toHours(diff); long minutes =
+     * TimeUnit.MILLISECONDS.toMinutes(diff);
+     * 
+     * long[] timeLeft = new long[2]; timeLeft[0] = hours; timeLeft[1] = minutes;
+     * 
+     * Long trLong = timeLeft[0] * 60 + timeLeft[1]; Integer tr = trLong.intValue();
+     * 
+     * return tr;
+     */
   }
 
   /**
@@ -527,7 +527,12 @@ public class GrouperDBManager {
     Connection conn = grouperDB.getConnection();
     String query = "UPDATE groups SET end_time = ? WHERE G_ID = ?;";
 
+    System.out.println(groupCache.getGroup(groupID).getEndTime().toGMTString());
+    System.out.println(groupHoursRemaining);
+
     Timestamp newEnd = getEndTime(groupHoursRemaining + durationExt);
+
+    groupCache.getGroup(groupID).setEndTime(newEnd);
 
     try (PreparedStatement prep = conn.prepareStatement(query)) {
       prep.setTimestamp(1, newEnd);
