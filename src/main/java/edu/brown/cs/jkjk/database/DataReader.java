@@ -72,7 +72,11 @@ public class DataReader {
 
     try {
       reader = new BufferedReader(new FileReader(courseFilepath));
-      String line = null;
+
+      //Read out headers
+      reader.readLine();
+      String line;
+
       while ((line = reader.readLine()) != null) {
         String[] data = line.split(COMMA_DELIMITER);
         if (courses.containsKey(data[0])) {
