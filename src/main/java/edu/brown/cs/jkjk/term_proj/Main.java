@@ -82,6 +82,7 @@ public abstract class Main {
       }
       // Set up users and groups table in database
       try {
+        grouperDBManager.deleteAllGroups();
         grouperDBManager.setUpUsersAndGroupsTable();
       } catch (Exception e) {
         e.printStackTrace();
@@ -122,6 +123,7 @@ public abstract class Main {
     Spark.post("/deleteGroup", new DeleteGroupHandler());
     Spark.post("/leaveGroup", new LeaveGroupHandler());
     Spark.post("/extendGroup", new ExtendGroupHandler());
+    Spark.post("/getUserGroup", new GetUserGroupHandler());
     Spark.post("/invisibility", new InvisibilityHandler());
   }
 
@@ -505,6 +507,28 @@ public abstract class Main {
         return "{status: \"success\"}";
       }
       return "{status: \"failure\"}";
+    }
+  }
+  
+  /**
+   * Returns the ID of whicih group a user is in.
+   * 
+   * @author Jeff
+   */
+  private static class GetUserGroupHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      
+      String userID = qm.value("user");
+      String userHash = qm.value("hash");
+      
+      if (grouperDB.verifyUserHash(userID, userHash)) {
+        return "{\"status\": \"success\",\n"
+            + "\"group\": " + userCache.getUser(userID).getGroupID() + "}";
+      }
+      
+      return "{status: \"failure\", group: undefined}";
     }
   }
   

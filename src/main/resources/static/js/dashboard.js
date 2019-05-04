@@ -134,7 +134,7 @@ function updateGrid() {
                     tile.updateTime();
                 }
             }
-            
+
             sort();
             sessionStorage.setItem("checkedClasses", JSON.stringify(checked_classes));
         });
@@ -200,6 +200,17 @@ $(document).ready(() => {
 
     // When page is refreshed, reload all the appropriate data that has been saved
     $(window).on('load', function(){
+
+        const postParameters = {user: getUserSession().email, hash: getUserSession().hash};
+        $.post("../getUserGroup", postParameters, responseJSON => {
+
+            const responseObject = JSON.parse(responseJSON);
+
+            if (responseObject.status != "failure") {
+              setUserSessionGroup(responseObject.group);
+            }
+
+        });
 
         // Reset all dropdowns with previous values before refresh
         $dept_select.val(sessionStorage.getItem("department"));
@@ -350,7 +361,7 @@ $(document).ready(() => {
 
     // Prevent users who are already in a group from creating a new one.
     $('#add-group-button').on('click', event => {
-        if (localStorage.getItem("gid") !== '-1') {
+        if (getUserSession().gid !== '-1') {
             alert("You are already in a group! You must leave or end your current group before adding a new one.");
         } else {
             window.location.href = "/grouper/newgroup";

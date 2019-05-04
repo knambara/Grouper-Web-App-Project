@@ -4,6 +4,10 @@ function addUserSession(email, hash) {
   localStorage.setItem("gid", "-1");
 }
 
+function setUserSessionGroup(groupID) {
+  localStorage.setItem("gid", groupID);
+}
+
 function doesSessionExist() {
   return localStorage.getItem("grouper_email") !== null &&
   localStorage.getItem("grouper_hash") !== null;
