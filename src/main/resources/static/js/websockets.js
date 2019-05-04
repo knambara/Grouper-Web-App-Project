@@ -60,8 +60,9 @@ const setup_live_groups = () => {
         console.log("Remove group invoked.");
         displayedGroups.delete(data.payload.gid);
         $('#' + data.payload.gid).remove();
-        break;      
+        break;
     }
+    updateCourseList();
   };
 }
 

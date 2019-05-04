@@ -200,6 +200,11 @@ const $group_grid = $('#group-grid');
 
 const class_map = new Map();
 
+function updateCourseList() {
+  $('#class-list').empty();
+  $dept_select.trigger('change');
+}
+
 $(document).ready(() => {
 
     // When page is refreshed, reload all the appropriate data that has been saved
