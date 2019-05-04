@@ -7,7 +7,8 @@ function updateGroupContent(email) {
   if (document.getElementById(email)) {
     let num = Number($groupSize.html()) - 1;
     $groupSize.html(num.toString());
-    $('#' + email, this).remove();
+    var line = $(document.getElementById(email));
+    line.remove();
   } else {
     console.log($groupSize.html());
     let num = Number($groupSize.html()) + 1;
