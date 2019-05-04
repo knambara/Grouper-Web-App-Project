@@ -44,7 +44,9 @@ const setup_live_groups = () => {
         // TODO: Update the members within a group
         console.log("update group invoked");
         // function in group.js
-        updateGroupContent(data.payload.email);
+        if (data.payload.gid === localStorage.getItem("gid")) {
+            updateGroupContent(data.payload.email);
+        }
         break;
       case MESSAGE_TYPE.REDIRECT_USERS:
         if (data.payload.gid === localStorage.getItem("gid")) {
@@ -80,10 +82,10 @@ const remove_group = (gid) => {
 }
 
 //Should be called when a user joins or leaves a group
-const update_group = (email) => {
+const update_group = (email, gid) => {
   // Send a MEMBERS message to the server using 'conn'
   console.log("In update group");
-  const p = {"id" : myId, "email" : email};
+  const p = {"id" : myId, "email" : email, "gid" : gid};
   const JSONObj = {"type" : MESSAGE_TYPE.MEMBERS, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }

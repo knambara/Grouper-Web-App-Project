@@ -63,7 +63,7 @@ $(document).ready(() => {
       const msg = responseObject.msg;
       console.log(msg);
       console.log("Commencing update group.");
-      update_group(localStorage.getItem("grouper_email"));
+      update_group(localStorage.getItem("grouper_email"), localStorage.getItem("gid"));
 
       // Redirect current user's page to dashboard and reset gid
       localStorage.setItem("gid", "-1");
@@ -115,7 +115,7 @@ $(document).ready(() => {
         localStorage.setItem("gid", gid);
         console.log("Commencing update group.");
         // Function in websockets.js
-        update_group(localStorage.getItem("grouper_email"));
+        update_group(localStorage.getItem("grouper_email"), gid);
       }
     }
   }

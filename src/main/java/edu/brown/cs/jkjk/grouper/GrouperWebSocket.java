@@ -81,11 +81,13 @@ public class GrouperWebSocket {
       JsonObject payload = received.get("payload").getAsJsonObject();
       int id = payload.get("id").getAsInt();
       String email = payload.get("email").getAsString();
+      String gid = payload.get("gid").getAsString();
 
       JsonObject updateMsg = new JsonObject();
       JsonObject updatePayload = new JsonObject();
       updatePayload.addProperty("id", id);
       updatePayload.addProperty("email", email);
+      updatePayload.addProperty("gid", gid);
 
       updateMsg.addProperty("type", MESSAGE_TYPE.UPDATE_GROUP.ordinal());
       updateMsg.add("payload", updatePayload);
