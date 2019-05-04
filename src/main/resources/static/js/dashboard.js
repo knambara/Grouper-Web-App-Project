@@ -323,7 +323,73 @@ $(document).ready(() => {
             sessionStorage.setItem("classList", JSON.stringify(curr_classes));
         });
         old_dept = curr_department;
-    });
+
+        let latS = 1;
+        let lonS = 1;
+        let message = null;
+        let errorCode = 0;
+
+        if (navigator.geolocation) {
+            //console.log("Supports geolocation");
+            const coords = navigator.geolocation.getCurrentPosition(showPostion, showError);
+            //            console.log(coords);
+
+        } else {
+            //console.log("Doesn't support geolocation");
+            // message.innerHTML = "Geolocation services not supported by this browser."
+            message = "Geolocation services not supported by this browser."
+            // error 1 -- location services are not supported
+            const noLocPostParams = {lat: 0, lon:0, message: message, error: 1};
+            $.post("/location", noLocPostParams);
+        }
+
+        function showPostion(position) {
+            // lat.innerHTML = position.coords.latitude;
+            // lon.innerHTML = position.coords.longitude;
+            // message.innerHTML = "Success";
+
+            latS = position.coords.latitude;
+            //console.log("Lat Stored: " + latS);
+            lonS = position.coords.longitude;
+            //console.log("Lon Stored: " + lonS);
+            message = "Success";
+            const locPostParams = {user: getUserSession().email, hash: getUserSession().hash, lat: latS, lon: lonS, message: message, error: 0};
+            $.post("/location", locPostParams);
+
+
+        }
+
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    // message.innerHTML = "User denided permission."
+                    message = "User permission denied.";
+                    const deniedPostParams = {user: getUserSession().email, hash: getUserSession().hash, lat: 0, lon:0, message: message, error: 2};
+                    $.post("/location", deniedPostParams);
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    // message.innerHTML = "User position is unavailable."
+                    message = "User position is unavailable.";
+                    const unavailPostParams = {user: getUserSession().email, hash: getUserSession().hash, lat: 0, lon:0, message: message, error: 1};
+                    $.post("/location", unavailPostParams);
+                    break;
+                case error.TIMEOUT:
+                    // message.innerHTML = "The request to get the user position timed out."
+                    message = "The request to get the user position timed out.";
+                    const timeoutPostParams = {user: getUserSession().email, hash: getUserSession().hash, lat: 0, lon:0, message: message, error: 1};
+                    $.post("/location", timeoutPostParams);
+                    break;
+                default:
+                    // message.innerHTML = "Unknown error occured."
+                    message = "Unknown error occurred.";
+                    const unkPostParams = {user: getUserSession().email, hash: getUserSession().hash, lat: 0, lon:0, message: message, error: 1};
+                    $.post("/location", unkPostParams);
+                    break;
+            }
+        }
+
+});
 
     // Remove all groups associated with the given class code
     function removeGroups(classCode) {

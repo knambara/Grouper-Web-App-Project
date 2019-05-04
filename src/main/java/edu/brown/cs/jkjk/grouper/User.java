@@ -17,6 +17,7 @@ public class User {
   private int groupID = -1;
   private boolean mod;
   private String img;
+  private double[] position;
 
   /**
    * Constructor for User. ID of each user is autoincremented.
@@ -28,6 +29,9 @@ public class User {
     this.name = name;
     this.email = email;
     this.img = img;
+    position = new double[2];
+    position[0] = 0;
+    position[1] = 0;
   }
 
   /**
@@ -91,6 +95,39 @@ public class User {
    */
   public void setMod(boolean m) {
     this.mod = m;
+  }
+
+  /**
+   * Sets the position of the user to a specified lat/lon coordinate.
+   *
+   * @param position array of 2 doubles, where 0-ind = lat and 1-ind = lon
+   */
+  public void setPosition(double[] position) {
+    this.position = position;
+  }
+
+  /**
+   * Returns the user's position.
+   *
+   * @return array of 2 doubles, where 0-ind = lat and 1-ind = lon
+   */
+  public double[] getPosition() {
+    return position;
+  }
+
+  public double getDistance(double[] building) {
+    if (position[0] != 0 && position[1] != 0) {
+      double latDiff = position[0] - building[0];
+      double latSq = Math.pow(latDiff, 2);
+      double lonDiff = position[1] - building[1];
+      double lonSq = Math.pow(lonDiff, 2);
+
+      double sum = latSq + lonSq;
+
+      return Math.pow(sum, 0.5);
+    } else {
+      return 0;
+    }
   }
 
   /**

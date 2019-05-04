@@ -124,6 +124,7 @@ public abstract class Main {
     Spark.post("/extendGroup", new ExtendGroupHandler());
     Spark.post("/getUserGroup", new GetUserGroupHandler());
     Spark.post("/invisibility", new InvisibilityHandler());
+    Spark.post("/location", new LocationHandler());
   }
 
   /**
@@ -182,8 +183,8 @@ public abstract class Main {
       DataReader dr = new DataReader();
       // Get list of departments and buildings
       List<String> depts = dr.departments("data/departments_sample.csv");
-      List<String> buildings = dr.buildings("data/buildings_sample.csv");
-      System.out.println(buildings);
+      List<String> buildings = dr.buildings("data/buildings.csv");
+      //System.out.println(buildings);
 
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group",
           "departments", depts, "buildings", buildings);
@@ -405,7 +406,18 @@ public abstract class Main {
           break;
         }
       }
-      
+
+      DataReader dr = new DataReader();
+      dr.buildings("data/buildings.csv");
+      Map<String, double[]> buildLocs = dr.getBuildingsLocation();
+
+      User u = null;
+      String dbUser = grouperDBManager.getUserIDFromHash(userHash);
+      if (userEmail.equals(dbUser)) {
+        u = userCache.getUser(dbUser);
+      }
+
+
       // Get all active groups for the list of classes
       for (String c : classes) {
         for (int gid : grouperDBManager.getAllGroupIDs()) {
@@ -420,7 +432,16 @@ public abstract class Main {
             String time_rem = Integer.toString(trInt);
             String end_time = g.getEndTime().toString();
 
-            groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time));
+            double[] buildPos = buildLocs.get(build);
+            Double dist;
+            if (!u.equals(null)) {
+              dist = u.getDistance(buildPos);
+            } else {
+              dist = 0.0;
+            }
+            String distString = Double.toString(dist);
+
+            groups.add(Arrays.asList(id, title, course, size, build, time_rem, end_time, distString));
           }
         }
       }
@@ -455,6 +476,48 @@ public abstract class Main {
 
       Map<String, Object> variables = ImmutableMap.of("dept", deptCourses);
       return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handler that gets the location of the user.
+   *
+   * @author kvlynch
+   */
+  private static class LocationHandler implements Route {
+
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String user = qm.value("user");
+      String userHash = qm.value("hash");
+
+      String latString = qm.value("lat");
+      String lonString = qm.value("lon");
+      //String message = qm.value("message");
+      String errorCode = qm.value("error");
+
+
+      Integer errorFlag = Integer.parseInt(errorCode);
+      Double lat = Double.parseDouble(latString);
+      Double lon = Double.parseDouble(lonString);
+      double[] position = new double[2];
+      position[0] = lat;
+      position[1] = lon;
+
+      //verify the user email from post is the same as what is stored in db
+      String dbUser = grouperDBManager.getUserIDFromHash(userHash);
+      if (user.equals(dbUser)) {
+        //if the error code is permission denied update to reflect or if the
+        //position is successfully retrieved. If it times out or location
+        //services are no longer available then keep the current location
+        if (errorFlag == 2 || errorFlag == 0) {
+          User u = userCache.getUser(dbUser);
+          u.setPosition(position);
+        }
+      }
+
+      return GSON.toJson("");
     }
   }
 

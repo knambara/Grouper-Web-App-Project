@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * Reads in the data regarding current courses, buildings and departments.
- * 
+ *
  * @author kvlynch
  */
 public class DataReader {
@@ -20,6 +20,7 @@ public class DataReader {
   private List<String> departments;
   private Map<String, Set<String>> courses;
   private List<String> buildings;
+  private Map<String, double[]> buildingsLocation;
 
   private static final String COMMA_DELIMITER = ",";
 
@@ -27,6 +28,7 @@ public class DataReader {
     departments = new ArrayList<>();
     courses = new HashMap<>();
     buildings = new ArrayList<>();
+    buildingsLocation = new HashMap<>();
   }
 
   /**
@@ -118,9 +120,20 @@ public class DataReader {
       reader = new BufferedReader(new FileReader(buildingsFilepath));
       String line;
 
+      //get rid of headers
+      reader.readLine();
+
       while ((line = reader.readLine()) != null) {
         String[] data = line.split(COMMA_DELIMITER);
         buildings.add(data[0]);
+        double lat = Double.parseDouble(data[1]);
+        double lon = Double.parseDouble(data[2]);
+        double[] position = new double[2];
+        position[0] = lat;
+        position[1] = lon;
+        buildingsLocation.put(data[0], position);
+
+
       }
 
     } catch (IOException e) {
@@ -136,4 +149,14 @@ public class DataReader {
     }
     return buildings;
   }
+
+  /**
+   * Returns the map of building names to positions
+   *
+   * @return building locations
+   */
+  public Map<String, double[]> getBuildingsLocation() {
+    return buildingsLocation;
+  }
+
 }
