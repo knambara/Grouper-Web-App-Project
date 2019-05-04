@@ -466,14 +466,14 @@ public class GrouperDBManager {
    * @param gID the group to verify.
    * @return True if the user is a mod of the group.
    */
-  public boolean isUserMod(String userHash, String gID) {
+  public boolean isUserMod(String userHash, int gID) {
 
     String query = "SELECT * FROM groups AS g, users AS u "
         + "WHERE u.hash=? AND u.U_ID=g.mod AND g.G_ID=?;";
     Connection conn = grouperDB.getConnection();
     try (PreparedStatement prep = conn.prepareStatement(query)) {
       prep.setString(1, userHash);
-      prep.setString(2, gID);
+      prep.setInt(2, gID);
       ResultSet results = prep.executeQuery();
 
       while (results.next()) {
@@ -510,5 +510,35 @@ public class GrouperDBManager {
       System.err.println(e.getMessage());
     }
     return false;
+  }
+
+  /**
+   * Extends a group's remaining time.
+   * 
+   * @param groupID The id of the group to extend.
+   * @param hours Hours to extend by.
+   * @param minutes Minutes to extend by.
+   */
+  public void extendGroupTime(int groupID, int hours, int minutes) {
+    double groupHoursRemaining = ((double) timeRemaining(groupCache.getGroup(groupID).getEndTime())
+        / 60.0);
+    double durationExt = hours + ((double) minutes / 60.0);
+
+    Connection conn = grouperDB.getConnection();
+    String query = "UPDATE groups SET end_time = ? WHERE G_ID = ?;";
+
+    Timestamp newEnd = getEndTime(groupHoursRemaining + durationExt);
+
+    try (PreparedStatement prep = conn.prepareStatement(query)) {
+      prep.setTimestamp(1, newEnd);
+      prep.setInt(2, groupID);
+
+      prep.executeUpdate();
+      prep.close();
+
+      groupCache.setEndTime(groupID, newEnd);
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }

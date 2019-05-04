@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
@@ -148,5 +149,21 @@ public class GroupCacheHandler {
       }
     }
     return deptGroups;
+  }
+
+  public void setEndTime(int groupId, Timestamp end) {
+    try {
+      groupCache.get(groupId).setEndTime(end);
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void setDuration(int groupId, double duration) {
+    try {
+      groupCache.get(groupId).setDuration(duration);
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
   }
 }

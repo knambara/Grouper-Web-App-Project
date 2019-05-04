@@ -1,5 +1,20 @@
 <#assign content>
 <div id="group-body">
+  <div id="group-extend-overlay">
+
+  </div>
+  <div id="group-extend-container">
+    <div id="group-extend-box">
+      <div id="duration-select">
+        <input type="number" min="0" max="23" value="1" class="duration-box" name="duration-hours" id="extend-duration-hours"> hr
+        <input type="number" min="0" max="59" value="30" class="duration-box" name="duration-mins" id="extend-duration-mins"> min
+        <br><br>
+        <button id="extend-time-apply">APPLY</button><br><br>
+        <a href="" id="extend-cancel">Cancel</a><br>
+      </div>
+      <br>&nbsp;
+    </div>
+  </div>
   <div id="group-centered">
   <div id="back-button">
   <button id="back-to-dashboard">Back to Dashboard</button>

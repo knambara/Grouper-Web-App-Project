@@ -121,6 +121,7 @@ public abstract class Main {
     Spark.post("/grouper/group", new GroupHandler(), freeMarker);
     Spark.post("/deleteGroup", new DeleteGroupHandler());
     Spark.post("/leaveGroup", new LeaveGroupHandler());
+    Spark.post("/extendGroup", new ExtendGroupHandler());
   }
 
   /**
@@ -257,7 +258,7 @@ public abstract class Main {
 
     @Override
     public ModelAndView handle(Request req, Response res) {
-      String g_id = req.queryParams("gid");
+      Integer g_id = Integer.parseInt(req.queryParams("gid"));
       String u_id = req.queryParams("uid");
 
       if (!grouperDBManager.doesUserExist(u_id)) {
@@ -270,8 +271,7 @@ public abstract class Main {
       // Handle get request for moderator group page is called
       // if (u_id.equals("modPage")) {
       if (isUserMod) {
-        int groupID = Integer.parseInt(g_id);
-        Group g = groupCache.getGroup(groupID);
+        Group g = groupCache.getGroup(g_id);
         String groupSize = Integer.toString(g.getUsers().size());
         // @formatter:off
         Map<String, Object> variables = ImmutableMap.<String, Object>builder()
@@ -290,14 +290,13 @@ public abstract class Main {
         return new ModelAndView(variables, "group.ftl");
       }
       // Handle get request for joined group page
-      int groupID = Integer.parseInt(g_id);
-      Group g = groupCache.getGroup(groupID);
+      Group g = groupCache.getGroup(g_id);
       String userHash = u_id;
       String userID = grouperDBManager.getUserIDFromHash(userHash);
       User u = userCache.getUser(userID);
       // Only add if group doesn't contain this user; handles refreshing group page
       if (!g.getUsers().contains(u)) {
-        grouperDBManager.addUserToGroup(userID, groupID);
+        grouperDBManager.addUserToGroup(userID, g_id);
       }
       String groupSize = Integer.toString(g.getUsers().size());
       // @formatter:off
@@ -482,6 +481,29 @@ public abstract class Main {
         return GSON.toJson(variables);
 
       }
+    }
+  }
+  
+  /**
+   * Handles a mod of a group extending the time for that group.
+   * 
+   * @author Jeff
+   */
+  private static class ExtendGroupHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      
+      String userHash = qm.value("hash");
+      Integer groupID = Integer.parseInt(qm.value("group"));
+      Integer durationHours = Integer.parseInt(qm.value("duration_hours"));
+      Integer durationMins = Integer.parseInt(qm.value("duration_mins"));
+      
+      if (grouperDBManager.isUserMod(userHash, groupID)) {
+        grouperDBManager.extendGroupTime(groupID, durationHours, durationMins);
+        return "{status: \"success\"}";
+      }
+      return "{status: \"failure\"}";
     }
   }
   

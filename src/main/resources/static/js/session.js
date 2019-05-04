@@ -18,6 +18,7 @@ function removeSession() {
 function getUserSession() {
   return {
     email: localStorage.getItem("grouper_email"),
-    hash: localStorage.getItem("grouper_hash")
+    hash: localStorage.getItem("grouper_hash"),
+    gid: localStorage.getItem("gid")
   };
 }

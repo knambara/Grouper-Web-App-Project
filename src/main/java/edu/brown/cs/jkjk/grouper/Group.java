@@ -66,6 +66,10 @@ public class Group {
     return duration;
   }
 
+  public void setDuration(double duration) {
+    this.duration = duration;
+  }
+
   public Timestamp getEndTime() {
     return end;
   }

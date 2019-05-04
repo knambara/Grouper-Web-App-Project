@@ -23,6 +23,10 @@ $(document).ready(() => {
 
   const $end_button = $('#end-button');
   const $leave_button = $('#leave-button');
+  const $extend_button = $('#extend-button');
+
+  const $extend_apply_button = $('#extend-time-apply');
+  const $extend_exit_area = $('#extend-cancel');
 
   // When the moderator ends a group
   $end_button.on('click', event => {
@@ -64,6 +68,34 @@ $(document).ready(() => {
       localStorage.setItem("gid", "-1");
       redirectToDashboard();
     });
+  });
+
+  $extend_button.on('click', event => {
+    $("#group-extend-overlay").css("display", "inline");
+    $("#group-extend-container").css("display", "inline");
+  });
+
+  $extend_exit_area.on('click', event => {
+    $("#group-extend-overlay").css("display", "none");
+    $("#group-extend-container").css("display", "none");
+  });
+
+  $extend_apply_button.on('click', event => {
+    const postParameter = {
+      hash: getUserSession().hash,
+      group: getUserSession().gid,
+      duration_hours: $("#extend-duration-hours").val(),
+      duration_mins: $("#extend-duration-mins").val(),
+    };
+    $.post("/extendGroup", postParameter, responseJSON => {
+      const responseObject = JSON.parse(responseJSON);
+
+      if (responseObject.status != "success") {
+        alert("Couldn't extend the group.");
+      }
+    });
+    $("#group-extend-overlay").css("display", "none");
+    $("#group-extend-container").css("display", "none");
   });
 
   // If group page is invoked, check if the session is newly joining or not
