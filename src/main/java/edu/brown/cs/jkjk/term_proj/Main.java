@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -184,7 +185,7 @@ public abstract class Main {
       // Get list of departments and buildings
       List<String> depts = dr.departments("data/departments.csv");
       List<String> buildings = dr.buildings("data/buildings.csv");
-      //System.out.println(buildings);
+      // System.out.println(buildings);
 
       Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Create a new group",
           "departments", depts, "buildings", buildings);
@@ -473,8 +474,11 @@ public abstract class Main {
         deptCourses = new HashSet<>();
         deptCourses.add("NONE");
       }
-
-      Map<String, Object> variables = ImmutableMap.of("dept", deptCourses);
+      
+      List<String> courseList = new ArrayList<String>();
+      courseList.addAll(deptCourses);
+      Collections.sort(courseList);
+      Map<String, Object> variables = ImmutableMap.of("dept", courseList);
       return GSON.toJson(variables);
     }
   }

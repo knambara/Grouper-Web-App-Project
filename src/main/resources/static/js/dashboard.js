@@ -1,7 +1,7 @@
 
 // Class defining a Group Tile for the Dashboard page
 class GroupTile {
-    constructor(id, title, course, size, loc, time_left, end_time) {
+    constructor(id, title, course, size, loc, time_left, end_time, dist) {
         this.id = id;
         this.title = title;
         this.dept = course.substring(0,4);
@@ -10,6 +10,7 @@ class GroupTile {
         this.loc = loc;
         this.time_left = time_left;
         this.endTime = end_time; // Timestamp
+        this.dist = dist;
     }
 
     // Builds the HTML of the Group Tile
@@ -52,6 +53,7 @@ class GroupTile {
         const currTime = new Date();
         const timeDiff = endTime.getTime() - currTime.getTime();
         const totalMins = timeDiff/ 60000;
+        this.setTime(totalMins);
         const hours = Math.floor(totalMins / 60);
         const mins = Math.floor(totalMins - hours*60);
         if (mins >= 10) {
@@ -122,7 +124,7 @@ function updateGrid() {
         };
 
         // POST request for all groups associated with checked classes; recieve list of
-        // active groups w/ information in formate of [id, title, course, size, location, time-remaining, end-time]
+        // active groups w/ information in formate of [id, title, course, size, location, time-remaining, end-time, dist]
         $.post("/checkedClasses", postParameters, responseJSON => {
 
             const responseObject = JSON.parse(responseJSON);
@@ -132,7 +134,7 @@ function updateGrid() {
             for (i in groups) {
                 const group = groups[i];
                 if (!displayedGroups.has(group[0])) {
-                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6]);
+                    const tile = new GroupTile(group[0], group[1], group[2], group[3], group[4], group[5], group[6], group[7]);
                     displayedGroups.set(tile.id, tile);
                     tile.build();
                     tile.updateTime();
@@ -142,7 +144,7 @@ function updateGrid() {
             sort();
             sessionStorage.setItem("checkedClasses", JSON.stringify(checked_classes));
         });
-    }
+}
 
 
 // Function to sort the grid based on whatever the value of each dropdown is
@@ -175,7 +177,7 @@ function sort() {
         }
     }
     // Sort based on distance to user
-    /*
+
     else if ($sort_select.val() === "distance") {
         const sorted = sortByDistance(displayedGroups);
         if ($order_select.val() === "asc") {
@@ -184,7 +186,6 @@ function sort() {
             rebuildGrid(sorted.reverse());
         }
     }
-    */
 }
 
 // Groups currently displayed stored in map where key = id, value = GroupTile
@@ -211,7 +212,7 @@ $(document).ready(() => {
     $('#user-img').html("<img class='circle-image' src='"+ profile_img + "'/>");
 
     // When page is refreshed, reload all the appropriate data that has been saved
-    $(window).on('load', function(){
+    $(window).on('load', function() {
 
         const postParameters = {user: getUserSession().email, hash: getUserSession().hash};
         $.post("../getUserGroup", postParameters, responseJSON => {
@@ -324,6 +325,7 @@ $(document).ready(() => {
         });
         old_dept = curr_department;
 
+
         let latS = 1;
         let lonS = 1;
         let message = null;
@@ -355,8 +357,6 @@ $(document).ready(() => {
             message = "Success";
             const locPostParams = {user: getUserSession().email, hash: getUserSession().hash, lat: latS, lon: lonS, message: message, error: 0};
             $.post("/location", locPostParams);
-
-
         }
 
 
@@ -388,8 +388,7 @@ $(document).ready(() => {
                     break;
             }
         }
-
-});
+    });
 
     // Remove all groups associated with the given class code
     function removeGroups(classCode) {
@@ -419,16 +418,31 @@ $(document).ready(() => {
         t = setTimeout(updateTimeRemainingForDisplayed,1000);
     }
 
-
     // SORTING FUNCTIONALITY
     $order_select.on('change', event => {
         sessionStorage.setItem("order", $order_select.val());
         sort();
+        $('#add-group-button').on('click', event => {
+            console.log("hi");
+            if (getUserSession().gid !== '-1') {
+                alert("You are already in a group! You must leave or end your current group before adding a new one.");
+            } else {
+                window.location.href = "/grouper/newgroup";
+            }
+        });
     });
 
     $sort_select.on('change', event => {
         sessionStorage.setItem("sort", $sort_select.val());
         sort();
+        $('#add-group-button').on('click', event => {
+            console.log("hi");
+            if (getUserSession().gid !== '-1') {
+                alert("You are already in a group! You must leave or end your current group before adding a new one.");
+            } else {
+                window.location.href = "/grouper/newgroup";
+            }
+        });
     });
 
     // Log out functionality
@@ -439,6 +453,7 @@ $(document).ready(() => {
 
     // Prevent users who are already in a group from creating a new one.
     $('#add-group-button').on('click', event => {
+        console.log("hi");
         if (getUserSession().gid !== '-1') {
             alert("You are already in a group! You must leave or end your current group before adding a new one.");
         } else {
@@ -498,5 +513,17 @@ function sortByGroupSize(groups) {
 }
 
 function sortByDistance(groups) {
-
+    const tempList = [];
+    const groupIter = groups.values();
+    for (let i = 0; i < groups.size; i++) {
+        const g = groupIter.next().value;
+        const tempGroup = {dist: g.dist, tile: g};
+        tempList.push(tempGroup);
+    }
+    tempList.sort(function(a,b){return b.dist - a.dist;});
+    const sortedTiles = [];
+    for (i in tempList) {
+        sortedTiles.push(tempList[i].tile);
+    }
+    return sortedTiles.reverse();
 }

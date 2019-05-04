@@ -75,7 +75,7 @@ public class DataReader {
     try {
       reader = new BufferedReader(new FileReader(courseFilepath));
 
-      //Read out headers
+      // Read out headers
       reader.readLine();
       String line;
 
@@ -120,20 +120,20 @@ public class DataReader {
       reader = new BufferedReader(new FileReader(buildingsFilepath));
       String line;
 
-      //get rid of headers
+      // get rid of headers
       reader.readLine();
 
       while ((line = reader.readLine()) != null) {
         String[] data = line.split(COMMA_DELIMITER);
         buildings.add(data[0]);
-        double lat = Double.parseDouble(data[1]);
-        double lon = Double.parseDouble(data[2]);
-        double[] position = new double[2];
-        position[0] = lat;
-        position[1] = lon;
-        buildingsLocation.put(data[0], position);
-
-
+        if (data.length > 1) {
+          double lat = Double.parseDouble(data[1]);
+          double lon = Double.parseDouble(data[2]);
+          double[] position = new double[2];
+          position[0] = lat;
+          position[1] = lon;
+          buildingsLocation.put(data[0], position);
+        }
       }
 
     } catch (IOException e) {
