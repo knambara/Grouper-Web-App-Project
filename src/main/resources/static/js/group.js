@@ -15,7 +15,7 @@ function updateGroupContent(email, img) {
     console.log($groupSize.html());
     let num = Number($groupSize.html()) + 1;
     $groupSize.html(num.toString());
-    $groupMembers.html( $groupMembers.html() + "<img class = 'circle-image small' id='" + img + "' src='" + img + "'/>  <p id='" + email + "'>" + email + "</p>");
+    $groupMembers.html( $groupMembers.html() + "<div id='group-user-info'><img class = 'circle-image small' id='" + img + "' src='" + img + "'/>  <p id='" + email + "'>" + email + "</p></div>");
   }
 }
 
@@ -32,10 +32,10 @@ $(document).ready(() => {
   const $extend_apply_button = $('#extend-time-apply');
   const $extend_exit_area = $('#extend-cancel');
   const $toggle_switch = $('#myToggle');
-  
+
 //   $('#group-duration').change(function() {
 //     const time = $('#group-duration').html();
-//     console.log(time);    
+//     console.log(time);
 //     if (time.equals("0 hr 0 min remaining")) {
 //         // Send mod email to backend
 //         const postParameter = {

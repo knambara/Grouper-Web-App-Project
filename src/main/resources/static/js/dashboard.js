@@ -453,7 +453,6 @@ $(document).ready(() => {
 
     // Prevent users who are already in a group from creating a new one.
     $('#add-group-button').on('click', event => {
-        console.log("hi");
         if (getUserSession().gid !== '-1') {
             alert("You are already in a group! You must leave or end your current group before adding a new one.");
         } else {
