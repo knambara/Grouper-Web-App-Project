@@ -26,7 +26,7 @@ public class GrouperWebSocket {
   private static int nextId = 0;
 
   private static enum MESSAGE_TYPE {
-    CONNECT, GROUPS, MEMBERS, UPDATE_DASHBOARD, UPDATE_GROUP, REDIRECT, REDIRECT_USERS, REMOVE, REMOVE_GROUP
+    CONNECT, GROUPS, MEMBERS, UPDATE_DASHBOARD, UPDATE_GROUP, REDIRECT, REDIRECT_USERS, REMOVE, REMOVE_GROUP, RELOAD, RELOAD_GROUP
   }
 
   @OnWebSocketConnect
@@ -82,12 +82,14 @@ public class GrouperWebSocket {
       int id = payload.get("id").getAsInt();
       String email = payload.get("email").getAsString();
       String gid = payload.get("gid").getAsString();
+      String img = payload.get("img").getAsString();
 
       JsonObject updateMsg = new JsonObject();
       JsonObject updatePayload = new JsonObject();
       updatePayload.addProperty("id", id);
       updatePayload.addProperty("email", email);
       updatePayload.addProperty("gid", gid);
+      updatePayload.addProperty("img", img);
 
       updateMsg.addProperty("type", MESSAGE_TYPE.UPDATE_GROUP.ordinal());
       updateMsg.add("payload", updatePayload);
@@ -134,6 +136,24 @@ public class GrouperWebSocket {
       updatePayload.addProperty("gid", gid);
 
       updateMsg.addProperty("type", MESSAGE_TYPE.REMOVE_GROUP.ordinal());
+      updateMsg.add("payload", updatePayload);
+
+      for (Session s : sessions) {
+        s.getRemote().sendString(GSON.toJson(updateMsg));
+      }
+    }
+
+    // TODO: Handles updating time in group page
+    if (received.get("type").getAsInt() == MESSAGE_TYPE.RELOAD.ordinal()) {
+      // Get session id from payload
+      JsonObject payload = received.get("payload").getAsJsonObject();
+      String gid = payload.get("gid").getAsString();
+
+      JsonObject updateMsg = new JsonObject();
+      JsonObject updatePayload = new JsonObject();
+      updatePayload.addProperty("gid", gid);
+
+      updateMsg.addProperty("type", MESSAGE_TYPE.RELOAD_GROUP.ordinal());
       updateMsg.add("payload", updatePayload);
 
       for (Session s : sessions) {

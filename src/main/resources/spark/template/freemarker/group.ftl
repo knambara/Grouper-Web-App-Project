@@ -48,7 +48,7 @@
     <div id="group-members">
       <#list groupusers as user>
         <div id="group-user-info">
-		<img class = "circle-image small" src =${user.getImg()} />
+		<img class = "circle-image small" id=${user.getImg()} src =${user.getImg()} />
         <p id=${user.getEmail()}>${user.getEmail()}</p>
         </div>
 	  </#list>

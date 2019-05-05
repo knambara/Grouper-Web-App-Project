@@ -7,7 +7,9 @@ const MESSAGE_TYPE = {
   REDIRECT: 5,
   REDIRECT_USERS: 6,
   REMOVE: 7,
-  REMOVE_GROUP: 8
+  REMOVE_GROUP: 8,
+  RELOAD: 9,
+  RELOAD_GROUP: 10
 };
 
 let conn;
@@ -31,35 +33,33 @@ const setup_live_groups = () => {
         break;
       case MESSAGE_TYPE.CONNECT:
         // Assign myId
-        console.log("Connected session with server.");
         myId = data.payload.id;
         break;
       case MESSAGE_TYPE.UPDATE_DASHBOARD:
         // TODO: Update what the dashboard shows
-        console.log("update dashboard invoked");
-        console.log("by session " + data.payload.id);
         updateGrid();
         break;
       case MESSAGE_TYPE.UPDATE_GROUP:
         // TODO: Update the members within a group
-        console.log("update group invoked");
         // function in group.js
         if (data.payload.gid === localStorage.getItem("gid")) {
-            updateGroupContent(data.payload.email);
+            updateGroupContent(data.payload.email, data.payload.img);
         }
         break;
       case MESSAGE_TYPE.REDIRECT_USERS:
         if (data.payload.gid === localStorage.getItem("gid")) {
-          console.log("redirect users invoked");
-          redirectToDashboard();
-          alert("Moderator ended group session!");
+          redirectToDashboard();          
           localStorage.setItem("gid", -1);
         }
         break;
       case MESSAGE_TYPE.REMOVE_GROUP:
-        console.log("Remove group invoked.");
         displayedGroups.delete(data.payload.gid);
         $('#' + data.payload.gid).remove();
+        break;
+      case MESSAGE_TYPE.RELOAD_GROUP:
+        if (data.payload.gid === localStorage.getItem("gid")) {
+          location.reload(); 
+        }
         break;
     }
     updateCourseList();
@@ -83,18 +83,23 @@ const remove_group = (gid) => {
 }
 
 //Should be called when a user joins or leaves a group
-const update_group = (email, gid) => {
+const update_group = (email, gid, img) => {
   // Send a MEMBERS message to the server using 'conn'
-  console.log("In update group");
-  const p = {"id" : myId, "email" : email, "gid" : gid};
+  const p = {"id" : myId, "email" : email, "gid" : gid, "img" : img};
   const JSONObj = {"type" : MESSAGE_TYPE.MEMBERS, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }
 
 const redirect_all = (gid) => {
   // Send a REDIRECT message to the server using 'conn'
-  console.log("redirect called");
   const p = {"id" : myId, "gid" : gid};
   const JSONObj = {"type" : MESSAGE_TYPE.REDIRECT, "payload" : p};
+  conn.send(JSON.stringify(JSONObj));
+}
+
+const reload_all = (gid) => {
+  // Send a RELOAD message to the server
+  const p = {"id" : myId, "gid" : gid};
+  const JSONObj = {"type" : MESSAGE_TYPE.RELOAD, "payload" : p};
   conn.send(JSON.stringify(JSONObj));
 }

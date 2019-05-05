@@ -1,21 +1,24 @@
 
 // Updates the HTML for number of members and members' emails
-function updateGroupContent(email) {
+function updateGroupContent(email, img) {
   const $groupSize = $('#groupSize');
   const $groupMembers = $('#group-members');
-
+  console.log("update content");
   if (document.getElementById(email)) {
     let num = Number($groupSize.html()) - 1;
     $groupSize.html(num.toString());
     var line = $(document.getElementById(email));
     line.remove();
+    var circle = $(document.getElementById(img));
+    circle.remove();
   } else {
     console.log($groupSize.html());
     let num = Number($groupSize.html()) + 1;
     $groupSize.html(num.toString());
-    $groupMembers.html( $groupMembers.html() + "<p id='" + email + "'>" + email + "</p>");
+    $groupMembers.html( $groupMembers.html() + "<img class = 'circle-image small' id='" + img + "' src='" + img + "'/>  <p id='" + email + "'>" + email + "</p>");
   }
 }
+
 
 $(document).ready(() => {
 
@@ -29,6 +32,40 @@ $(document).ready(() => {
   const $extend_apply_button = $('#extend-time-apply');
   const $extend_exit_area = $('#extend-cancel');
   const $toggle_switch = $('#myToggle');
+  
+//   $('#group-duration').change(function() {
+//     const time = $('#group-duration').html();
+//     console.log(time);    
+//     if (time.equals("0 hr 0 min remaining")) {
+//         // Send mod email to backend
+//         const postParameter = {
+//         mod: localStorage.getItem("grouper_email"),
+//         hash: getUserSession().hash
+//         };
+
+//         // Deletes group mod is in and returns the URL corresponding to
+//         // that group, which the user is sent to
+//         $.post("/deleteGroup", postParameter, responseJSON => {
+
+//             const responseObject = JSON.parse(responseJSON);
+//             const msg = responseObject.msg;
+
+//             if (msg == "success") {
+//             // Call function in websockets.js
+//             remove_group(localStorage.getItem("gid"));
+//             // Redirect all other users' page to dashboard
+//             redirect_all(localStorage.getItem("gid"));
+
+//             // Redirect current user's page to dashboard and reset gid
+//             localStorage.setItem("gid", "-1");
+//             localStorage.setItem("isModerator", false);
+//             redirectToDashboard();
+//             } else {
+//             alert("Error deleting group.");
+//             }
+//         });
+//     }
+//   });
 
   // When invisible switch is changed
   $toggle_switch.change(function() {
@@ -95,7 +132,7 @@ $(document).ready(() => {
       const msg = responseObject.msg;
       console.log(msg);
       console.log("Commencing update group.");
-      update_group(localStorage.getItem("grouper_email"), localStorage.getItem("gid"));
+      update_group(localStorage.getItem("grouper_email"), localStorage.getItem("gid"), localStorage.getItem("grouper_img"));
 
       // Redirect current user's page to dashboard and reset gid
       localStorage.setItem("gid", "-1");
@@ -126,6 +163,8 @@ $(document).ready(() => {
       if (responseObject.status != "success") {
         alert("Couldn't extend the group.");
       }
+      // Call function in websockets.js
+      reload_all(getUserSession().gid);
     });
     $("#group-extend-overlay").css("display", "none");
     $("#group-extend-container").css("display", "none");
@@ -147,7 +186,7 @@ $(document).ready(() => {
         localStorage.setItem("gid", gid);
         console.log("Commencing update group.");
         // Function in websockets.js
-        update_group(localStorage.getItem("grouper_email"), gid);
+        update_group(localStorage.getItem("grouper_email"), gid, localStorage.getItem("grouper_img"));
       }
     }
   }
