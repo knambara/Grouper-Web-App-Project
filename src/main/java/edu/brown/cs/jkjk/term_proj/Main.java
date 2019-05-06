@@ -170,8 +170,6 @@ public abstract class Main {
           groupLink = "\"./group?gid=" + group.getGroupID() + "&uid=" + hash + "\"";
         }
 
-        String inGroup = group == null ? "none" : "inline";
-
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
             "departments", departmentList, "email", email, "groupname", groupName, "grouplink",
             groupLink);

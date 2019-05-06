@@ -171,7 +171,7 @@ $(document).ready(() => {
   });
 
   // If group page is invoked, check if the session is newly joining or not
-  if(window.location.href.split('?')[0] === "http://localhost:4567/grouper/group"){
+  if(window.location.pathname.split('?')[0] === "/grouper/group"){
     // Function in websockets.js
     setup_live_groups();
     conn.onopen = function() {

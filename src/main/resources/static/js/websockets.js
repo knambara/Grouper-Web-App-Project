@@ -18,7 +18,13 @@ let myId = -1;
 // Setup the WebSocket connection for live updating of groups
 const setup_live_groups = () => {
   // TODO Create the WebSocket connection and assign it to `conn`
-  conn = new WebSocket("ws://localhost:4567/websocket");
+  if (window.location.pathname.includes("localhost")) {
+    conn = new WebSocket("ws://localhost:4567/websocket");
+  }
+  else {
+    // use heroku link
+    conn = new WebSocket("ws://localhost:4567/websocket");
+  }
   console.log("Websocket has been set.");
 
   conn.onerror = err => {
@@ -48,7 +54,7 @@ const setup_live_groups = () => {
         break;
       case MESSAGE_TYPE.REDIRECT_USERS:
         if (data.payload.gid === localStorage.getItem("gid")) {
-          redirectToDashboard();          
+          redirectToDashboard();
           localStorage.setItem("gid", -1);
         }
         break;
@@ -58,7 +64,7 @@ const setup_live_groups = () => {
         break;
       case MESSAGE_TYPE.RELOAD_GROUP:
         if (data.payload.gid === localStorage.getItem("gid")) {
-          location.reload(); 
+          location.reload();
         }
         break;
     }
