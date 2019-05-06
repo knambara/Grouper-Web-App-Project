@@ -23,7 +23,7 @@ const setup_live_groups = () => {
   }
   else {
     // use heroku link
-    conn = new WebSocket("ws://localhost:4567/websocket");
+    conn = new WebSocket("wss://brown-grouper.herokuapp.com/websocket");
   }
   console.log("Websocket has been set.");
 
