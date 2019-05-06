@@ -404,7 +404,7 @@ select {
     display: flex;
     flex-wrap: wrap;
     margin: 15px;
-    margin-top: 100px;
+    margin-top: 50px;
 }
 
 .group-tile-content {
@@ -751,4 +751,14 @@ input:checked + .slider:before {
 #members-tag {
     font-weight: 600;
     margin-top: 20px;
+}
+
+#own-group {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    height: 40px;
+    width: 75%;
+    margin: 20px;
+    font-size: 24pt;
 }

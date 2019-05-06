@@ -161,8 +161,20 @@ public abstract class Main {
         // Get list of departments
         List<String> departmentList = dr.departments("data/departments.csv");
 
+        Group group = groupCache.getGroup(userCache.getUser(email).getGroupID());
+        String groupName = "";
+        String groupLink = "";
+
+        if (group != null) {
+          groupName = group.getTitle();
+          groupLink = "\"./group?gid=" + group.getGroupID() + "&uid=" + hash + "\"";
+        }
+
+        String inGroup = group == null ? "none" : "inline";
+
         Map<String, Object> variables = ImmutableMap.of("title", "Grouper - Your dashboard",
-            "departments", departmentList, "email", email);
+            "departments", departmentList, "email", email, "groupname", groupName, "grouplink",
+            groupLink);
         return new ModelAndView(variables, "dashboard.ftl");
       } else {
         Map<String, Object> variables = ImmutableMap.of("title", "Redirecting");
@@ -378,6 +390,8 @@ public abstract class Main {
       String classesUnparsed = qm.value("checked");
       String userEmail = qm.value("user");
       String userHash = qm.value("hash");
+      
+      int userGroupID = userCache.getUser(userEmail).getGroupID();
 
       // Stripping and parsing input from front end into list of just class codes
       classesUnparsed = classesUnparsed.replace("]", "");
@@ -392,7 +406,7 @@ public abstract class Main {
       
       // First, if the user is verified to be the moderator of some group, make that group appear first.
       for (Group g : groupCache.getCache().asMap().values()) {
-        if (userCache.getUser(userEmail).getGroupID() == g.getGroupID() && grouperDB.verifyUserHash(userEmail, userHash)) {
+        if (userGroupID == g.getGroupID() && grouperDB.verifyUserHash(userEmail, userHash)) {
           String id = Integer.toString(g.getGroupID());
           String title = g.getTitle();
           String course = g.getCourseCode();

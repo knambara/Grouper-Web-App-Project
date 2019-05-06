@@ -39,6 +39,10 @@
 
 <div id="group-display">
 
+    <div id="own-group">
+      <a href=${grouplink}>${groupname}</a>
+    </div>
+
     <div id="sort-bar">
         <p> Sort by: </p>
         <div id="sort-dropdowns">
