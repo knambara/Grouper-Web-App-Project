@@ -55,7 +55,7 @@ class GroupTile {
         const totalMins = timeDiff/ 60000;
         this.setTime(totalMins);
         const hours = Math.floor(totalMins / 60);
-        const mins = Math.floor(totalMins - hours*60);
+        const mins = Math.ceil(totalMins - hours*60);
         if (mins >= 10) {
             $('#time-'+ this.id).html(hours + ":" + mins + " left");
         } else {
@@ -210,6 +210,13 @@ $(document).ready(() => {
 
     const profile_img = getUserSession().img;
     $('#user-img').html("<img class='circle-image' src='"+ profile_img + "'/>");
+
+    const curr_group = $('#curr-group-link').html();
+    if (curr_group !== "") {
+        console.log("hi");
+        $('#curr-group-prefix').html("You are currently in: ");
+    }
+
 
     // When page is refreshed, reload all the appropriate data that has been saved
     $(window).on('load', function() {

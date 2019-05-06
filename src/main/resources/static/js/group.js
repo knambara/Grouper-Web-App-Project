@@ -240,6 +240,6 @@ $(document).ready(() => {
 // Converts total numbers of minutes remaining to proper format and adds to HTML
 function displayTime(totalMins) {
     const hours = Math.floor(totalMins / 60);
-    const mins = Math.floor(totalMins - hours * 60);
+    const mins = Math.ceil(totalMins - hours * 60);
     $('#group-duration').html(hours + " hr " + mins + " min remaining");
 }

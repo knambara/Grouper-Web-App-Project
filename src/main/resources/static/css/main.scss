@@ -755,10 +755,28 @@ input:checked + .slider:before {
 
 #own-group {
     position: relative;
+    display: flex;
+    align-items: center;
     top: 0px;
     left: 0px;
     height: 40px;
-    width: 75%;
     margin: 20px;
-    font-size: 24pt;
+    font-size: 15pt;
+    padding: 5px;
+    margin-top: 30px;
+    margin-left: 30px;
+    max-width: 500px;
+}
+
+#curr-group-prefix {
+    margin-right: 10px;
+}
+
+#curr-group-link {
+    text-decoration: none;
+    color: $primary_color;
+}
+
+#curr-group-link:hover {
+        font-weight: 600;
 }

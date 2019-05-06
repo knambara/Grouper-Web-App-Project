@@ -40,7 +40,7 @@
 <div id="group-display">
 
     <div id="own-group">
-      <a href=${grouplink}>${groupname}</a>
+      <p id="curr-group-prefix"></p><a id="curr-group-link" href=${grouplink}>${groupname}</a>
     </div>
 
     <div id="sort-bar">
