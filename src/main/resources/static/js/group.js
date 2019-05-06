@@ -197,6 +197,35 @@ $(document).ready(() => {
       const currTime = new Date();
       const timeDiff = endTime.getTime() - currTime.getTime();
       const totalMins = timeDiff/ 60000;
+
+      // If totalMins = 0, delete group and redirect all
+      if (totalMins < 0 && document.getElementById("group-option-end")) {
+        const postParameter = {
+        mod: localStorage.getItem("grouper_email"),
+        hash: getUserSession().hash
+        };
+        // Deletes group mod is in and returns the URL corresponding to
+        // that group, which the user is sent to
+        $.post("/deleteGroup", postParameter, responseJSON => {
+
+            const responseObject = JSON.parse(responseJSON);
+            const msg = responseObject.msg;
+
+            if (msg == "success") {
+            // Call function in websockets.js
+            remove_group(localStorage.getItem("gid"));
+            // Redirect all other users' page to dashboard
+            redirect_all(localStorage.getItem("gid"));
+
+            // Redirect current user's page to dashboard and reset gid
+            localStorage.setItem("gid", "-1");
+            localStorage.setItem("isModerator", false);
+            redirectToDashboard();
+            } else {
+            alert("Error deleting group.");
+            }
+        });
+      }
       displayTime(totalMins);
       t = setTimeout(updateDuration,1000);
   }
