@@ -68,28 +68,28 @@ public abstract class Main {
     OptionSpec<Integer> portSpec = parser.accepts("port").withRequiredArg().ofType(Integer.class);
     OptionSet options = parser.parse(args);
 
-    if (options.has("gui")) {
-      if (options.has(portSpec)) {
-        Spark.port(options.valueOf(portSpec));
-      } else {
-        Spark.port(PORT_NUM);
-      }
-      // Connect to database
-      try {
-        grouperDB.connect("data/grouperDB.sqlite3");
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-      }
-      // Set up users and groups table in database
-      try {
-        grouperDBManager.deleteAllGroups();
-        grouperDBManager.setUpUsersAndGroupsTable();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      // Run Spark server
-      runSparkServer();
+    // if (options.has("gui")) {
+    if (options.has(portSpec)) {
+      Spark.port(options.valueOf(portSpec));
+    } else {
+      Spark.port(PORT_NUM);
     }
+    // Connect to database
+    try {
+      grouperDB.connect("data/grouperDB.sqlite3");
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+    // Set up users and groups table in database
+    try {
+      grouperDBManager.deleteAllGroups();
+      grouperDBManager.setUpUsersAndGroupsTable();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    // Run Spark server
+    runSparkServer();
+    // }
 
     // Delete groups database upon server crash/server exit
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -99,11 +99,20 @@ public abstract class Main {
     }, "Shutdown-thread"));
   }
 
+  static int getHerokuAssignedPort() {
+    ProcessBuilder processBuilder = new ProcessBuilder();
+    if (processBuilder.environment().get("PORT") != null) {
+      return Integer.parseInt(processBuilder.environment().get("PORT"));
+    }
+    return 4567; // return default port if heroku-port isn't set (i.e. on localhost)
+  }
+
   /**
    * Method to start Spark server and create Spark routes.
    */
   @SuppressWarnings("unchecked")
   public static void runSparkServer() {
+    Spark.port(getHerokuAssignedPort());
     Spark.externalStaticFileLocation("src/main/resources/static");
     Spark.exception(Exception.class, new ExceptionPrinter());
     FreeMarkerEngine freeMarker = createEngine();
