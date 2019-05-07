@@ -531,5 +531,5 @@ function sortByDistance(groups) {
     for (i in tempList) {
         sortedTiles.push(tempList[i].tile);
     }
-    return sortedTiles.reverse();
+    return sortedTiles;
 }
